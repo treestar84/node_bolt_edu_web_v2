@@ -1,11 +1,10 @@
 import express from 'express';
-import { authenticateApiKey } from '../middleware/auth.js';
 import { upload, handleUploadError } from '../middleware/upload.js';
 
 const router = express.Router();
 
 // Upload single image
-router.post('/image', authenticateApiKey, upload.single('image'), handleUploadError, (req, res) => {
+router.post('/image', upload.single('image'), handleUploadError, (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({
@@ -36,7 +35,7 @@ router.post('/image', authenticateApiKey, upload.single('image'), handleUploadEr
 });
 
 // Upload single audio file
-router.post('/audio', authenticateApiKey, upload.single('audio'), handleUploadError, (req, res) => {
+router.post('/audio', upload.single('audio'), handleUploadError, (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({
@@ -67,7 +66,7 @@ router.post('/audio', authenticateApiKey, upload.single('audio'), handleUploadEr
 });
 
 // Upload multiple files (batch upload)
-router.post('/batch', authenticateApiKey, upload.fields([
+router.post('/batch', upload.fields([
   { name: 'images', maxCount: 10 },
   { name: 'audio', maxCount: 10 }
 ]), handleUploadError, (req, res) => {

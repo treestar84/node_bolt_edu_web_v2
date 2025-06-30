@@ -9,11 +9,11 @@
           <div class="quiz-stats">
             <div class="stat">
               <span class="stat-label">점수</span>
-              <span class="stat-value">{{ store.quizScore }}</span>
+              <span class="stat-value">{{ authStore.userProgress?.quiz_score || 0 }}</span>
             </div>
             <div class="stat">
               <span class="stat-label">연속 정답</span>
-              <span class="stat-value">{{ store.quizStreak }}</span>
+              <span class="stat-value">{{ authStore.userProgress?.quiz_streak || 0 }}</span>
             </div>
           </div>
         </div>
@@ -23,7 +23,6 @@
 
         <div v-if="!gameStarted" class="game-start">
           <div class="start-card">
-            <div class="start-icon">🧩</div>
             <h2>퀴즈 게임을 시작해볼까요?</h2>
             <p>음성을 듣고 정답 이미지를 찾아보세요!</p>
             <button @click="startGame" class="btn btn-primary btn-lg">
@@ -33,14 +32,15 @@
         </div>
 
         <div v-else-if="currentQuiz" class="quiz-game">
+          <!-- 퀴즈 질문 패널을 최상단으로 이동 -->
           <div class="quiz-question">
             <h2>음성을 듣고 정답을 찾아보세요</h2>
             <button @click="playQuizAudio" class="audio-button" :class="{ playing: isPlaying }">
-              <span class="audio-icon">{{ isPlaying ? '🔊' : '🔈' }}</span>
-              <span>다시 듣기</span>
+              <span class="audio-text">다시 듣기</span>
             </button>
           </div>
 
+          <!-- 퀴즈 옵션들 -->
           <div class="quiz-options">
             <div 
               v-for="option in currentQuiz.options" 
@@ -53,7 +53,7 @@
                 incorrect: showResult && selectedAnswer === option.id && option.id !== currentQuiz.correctAnswerId
               }"
             >
-              <img :src="option.imageUrl" :alt="option.name" />
+              <img :src="getImageUrl(option.imageUrl)" :alt="option.name" />
               <div class="option-name">
                 {{ store.currentLanguage === 'ko' ? option.name : option.nameEn }}
               </div>
@@ -63,15 +63,11 @@
           <div v-if="showResult" class="quiz-result">
             <div v-if="isCorrect" class="result-correct">
               <div class="celebration-container">
-                <div class="celebration-icon">🎉</div>
+                <div class="celebration-text">정답입니다!</div>
                 <div class="confetti" v-for="i in 20" :key="i" :style="getConfettiStyle(i)"></div>
               </div>
-              <h3>정답입니다!</h3>
-              <div class="reward-stickers">
-                <span v-for="sticker in rewardStickers" :key="sticker" class="sticker">{{ sticker }}</span>
-              </div>
+              <h3>잘했어요!</h3>
               <div v-if="newBadgeUnlocked" class="new-badge-notification">
-                <div class="badge-unlock-icon">🏆</div>
                 <div class="badge-unlock-text">새로운 뱃지 획득!</div>
                 <div class="unlocked-badge">
                   <span class="unlocked-badge-icon">{{ newBadgeUnlocked.icon }}</span>
@@ -80,14 +76,12 @@
               </div>
             </div>
             <div v-else class="result-incorrect">
-              <div class="result-icon">😅</div>
               <h3>다시 한번 도전해보세요!</h3>
             </div>
           </div>
         </div>
 
         <div v-else class="no-words">
-          <div class="empty-icon">📚</div>
           <h3>퀴즈할 단어가 부족합니다</h3>
           <p>최소 3개 이상의 단어가 필요합니다</p>
           <router-link to="/words" class="btn btn-primary">
@@ -96,20 +90,6 @@
         </div>
       </div>
     </main>
-
-    <!-- Sound Effect Audio Elements -->
-    <audio ref="successAudio" preload="auto">
-      <source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIG2m98OScTgwOUarm7blmGgU7k9n1unEiBC13yO/eizEIHWq+8+OWT" type="audio/wav">
-    </audio>
-    <audio ref="failureAudio1" preload="auto">
-      <source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIG2m98OScTgwOUarm7blmGgU7k9n1unEiBC13yO/eizEIHWq+8+OWT" type="audio/wav">
-    </audio>
-    <audio ref="failureAudio2" preload="auto">
-      <source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIG2m98OScTgwOUarm7blmGgU7k9n1unEiBC13yO/eizEIHWq+8+OWT" type="audio/wav">
-    </audio>
-    <audio ref="failureAudio3" preload="auto">
-      <source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIG2m98OScTgwOUarm7blmGgU7k9n1unEiBC13yO/eizEIHWq+8+OWT" type="audio/wav">
-    </audio>
   </div>
 </template>
 
@@ -118,11 +98,17 @@ import { ref, computed, onMounted } from 'vue';
 import Navigation from '@/components/Navigation.vue';
 import BadgeDisplay from '@/components/BadgeDisplay.vue';
 import { useAppStore } from '@/stores/app';
+import { useAuthStore } from '@/stores/auth';
+import { useContentStore } from '@/stores/content';
 import { useAudio } from '@/composables/useAudio';
+import { useFileUpload } from '@/composables/useFileUpload';
 import type { Quiz, Badge } from '@/types';
 
 const store = useAppStore();
+const authStore = useAuthStore();
+const contentStore = useContentStore();
 const { isPlaying, playAudio } = useAudio();
+const { getUploadedFileUrl } = useFileUpload();
 
 const gameStarted = ref(false);
 const currentQuiz = ref<Quiz | null>(null);
@@ -131,16 +117,23 @@ const showResult = ref(false);
 const isCorrect = ref(false);
 const newBadgeUnlocked = ref<Badge | null>(null);
 
-const rewardStickers = ref<string[]>([]);
-const vehicleStickers = ['🚗', '🚒', '🚀', '🚁', '🚂', '🚢', '✈️', '🚌', '🏎️', '🚜'];
-
-// Audio refs for sound effects
-const successAudio = ref<HTMLAudioElement>();
-const failureAudio1 = ref<HTMLAudioElement>();
-const failureAudio2 = ref<HTMLAudioElement>();
-const failureAudio3 = ref<HTMLAudioElement>();
-
 const canStartGame = computed(() => store.currentWords.length >= 3);
+
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
+
+const getImageUrl = (url: string): string => {
+  if (url.startsWith('/uploads/')) {
+    return '/server' + url;
+  }
+  return url;
+};
+
+const getAudioUrl = (url: string): string => {
+  if (url.startsWith('/uploads/')) {
+    return '/server' + url;
+  }
+  return url;
+};
 
 const startGame = () => {
   if (!canStartGame.value) return;
@@ -191,7 +184,7 @@ const playQuizAudio = () => {
   }
 };
 
-const selectAnswer = (answerId: string) => {
+const selectAnswer = async (answerId: string) => {
   if (showResult.value) return;
   
   selectedAnswer.value = answerId;
@@ -199,21 +192,27 @@ const selectAnswer = (answerId: string) => {
   showResult.value = true;
   
   if (isCorrect.value) {
-    store.incrementQuizScore();
+    console.log('🎯 Correct answer! Updating quiz score...');
     
-    // Check for newly unlocked badge
-    const unlockedBadge = store.currentBadges.find(badge => 
-      badge.requiredScore === store.quizScore && badge.unlocked
-    );
-    
-    if (unlockedBadge) {
-      newBadgeUnlocked.value = unlockedBadge;
+    // Supabase에 진행도 업데이트
+    if (authStore.userProgress) {
+      const newScore = authStore.userProgress.quiz_score + 1;
+      const newStreak = authStore.userProgress.quiz_streak + 1;
+      
+      await authStore.updateProgress({
+        quiz_score: newScore,
+        quiz_streak: newStreak
+      });
+      
+      console.log('✅ Quiz progress updated in Supabase:', { score: newScore, streak: newStreak });
+      
+      // 뱃지 확인
+      const unlockedBadges = await contentStore.checkBadgeUnlocks();
+      if (unlockedBadges.length > 0) {
+        newBadgeUnlocked.value = unlockedBadges[0];
+        console.log('🏆 New badge unlocked:', newBadgeUnlocked.value.name);
+      }
     }
-    
-    // Generate reward stickers
-    rewardStickers.value = vehicleStickers
-      .sort(() => Math.random() - 0.5)
-      .slice(0, Math.min(3, store.quizStreak));
     
     // Play success sound effect
     playSuccessSound();
@@ -224,8 +223,15 @@ const selectAnswer = (answerId: string) => {
     }, 3000);
     
   } else {
-    store.resetQuizStreak();
-    rewardStickers.value = [];
+    console.log('❌ Wrong answer! Resetting quiz streak...');
+    
+    // Supabase에 연속 정답 리셋
+    if (authStore.userProgress) {
+      await authStore.updateProgress({
+        quiz_streak: 0
+      });
+      console.log('✅ Quiz streak reset in Supabase');
+    }
     
     // Play failure sound effect
     playFailureSound();
@@ -358,17 +364,17 @@ onMounted(() => {
 }
 
 .main-content {
-  padding: var(--spacing-2xl) 0;
+  padding: var(--spacing-lg) 0; /* 상단 패딩을 줄여서 네비게이션과 더 가깝게 */
 }
 
 .quiz-header {
   text-align: center;
-  margin-bottom: var(--spacing-2xl);
+  margin-bottom: var(--spacing-lg); /* 헤더 하단 마진 줄임 */
 }
 
 .page-title {
   font-size: 2.5rem;
-  font-weight: 700;
+  font-weight: 800;
   margin-bottom: var(--spacing-lg);
   background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
   background-clip: text;
@@ -393,14 +399,15 @@ onMounted(() => {
 .stat-label {
   display: block;
   font-size: 0.875rem;
-  color: var(--color-text-secondary);
+  color: var(--color-text-primary);
   margin-bottom: var(--spacing-xs);
+  font-weight: 600;
 }
 
 .stat-value {
   display: block;
   font-size: 1.5rem;
-  font-weight: 700;
+  font-weight: 800;
   color: var(--color-text-primary);
 }
 
@@ -420,41 +427,45 @@ onMounted(() => {
   max-width: 500px;
 }
 
-.start-icon {
-  font-size: 4rem;
-  margin-bottom: var(--spacing-lg);
-}
-
 .start-card h2 {
   font-size: 1.75rem;
   margin-bottom: var(--spacing-md);
   color: var(--color-text-primary);
+  font-weight: 700;
 }
 
 .start-card p {
-  color: var(--color-text-secondary);
+  color: var(--color-text-primary);
   margin-bottom: var(--spacing-xl);
   font-size: 1.125rem;
+  font-weight: 500;
 }
 
 .quiz-game {
   max-width: 800px;
   margin: 0 auto;
+  /* 네비게이션 바로 아래 배치를 위한 상단 마진 제거 */
+  margin-top: 0;
 }
 
 .quiz-question {
   text-align: center;
-  margin-bottom: var(--spacing-2xl);
+  margin-bottom: var(--spacing-xl); /* 하단 마진 줄임 */
   background: var(--color-bg-card);
   padding: var(--spacing-xl);
   border-radius: var(--radius-lg);
   border: 1px solid var(--color-border);
+  /* 최상단 배치를 위한 order 설정 */
+  order: -1;
+  /* 네비게이션과 더 가깝게 배치 */
+  margin-top: var(--spacing-md);
 }
 
 .quiz-question h2 {
   font-size: 1.5rem;
   margin-bottom: var(--spacing-lg);
   color: var(--color-text-primary);
+  font-weight: 700;
 }
 
 .audio-button {
@@ -467,7 +478,7 @@ onMounted(() => {
   border: none;
   border-radius: var(--radius-md);
   font-size: 1.125rem;
-  font-weight: 500;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.3s ease;
 }
@@ -481,15 +492,16 @@ onMounted(() => {
   animation: pulse 1s infinite;
 }
 
-.audio-icon {
-  font-size: 1.5rem;
+.audio-text {
+  color: white;
+  font-weight: 700;
 }
 
 .quiz-options {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: var(--spacing-lg);
-  margin-bottom: var(--spacing-2xl);
+  margin-bottom: var(--spacing-xl); /* 하단 마진 줄임 */
 }
 
 .quiz-option {
@@ -533,7 +545,7 @@ onMounted(() => {
 
 .option-name {
   padding: var(--spacing-md);
-  font-weight: 500;
+  font-weight: 700;
   color: var(--color-text-primary);
   font-size: 1.125rem;
 }
@@ -543,7 +555,7 @@ onMounted(() => {
   background: var(--color-bg-card);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
-  padding: var(--spacing-2xl);
+  padding: var(--spacing-xl); /* 패딩 줄임 */
 }
 
 .celebration-container {
@@ -551,9 +563,11 @@ onMounted(() => {
   margin-bottom: var(--spacing-lg);
 }
 
-.celebration-icon {
+.celebration-text {
   font-size: 4rem;
   animation: celebration 1s ease;
+  color: var(--color-text-primary);
+  font-weight: 800;
 }
 
 .confetti {
@@ -563,37 +577,19 @@ onMounted(() => {
   animation: confettiFall 3s linear infinite;
 }
 
-.result-icon {
-  font-size: 4rem;
-  margin-bottom: var(--spacing-lg);
-}
-
 .result-correct h3 {
   color: var(--color-success);
   font-size: 1.75rem;
   margin-bottom: var(--spacing-lg);
+  font-weight: 800;
 }
 
 .result-incorrect h3 {
   color: var(--color-text-primary);
   font-size: 1.75rem;
   margin-bottom: var(--spacing-lg);
+  font-weight: 800;
 }
-
-.reward-stickers {
-  display: flex;
-  justify-content: center;
-  gap: var(--spacing-sm);
-  margin-bottom: var(--spacing-xl);
-}
-
-.sticker {
-  font-size: 2rem;
-  animation: bounce 0.6s ease;
-}
-
-.sticker:nth-child(2) { animation-delay: 0.1s; }
-.sticker:nth-child(3) { animation-delay: 0.2s; }
 
 .new-badge-notification {
   background: linear-gradient(135deg, var(--color-success), var(--color-secondary));
@@ -604,13 +600,8 @@ onMounted(() => {
   animation: badgeNotification 2s ease;
 }
 
-.badge-unlock-icon {
-  font-size: 2rem;
-  margin-bottom: var(--spacing-sm);
-}
-
 .badge-unlock-text {
-  font-weight: 600;
+  font-weight: 700;
   margin-bottom: var(--spacing-sm);
 }
 
@@ -629,7 +620,8 @@ onMounted(() => {
 }
 
 .unlocked-badge-name {
-  font-weight: 500;
+  font-weight: 700;
+  color: white;
 }
 
 .no-words {
@@ -640,20 +632,17 @@ onMounted(() => {
   border: 1px solid var(--color-border);
 }
 
-.empty-icon {
-  font-size: 4rem;
-  margin-bottom: var(--spacing-lg);
-}
-
 .no-words h3 {
   font-size: 1.5rem;
   margin-bottom: var(--spacing-md);
   color: var(--color-text-primary);
+  font-weight: 700;
 }
 
 .no-words p {
-  color: var(--color-text-secondary);
+  color: var(--color-text-primary);
   margin-bottom: var(--spacing-xl);
+  font-weight: 500;
 }
 
 @keyframes correctAnswer {
@@ -704,6 +693,10 @@ onMounted(() => {
 }
 
 @media (max-width: 768px) {
+  .main-content {
+    padding: var(--spacing-md) 0; /* 모바일에서도 상단 패딩 줄임 */
+  }
+  
   .quiz-stats {
     gap: var(--spacing-md);
   }
@@ -728,6 +721,7 @@ onMounted(() => {
   
   .quiz-question {
     padding: var(--spacing-md);
+    margin-top: var(--spacing-sm); /* 모바일에서 더 가깝게 */
   }
   
   .quiz-question h2 {

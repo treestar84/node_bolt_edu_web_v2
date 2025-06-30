@@ -27,8 +27,9 @@ app.use(helmet({
       defaultSrc: ["'self'"],
       styleSrc: ["'self'", "'unsafe-inline'"],
       scriptSrc: ["'self'"],
-      imgSrc: ["'self'", "data:", "https:"],
-      connectSrc: ["'self'"],
+      imgSrc: ["'self'", 'data:', 'https:', 'http://localhost:3001', 'blob:'],
+      mediaSrc: ["'self'", 'data:', 'https:', 'http://localhost:3001', 'blob:'],
+      connectSrc: ["'self'", 'http://localhost:3001', 'ws://localhost:3001'],
     },
   },
 }));
@@ -66,7 +67,13 @@ app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
 // Static file serving for uploads
-app.use('/uploads', express.static(join(__dirname, 'uploads')));
+app.use('/uploads', cors({
+  origin: '*',
+  methods: ['GET', 'HEAD'],
+  allowedHeaders: ['Content-Type', 'Range'],
+  exposedHeaders: ['Content-Range', 'Accept-Ranges', 'Content-Length'],
+  credentials: false
+}), express.static(join(__dirname, 'uploads')));
 
 // Health check endpoint
 app.get('/health', (req, res) => {
@@ -159,12 +166,22 @@ const initializeServer = async () => {
   try {
     // Ensure uploads directory exists
     const uploadsDir = join(__dirname, 'uploads');
+    const imagesDir = join(uploadsDir, 'images');
+    const audioDir = join(uploadsDir, 'audio');
     try {
       await fs.access(uploadsDir);
     } catch {
       await fs.mkdir(uploadsDir, { recursive: true });
-      await fs.mkdir(join(uploadsDir, 'images'), { recursive: true });
-      await fs.mkdir(join(uploadsDir, 'audio'), { recursive: true });
+    }
+    try {
+      await fs.access(imagesDir);
+    } catch {
+      await fs.mkdir(imagesDir, { recursive: true });
+    }
+    try {
+      await fs.access(audioDir);
+    } catch {
+      await fs.mkdir(audioDir, { recursive: true });
     }
 
     // Start server

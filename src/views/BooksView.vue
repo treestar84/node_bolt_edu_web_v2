@@ -51,20 +51,43 @@
 import { useRouter } from 'vue-router';
 import Navigation from '@/components/Navigation.vue';
 import { useAppStore } from '@/stores/app';
+import { useAuthStore } from '@/stores/auth';
+import { useContentStore } from '@/stores/content';
 import { useFileUpload } from '@/composables/useFileUpload';
 
 const store = useAppStore();
+const authStore = useAuthStore();
+const contentStore = useContentStore();
 const router = useRouter();
 const { getUploadedFileUrl } = useFileUpload();
 
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
+
 const getImageUrl = (url: string): string => {
   if (url.startsWith('/uploads/')) {
-    return getUploadedFileUrl(url.replace('/uploads/', '')) || url;
+    return '/server' + url;
   }
   return url;
 };
 
-const openBook = (bookId: string) => {
+const openBook = async (bookId: string) => {
+  // 책 읽기 진행도 업데이트
+  if (authStore.userProgress) {
+    const newBooksRead = authStore.userProgress.books_read + 1;
+    
+    await authStore.updateProgress({
+      books_read: newBooksRead
+    });
+    
+    console.log('✅ Books read progress updated in Supabase:', { booksRead: newBooksRead });
+    
+    // 뱃지 확인
+    const unlockedBadges = await contentStore.checkBadgeUnlocks();
+    if (unlockedBadges.length > 0) {
+      console.log('🏆 New book reading badge unlocked:', unlockedBadges[0].name);
+    }
+  }
+  
   router.push(`/book/${bookId}`);
 };
 </script>

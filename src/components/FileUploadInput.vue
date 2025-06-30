@@ -3,38 +3,23 @@
     <div class="input-tabs">
       <button 
         type="button"
-        @click="inputMode = 'url'"
-        class="tab-button"
-        :class="{ active: inputMode === 'url' }"
-      >
-        🔗 URL 입력
-      </button>
-      <button 
-        type="button"
         @click="inputMode = 'upload'"
         class="tab-button"
         :class="{ active: inputMode === 'upload' }"
       >
         📁 파일 업로드
       </button>
+      <button 
+        type="button"
+        @click="inputMode = 'url'"
+        class="tab-button"
+        :class="{ active: inputMode === 'url' }"
+      >
+        🔗 URL 입력
+      </button>
     </div>
 
-    <!-- URL Input Mode -->
-    <div v-if="inputMode === 'url'" class="url-input-section">
-      <input 
-        :type="fileType === 'audio' ? 'text' : 'url'"
-        :value="modelValue" 
-        @input="$emit('update:modelValue', ($event.target as HTMLInputElement).value)"
-        :placeholder="placeholder"
-        class="form-input"
-        :required="required"
-      />
-      <div v-if="modelValue && fileType === 'image'" class="preview-section">
-        <img :src="modelValue" :alt="label" class="image-preview" />
-      </div>
-    </div>
-
-    <!-- File Upload Mode -->
+    <!-- File Upload Mode (Default) -->
     <div v-if="inputMode === 'upload'" class="upload-input-section">
       <div class="upload-area" :class="{ 'drag-over': isDragOver }" @click="triggerFileInput">
         <input 
@@ -53,6 +38,7 @@
           <div class="upload-text">
             <p>클릭하거나 파일을 드래그해서 업로드</p>
             <p class="upload-hint">{{ fileType === 'image' ? 'JPG, PNG, GIF, WebP' : 'MP3, WAV, OGG' }} (최대 10MB)</p>
+            <p class="upload-hint">서버에 업로드되며, 다른 기기에서도 접근 가능합니다</p>
           </div>
         </div>
 
@@ -66,12 +52,28 @@
         <div v-if="uploadedFile && !isUploading" class="upload-success">
           <div class="success-icon">✅</div>
           <p>{{ uploadedFile.name }}</p>
+          <p class="upload-status">{{ modelValue.includes('/images/') || modelValue.includes('/audio/') ? '서버에 업로드됨' : '로컬에 저장됨' }}</p>
           <button type="button" @click.stop="removeFile" class="remove-button">삭제</button>
         </div>
       </div>
 
       <div v-if="uploadedFileUrl && fileType === 'image'" class="preview-section">
         <img :src="uploadedFileUrl" :alt="label" class="image-preview" />
+      </div>
+    </div>
+
+    <!-- URL Input Mode -->
+    <div v-else-if="inputMode === 'url'" class="url-input-section">
+      <input 
+        :type="fileType === 'audio' ? 'text' : 'url'"
+        :value="modelValue" 
+        @input="$emit('update:modelValue', ($event.target as HTMLInputElement).value)"
+        :placeholder="placeholder"
+        class="form-input"
+        :required="required"
+      />
+      <div v-if="modelValue && fileType === 'image'" class="preview-section">
+        <img :src="getPreviewUrl(modelValue)" :alt="label" class="image-preview" />
       </div>
     </div>
 
@@ -102,7 +104,7 @@ const emit = defineEmits<Emits>();
 
 const { isUploading, uploadProgress, uploadFile, getUploadedFileUrl, validateFile } = useFileUpload();
 
-const inputMode = ref<'url' | 'upload'>('url');
+const inputMode = ref<'url' | 'upload'>('upload'); // Default to upload
 const fileInput = ref<HTMLInputElement>();
 const uploadedFile = ref<File | null>(null);
 const uploadedFileUrl = ref<string>('');
@@ -137,24 +139,21 @@ const handleFileDrop = (event: DragEvent) => {
 
 const processFile = async (file: File) => {
   error.value = '';
-  
   // Validate file
   const validation = validateFile(file, props.fileType);
   if (!validation.valid) {
     error.value = validation.error || '유효하지 않은 파일입니다.';
     return;
   }
-
   try {
     uploadedFile.value = file;
     const fileUrl = await uploadFile(file, props.fileType);
-    
-    // Get the actual data URL for preview
-    uploadedFileUrl.value = getUploadedFileUrl(fileUrl.replace('/uploads/', '')) || '';
-    
-    // Emit the file URL to parent
+    if (!fileUrl || fileUrl === '') {
+      error.value = '파일 업로드에 실패했습니다.';
+      return;
+    }
+    uploadedFileUrl.value = fileUrl;
     emit('update:modelValue', fileUrl);
-    
   } catch (err) {
     error.value = '파일 업로드에 실패했습니다.';
     console.error('Upload error:', err);
@@ -176,10 +175,13 @@ watch(() => props.modelValue, (newValue) => {
     uploadedFile.value = null;
     uploadedFileUrl.value = '';
   } else if (newValue.startsWith('/uploads/')) {
-    // This is an uploaded file, get the data URL for preview
-    uploadedFileUrl.value = getUploadedFileUrl(newValue.replace('/uploads/', '')) || '';
+    uploadedFileUrl.value = newValue;
   }
 });
+
+const getPreviewUrl = (url: string) => {
+  return url;
+};
 </script>
 
 <style scoped>
@@ -259,9 +261,14 @@ watch(() => props.modelValue, (newValue) => {
   color: var(--color-text-primary);
 }
 
+.upload-text p:first-child {
+  margin-bottom: var(--spacing-xs);
+}
+
 .upload-hint {
   font-size: 0.75rem;
   color: var(--color-text-muted);
+  margin: var(--spacing-xs) 0 0 0;
 }
 
 .upload-progress {
@@ -294,6 +301,12 @@ watch(() => props.modelValue, (newValue) => {
 
 .success-icon {
   font-size: 2rem;
+}
+
+.upload-status {
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+  margin: 0;
 }
 
 .remove-button {

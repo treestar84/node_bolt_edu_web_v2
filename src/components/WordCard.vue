@@ -35,6 +35,8 @@ const store = useAppStore();
 const { isPlaying, playAudio } = useAudio();
 const { getUploadedFileUrl } = useFileUpload();
 
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
+
 const currentName = computed(() => {
   return store.currentLanguage === 'ko' ? props.word.name : props.word.nameEn;
 });
@@ -46,14 +48,14 @@ const currentAudioUrl = computed(() => {
 
 const getImageUrl = (url: string): string => {
   if (url.startsWith('/uploads/')) {
-    return getUploadedFileUrl(url.replace('/uploads/', '')) || url;
+    return '/server' + url;
   }
   return url;
 };
 
 const getAudioUrl = (url: string): string => {
   if (url.startsWith('/uploads/')) {
-    return getUploadedFileUrl(url.replace('/uploads/', '')) || url;
+    return '/server' + url;
   }
   return url;
 };

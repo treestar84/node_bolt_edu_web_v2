@@ -67,6 +67,7 @@ export interface Badge {
   category: 'quiz' | 'puzzle' | 'words' | 'books';
   requiredScore: number;
   createdAt?: string;
+  unlocked?: boolean;
 }
 
 export interface UserBadge {

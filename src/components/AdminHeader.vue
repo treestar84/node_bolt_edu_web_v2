@@ -3,7 +3,6 @@
     <div class="container">
       <div class="header-content">
         <div class="admin-brand">
-          <span class="brand-icon">🛠️</span>
           <span class="brand-text">관리자 패널</span>
         </div>
         
@@ -15,17 +14,16 @@
             class="nav-item"
             :class="{ active: $route.path === item.path }"
           >
-            <span class="nav-icon">{{ item.icon }}</span>
             <span class="nav-text">{{ item.name }}</span>
           </router-link>
         </nav>
 
         <div class="header-actions">
           <router-link to="/api-guide" class="btn btn-sm btn-secondary">
-            📚 API 가이드
+            API 가이드
           </router-link>
           <router-link to="/" class="btn btn-sm btn-secondary">
-            👶 사용자 화면
+            사용자 화면
           </router-link>
           <button @click="handleLogout" class="btn btn-sm btn-danger">
             로그아웃
@@ -45,11 +43,11 @@ const router = useRouter();
 const store = useAppStore();
 
 const navItems = computed(() => [
-  { name: '대시보드', path: '/admin/dashboard', icon: '📊' },
-  { name: '단어 관리', path: '/admin/words', icon: '📚' },
-  { name: '책 관리', path: '/admin/books', icon: '📖' },
-  { name: '뱃지 관리', path: '/admin/badges', icon: '🏆' },
-  { name: 'API 키', path: '/admin/api-keys', icon: '🔑' }
+  { name: '대시보드', path: '/admin/dashboard' },
+  { name: '단어 관리', path: '/admin/words' },
+  { name: '책 관리', path: '/admin/books' },
+  { name: '뱃지 관리', path: '/admin/badges' },
+  { name: 'API 키', path: '/admin/api-keys' }
 ]);
 
 const handleLogout = async () => {
@@ -80,13 +78,13 @@ const handleLogout = async () => {
   display: flex;
   align-items: center;
   gap: var(--spacing-sm);
-  font-weight: 600;
-  font-size: 1.25rem;
+  font-weight: 800;
+  font-size: 1.5rem;
   color: var(--color-text-primary);
 }
 
-.brand-icon {
-  font-size: 1.5rem;
+.brand-text {
+  color: var(--color-text-primary);
 }
 
 .admin-nav {
@@ -104,7 +102,7 @@ const handleLogout = async () => {
   border-radius: var(--radius-md);
   text-decoration: none;
   color: var(--color-text-secondary);
-  font-weight: 500;
+  font-weight: 600;
   transition: all 0.2s ease;
   min-width: 120px;
   justify-content: center;
@@ -122,8 +120,9 @@ const handleLogout = async () => {
   color: white;
 }
 
-.nav-icon {
-  font-size: 1.1rem;
+.nav-text {
+  color: inherit;
+  font-weight: inherit;
 }
 
 .header-actions {

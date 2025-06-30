@@ -50,6 +50,7 @@
               :key="word.id" 
               :word="word"
               class="fade-in"
+              @audio-played="handleWordLearned"
             />
           </div>
 
@@ -169,8 +170,13 @@ import { computed, ref, watch, onMounted, onUnmounted } from 'vue';
 import Navigation from '@/components/Navigation.vue';
 import WordCard from '@/components/WordCard.vue';
 import { useAppStore } from '@/stores/app';
+import { useAuthStore } from '@/stores/auth';
+import { useContentStore } from '@/stores/content';
 
 const store = useAppStore();
+const authStore = useAuthStore();
+const contentStore = useContentStore();
+
 const selectedCategory = ref('all');
 const viewMode = ref<'grid' | 'single'>('single'); // Default to learning mode
 const currentPage = ref(1);
@@ -179,6 +185,7 @@ const autoAdvanceEnabled = ref(true);
 const autoAdvanceProgress = ref(0);
 const autoAdvanceTimer = ref<NodeJS.Timeout | null>(null);
 const progressTimer = ref<NodeJS.Timeout | null>(null);
+const learnedWordsSet = ref(new Set<string>());
 
 const itemsPerPage = 10;
 
@@ -268,6 +275,32 @@ const shuffleWords = () => {
 const handleAudioPlayed = () => {
   if (autoAdvanceEnabled.value && viewMode.value === 'single') {
     startAutoAdvanceTimer();
+  }
+  handleWordLearned();
+};
+
+const handleWordLearned = async () => {
+  const word = currentWord.value || paginatedWords.value[0];
+  if (!word || learnedWordsSet.value.has(word.id)) return;
+  
+  learnedWordsSet.value.add(word.id);
+  console.log('📚 Word learned:', word.name);
+  
+  // Supabase에 단어 학습 진행도 업데이트
+  if (authStore.userProgress) {
+    const newWordsLearned = authStore.userProgress.words_learned + 1;
+    
+    await authStore.updateProgress({
+      words_learned: newWordsLearned
+    });
+    
+    console.log('✅ Words learned progress updated in Supabase:', { wordsLearned: newWordsLearned });
+    
+    // 뱃지 확인
+    const unlockedBadges = await contentStore.checkBadgeUnlocks();
+    if (unlockedBadges.length > 0) {
+      console.log('🏆 New word learning badge unlocked:', unlockedBadges[0].name);
+    }
   }
 };
 

@@ -10,11 +10,36 @@
       </div>
     </div>
 
-    <div v-if="book" class="reader-content">
+    <div v-if="!book">
+      <div class="book-not-found">
+        <div class="error-icon">📖</div>
+        <h2>책을 찾을 수 없습니다</h2>
+        <p>요청하신 그림책이 존재하지 않거나, 데이터가 로드되지 않았습니다.</p>
+        <router-link to="/books" class="btn btn-primary">
+          그림책 목록으로 돌아가기
+        </router-link>
+      </div>
+    </div>
+    <div v-else-if="!book.pages || book.pages.length === 0">
+      <div class="book-not-found">
+        <div class="error-icon">📖</div>
+        <h2>책 페이지가 없습니다</h2>
+        <p>이 책에 등록된 페이지가 없습니다. 관리자에게 문의하세요.</p>
+        <router-link to="/books" class="btn btn-primary">
+          그림책 목록으로 돌아가기
+        </router-link>
+      </div>
+    </div>
+    <div v-else class="reader-content">
       <div class="book-container">
         <div class="book-page">
           <div class="page-image">
-            <img :src="getImageUrl(currentPage?.imageUrl || '')" :alt="`페이지 ${currentPageIndex + 1}`" />
+            <template v-if="currentPage && currentPage.imageUrl">
+              <img :src="getImageUrl(currentPage.imageUrl)" :alt="`페이지 ${currentPageIndex + 1}`" />
+            </template>
+            <template v-else>
+              <div class="missing-media">이미지가 없습니다</div>
+            </template>
             <div class="page-text" v-if="currentPage?.text">
               {{ currentPage.text }}
             </div>
@@ -25,10 +50,14 @@
               @click="playPageAudio" 
               class="audio-button"
               :class="{ playing: isPlaying }"
+              :disabled="!currentPage || !currentPage.audio"
             >
               <span class="audio-icon">{{ isPlaying ? '🔊' : '🔈' }}</span>
               <span>음성 듣기</span>
             </button>
+            <template v-if="!currentPage || !currentPage.audio">
+              <div class="missing-media">오디오가 없습니다</div>
+            </template>
             
             <div class="auto-play-controls">
               <label class="auto-play-toggle">
@@ -86,15 +115,6 @@
         </div>
       </div>
     </div>
-
-    <div v-else class="book-not-found">
-      <div class="error-icon">📖</div>
-      <h2>책을 찾을 수 없습니다</h2>
-      <p>요청하신 그림책이 존재하지 않습니다</p>
-      <router-link to="/books" class="btn btn-primary">
-        그림책 목록으로 돌아가기
-      </router-link>
-    </div>
   </div>
 </template>
 
@@ -118,6 +138,8 @@ const autoPlayDelay = ref(7000); // 7 seconds default delay
 const autoPlayTimer = ref<NodeJS.Timeout | null>(null);
 const progressTimer = ref<NodeJS.Timeout | null>(null);
 
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
+
 const book = computed(() => {
   const bookId = route.params.id as string;
   return store.currentBooks.find(b => b.id === bookId);
@@ -128,16 +150,18 @@ const currentPage = computed(() => {
   return book.value.pages[currentPageIndex.value];
 });
 
-const getImageUrl = (url: string): string => {
+const getImageUrl = (url: string | undefined | null): string => {
+  if (!url) return '';
   if (url.startsWith('/uploads/')) {
-    return getUploadedFileUrl(url.replace('/uploads/', '')) || url;
+    return '/server' + url;
   }
   return url;
 };
 
-const getAudioUrl = (url: string): string => {
+const getAudioUrl = (url: string | undefined | null): string => {
+  if (!url) return '';
   if (url.startsWith('/uploads/')) {
-    return getUploadedFileUrl(url.replace('/uploads/', '')) || url;
+    return '/server' + url;
   }
   return url;
 };
@@ -166,9 +190,10 @@ const goToPage = (index: number) => {
 };
 
 const playPageAudio = async () => {
-  if (currentPage.value) {
+  if (currentPage.value && currentPage.value.audio) {
     try {
       const audioUrl = getAudioUrl(currentPage.value.audio);
+      if (!audioUrl) return;
       const duration = await playAudio(audioUrl);
       
       if (autoPlayEnabled.value) {
@@ -243,7 +268,11 @@ watch(currentPageIndex, () => {
   }, 500);
 });
 
-onMounted(() => {
+onMounted(async () => {
+  // 책 데이터가 없으면 반드시 로드
+  if (store.currentBooks.length === 0) {
+    await store.loadBooks();
+  }
   // Auto-play first page audio
   setTimeout(() => {
     playPageAudio();

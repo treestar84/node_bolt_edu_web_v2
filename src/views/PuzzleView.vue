@@ -182,6 +182,8 @@
 import { ref, computed, onMounted } from 'vue';
 import Navigation from '@/components/Navigation.vue';
 import { useAppStore } from '@/stores/app';
+import { useAuthStore } from '@/stores/auth';
+import { useContentStore } from '@/stores/content';
 import { useFileUpload } from '@/composables/useFileUpload';
 import type { WordItem, Badge } from '@/types';
 
@@ -198,6 +200,8 @@ interface PuzzleSlot {
 }
 
 const store = useAppStore();
+const authStore = useAuthStore();
+const contentStore = useContentStore();
 const { getUploadedFileUrl } = useFileUpload();
 
 const gameState = ref<'selection' | 'playing' | 'completed'>('selection');
@@ -213,6 +217,8 @@ const puzzleBoard = ref<HTMLElement>();
 // Touch handling
 const draggedPiece = ref<PuzzlePiece | null>(null);
 const touchOffset = ref({ x: 0, y: 0 });
+
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
 
 const puzzleOptions = computed(() => {
   const words = store.currentWords.filter(w => w.imageUrl);
@@ -233,7 +239,7 @@ const gridRows = computed(() => {
 
 const getImageUrl = (url: string): string => {
   if (url.startsWith('/uploads/')) {
-    return getUploadedFileUrl(url.replace('/uploads/', '')) || url;
+    return '/server' + url;
   }
   return url;
 };
@@ -299,10 +305,30 @@ const initializePuzzle = () => {
 const handleDragStart = (event: DragEvent, piece: PuzzlePiece) => {
   if (event.dataTransfer) {
     event.dataTransfer.setData('text/plain', piece.id);
-    // 드래그 이미지를 투명하게 설정하여 원본 조각이 보이도록
-    const dragImage = new Image();
-    dragImage.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs=';
-    event.dataTransfer.setDragImage(dragImage, 0, 0);
+    
+    // 간단한 드래그 이미지 설정 - 원본 요소 사용
+    const dragElement = event.target as HTMLElement;
+    
+    // 드래그 이미지를 현재 요소로 설정하되, 약간 투명하게
+    const clonedElement = dragElement.cloneNode(true) as HTMLElement;
+    clonedElement.style.opacity = '0.8';
+    clonedElement.style.transform = 'scale(0.9)';
+    
+    // 임시로 DOM에 추가
+    document.body.appendChild(clonedElement);
+    clonedElement.style.position = 'absolute';
+    clonedElement.style.top = '-1000px';
+    clonedElement.style.left = '-1000px';
+    
+    // 드래그 이미지로 설정
+    event.dataTransfer.setDragImage(clonedElement, 60, 60);
+    
+    // 잠시 후 제거
+    setTimeout(() => {
+      if (document.body.contains(clonedElement)) {
+        document.body.removeChild(clonedElement);
+      }
+    }, 0);
   }
   draggedPiece.value = piece;
 };
@@ -393,21 +419,27 @@ const placePiece = (piece: PuzzlePiece, slotIndex: number) => {
   }
 };
 
-const completePuzzle = () => {
+const completePuzzle = async () => {
   gameState.value = 'completed';
   
-  // Update puzzle completion count and check for badges
-  store.incrementPuzzleCompletions();
+  console.log('🧩 Puzzle completed! Updating puzzle completions...');
   
-  // Check for newly unlocked puzzle badge
-  const unlockedBadge = store.currentBadges.find(badge => 
-    badge.category === 'puzzle' && 
-    badge.requiredScore === store.puzzleCompletions && 
-    badge.unlocked
-  );
-  
-  if (unlockedBadge) {
-    newBadgeUnlocked.value = unlockedBadge;
+  // Supabase에 진행도 업데이트
+  if (authStore.userProgress) {
+    const newCompletions = authStore.userProgress.puzzle_completions + 1;
+    
+    await authStore.updateProgress({
+      puzzle_completions: newCompletions
+    });
+    
+    console.log('✅ Puzzle progress updated in Supabase:', { completions: newCompletions });
+    
+    // 뱃지 확인
+    const unlockedBadges = await contentStore.checkBadgeUnlocks();
+    if (unlockedBadges.length > 0) {
+      newBadgeUnlocked.value = unlockedBadges[0];
+      console.log('🏆 New puzzle badge unlocked:', newBadgeUnlocked.value.name);
+    }
   }
   
   // Play completion sound

@@ -6,10 +6,15 @@
       <div class="container">
         <div class="page-header">
           <h1 class="page-title">책 관리</h1>
-          <button @click="showAddModal = true" class="btn btn-primary">
-            <span>➕</span>
-            새 책 추가
-          </button>
+          <div class="header-actions">
+            <div class="admin-type-indicator" v-if="isSystemAdmin">
+              <span class="admin-badge">시스템 관리자</span>
+            </div>
+            <button @click="showAddModal = true" class="btn btn-primary">
+              <span>➕</span>
+              새 책 추가
+            </button>
+          </div>
         </div>
 
         <div class="books-grid" v-if="store.currentBooks.length > 0">
@@ -20,13 +25,18 @@
           >
             <div class="book-cover">
               <img :src="getImageUrl(book.coverImage)" :alt="book.title" />
+              <div class="book-overlay">
+                <div class="book-meta">
+                  <span class="page-count">{{ book.pages.length }}장</span>
+                  <span class="age-range">{{ book.minAge }}-{{ book.maxAge }}세</span>
+                  <span v-if="isSystemAdmin" class="owner-tag" :class="book.ownerType">
+                    {{ book.ownerType === 'global' ? '공용' : '개인' }}
+                  </span>
+                </div>
+              </div>
             </div>
             <div class="book-info">
               <h3 class="book-title">{{ book.title }}</h3>
-              <div class="book-meta">
-                <span class="page-count">{{ book.pages.length }}장</span>
-                <span class="age-range">{{ book.minAge }}-{{ book.maxAge }}세</span>
-              </div>
               <div class="book-actions">
                 <button @click="editBook(book)" class="btn btn-sm btn-secondary">
                   수정
@@ -101,12 +111,41 @@
                 :required="true"
               />
             </div>
+
+            <!-- 시스템 관리자만 소유권 선택 가능 -->
+            <div v-if="isSystemAdmin" class="form-group">
+              <label class="form-label">소유권 설정</label>
+              <div class="ownership-options">
+                <label class="radio-option">
+                  <input 
+                    type="radio" 
+                    v-model="formData.ownerType" 
+                    value="global"
+                    name="ownerType"
+                  />
+                  <span class="radio-text">
+                    <strong>공용</strong> - 모든 사용자에게 표시
+                  </span>
+                </label>
+                <label class="radio-option">
+                  <input 
+                    type="radio" 
+                    v-model="formData.ownerType" 
+                    value="user"
+                    name="ownerType"
+                  />
+                  <span class="radio-text">
+                    <strong>개인</strong> - 나만 볼 수 있음
+                  </span>
+                </label>
+              </div>
+            </div>
           </div>
 
           <div class="pages-section">
             <h3 class="section-title">책 페이지 (4장)</h3>
             
-            <div class="pages-grid">
+            <div class="pages-container">
               <div 
                 v-for="(page, index) in formData.pages" 
                 :key="index"
@@ -115,26 +154,28 @@
                 <h4 class="page-title">{{ index + 1 }}장</h4>
                 
                 <div class="page-form-content">
-                  <div class="form-group">
-                    <label class="form-label">이미지</label>
-                    <FileUploadInput
-                      v-model="page.imageUrl"
-                      label="페이지 이미지"
-                      placeholder="https://example.com/page1.jpg"
-                      file-type="image"
-                      :required="true"
-                    />
-                  </div>
+                  <div class="page-form-row">
+                    <div class="form-group">
+                      <label class="form-label">이미지</label>
+                      <FileUploadInput
+                        v-model="page.imageUrl"
+                        label="페이지 이미지"
+                        placeholder="https://example.com/page1.jpg"
+                        file-type="image"
+                        :required="true"
+                      />
+                    </div>
 
-                  <div class="form-group">
-                    <label class="form-label">음성</label>
-                    <FileUploadInput
-                      v-model="page.audioUrl"
-                      label="페이지 음성"
-                      placeholder="/audio/book1-page1.mp3"
-                      file-type="audio"
-                      :required="true"
-                    />
+                    <div class="form-group">
+                      <label class="form-label">음성</label>
+                      <FileUploadInput
+                        v-model="page.audioUrl"
+                        label="페이지 음성"
+                        placeholder="/audio/book1-page1.mp3"
+                        file-type="audio"
+                        :required="true"
+                      />
+                    </div>
                   </div>
 
                   <div class="form-group">
@@ -143,7 +184,7 @@
                       v-model="page.textContent" 
                       class="form-input textarea"
                       placeholder="예: 귀여운 고양이가 있어요"
-                      rows="3"
+                      rows="2"
                     ></textarea>
                   </div>
                 </div>
@@ -194,14 +235,16 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue';
+import { ref, reactive, computed, onMounted } from 'vue';
 import AdminHeader from '@/components/AdminHeader.vue';
 import FileUploadInput from '@/components/FileUploadInput.vue';
 import { useAppStore } from '@/stores/app';
+import { useAuthStore } from '@/stores/auth';
 import { useFileUpload } from '@/composables/useFileUpload';
 import type { Book, BookPage } from '@/types';
 
 const store = useAppStore();
+const authStore = useAuthStore();
 const { getUploadedFileUrl } = useFileUpload();
 
 const showAddModal = ref(false);
@@ -211,6 +254,13 @@ const editingBook = ref<Book | null>(null);
 const bookToDelete = ref<Book | null>(null);
 const isLoading = ref(false);
 const error = ref('');
+
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
+
+// 시스템 관리자 여부 확인
+const isSystemAdmin = computed(() => {
+  return authStore.userProfile?.userType === 'teacher' || authStore.userProfile?.userType === 'director';
+});
 
 const createEmptyPage = () => ({
   imageUrl: '',
@@ -223,6 +273,7 @@ const formData = reactive({
   coverImage: '',
   minAge: 3,
   maxAge: 6,
+  ownerType: 'user' as 'global' | 'user',
   pages: [
     createEmptyPage(),
     createEmptyPage(),
@@ -233,7 +284,7 @@ const formData = reactive({
 
 const getImageUrl = (url: string): string => {
   if (url.startsWith('/uploads/')) {
-    return getUploadedFileUrl(url.replace('/uploads/', '')) || url;
+    return '/server' + url;
   }
   return url;
 };
@@ -243,6 +294,8 @@ const resetForm = () => {
   formData.coverImage = '';
   formData.minAge = 3;
   formData.maxAge = 6;
+  // 시스템 관리자는 기본적으로 공용으로, 일반 사용자는 개인으로 설정
+  formData.ownerType = isSystemAdmin.value ? 'global' : 'user';
   formData.pages = [
     createEmptyPage(),
     createEmptyPage(),
@@ -265,6 +318,7 @@ const editBook = (book: Book) => {
   formData.coverImage = book.coverImage;
   formData.minAge = book.minAge;
   formData.maxAge = book.maxAge;
+  formData.ownerType = book.ownerType;
   
   // Fill pages data
   formData.pages = book.pages.map(page => ({
@@ -300,34 +354,36 @@ const saveBook = async () => {
   error.value = '';
 
   try {
-    const pages: BookPage[] = formData.pages.map((page, index) => ({
-      id: `${Date.now()}-${index}`,
-      bookId: '', // Will be set by the store
-      pageNumber: index + 1,
-      imageUrl: page.imageUrl,
-      audioUrl: page.audioUrl,
-      textContent: page.textContent || undefined
-    }));
+    // pagesData를 snake_case로 변환 (값이 없으면 에러)
+    const pagesData = formData.pages.map((page, index) => {
+      if (!page.imageUrl || !page.audioUrl) {
+        throw new Error(`${index + 1}장의 이미지와 음성은 필수입니다.`);
+      }
+      return {
+        id: `${Date.now()}-${index}`,
+        book_id: '', // Will be set by the store
+        page_number: index + 1,
+        image_url: page.imageUrl,
+        audio_url: page.audioUrl,
+        text_content: page.textContent || null
+      };
+    });
+
+    const bookData = {
+      title: formData.title,
+      coverImage: formData.coverImage,
+      minAge: formData.minAge,
+      maxAge: formData.maxAge,
+      ownerType: formData.ownerType,
+      ownerId: formData.ownerType === 'user' ? authStore.user?.id : undefined,
+      pages: pagesData
+    };
 
     if (showAddModal.value) {
-      await store.addBook({
-        title: formData.title,
-        coverImage: formData.coverImage,
-        minAge: formData.minAge,
-        maxAge: formData.maxAge,
-        ownerType: 'global',
-        ownerId: undefined,
-        pages
-      });
+      await store.addBook(bookData);
       console.log('✅ Book added successfully');
     } else if (showEditModal.value && editingBook.value) {
-      await store.updateBook(editingBook.value.id, {
-        title: formData.title,
-        coverImage: formData.coverImage,
-        minAge: formData.minAge,
-        maxAge: formData.maxAge,
-        pages
-      });
+      await store.updateBook(editingBook.value.id, bookData);
       console.log('✅ Book updated successfully');
     }
     
@@ -367,6 +423,9 @@ onMounted(async () => {
   // 페이지 로드 시 최신 데이터 가져오기
   console.log('🔄 Loading books data...');
   await store.loadBooks();
+  
+  // 폼 초기값 설정
+  resetForm();
 });
 </script>
 
@@ -387,6 +446,28 @@ onMounted(async () => {
   margin-bottom: var(--spacing-2xl);
 }
 
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.admin-type-indicator {
+  display: flex;
+  align-items: center;
+}
+
+.admin-badge {
+  background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+  color: white;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-md);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
 .page-title {
   font-size: 2rem;
   font-weight: 700;
@@ -402,7 +483,7 @@ onMounted(async () => {
 .book-card {
   background: var(--color-bg-card);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-xl);
   overflow: hidden;
   transition: all 0.3s ease;
 }
@@ -414,6 +495,7 @@ onMounted(async () => {
 }
 
 .book-cover {
+  position: relative;
   width: 100%;
   height: 200px;
   overflow: hidden;
@@ -423,6 +505,49 @@ onMounted(async () => {
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+.book-overlay {
+  position: absolute;
+  top: var(--spacing-sm);
+  right: var(--spacing-sm);
+}
+
+.book-meta {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.page-count,
+.age-range {
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-align: center;
+}
+
+.owner-tag {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  text-align: center;
+}
+
+.owner-tag.global {
+  background: var(--color-success);
+  color: white;
+}
+
+.owner-tag.user {
+  background: var(--color-bg-secondary);
+  color: var(--color-text-secondary);
 }
 
 .book-info {
@@ -436,33 +561,43 @@ onMounted(async () => {
   margin-bottom: var(--spacing-md);
 }
 
-.book-meta {
-  margin-bottom: var(--spacing-lg);
-  display: flex;
-  gap: var(--spacing-sm);
-}
-
-.page-count {
-  background: var(--color-bg-secondary);
-  color: var(--color-text-secondary);
-  padding: var(--spacing-xs) var(--spacing-sm);
-  border-radius: var(--radius-sm);
-  font-size: 0.75rem;
-  font-weight: 500;
-}
-
-.age-range {
-  background: var(--color-primary);
-  color: white;
-  padding: var(--spacing-xs) var(--spacing-sm);
-  border-radius: var(--radius-sm);
-  font-size: 0.75rem;
-  font-weight: 500;
-}
-
 .book-actions {
   display: flex;
   gap: var(--spacing-sm);
+}
+
+.ownership-options {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  background: var(--color-bg-secondary);
+  padding: var(--spacing-lg);
+  border-radius: var(--radius-md);
+}
+
+.radio-option {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  cursor: pointer;
+  padding: var(--spacing-md);
+  border-radius: var(--radius-sm);
+  transition: background-color 0.2s ease;
+}
+
+.radio-option:hover {
+  background: var(--color-bg-hover);
+}
+
+.radio-option input[type="radio"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--color-primary);
+}
+
+.radio-text {
+  color: var(--color-text-primary);
+  font-size: 0.875rem;
 }
 
 .empty-state {
@@ -515,7 +650,7 @@ onMounted(async () => {
 }
 
 .large-modal {
-  max-width: 1000px;
+  max-width: 900px;
 }
 
 .modal-header {
@@ -557,7 +692,7 @@ onMounted(async () => {
 }
 
 .basic-info-section {
-  margin-bottom: var(--spacing-2xl);
+  margin-bottom: var(--spacing-xl);
 }
 
 .section-title {
@@ -587,10 +722,10 @@ onMounted(async () => {
 }
 
 .pages-section {
-  margin-bottom: var(--spacing-2xl);
+  margin-bottom: var(--spacing-xl);
 }
 
-.pages-grid {
+.pages-container {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: var(--spacing-lg);
@@ -600,7 +735,7 @@ onMounted(async () => {
   background: var(--color-bg-secondary);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  padding: var(--spacing-lg);
+  padding: var(--spacing-md);
 }
 
 .page-title {
@@ -621,12 +756,18 @@ onMounted(async () => {
 .page-form-content {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-md);
+  gap: var(--spacing-sm);
+}
+
+.page-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-sm);
 }
 
 .textarea {
   resize: vertical;
-  min-height: 80px;
+  min-height: 60px;
 }
 
 .error-message {
@@ -674,6 +815,10 @@ onMounted(async () => {
     align-items: stretch;
   }
   
+  .header-actions {
+    justify-content: space-between;
+  }
+  
   .books-grid {
     grid-template-columns: 1fr;
     gap: var(--spacing-lg);
@@ -683,9 +828,13 @@ onMounted(async () => {
     grid-template-columns: 1fr;
   }
   
-  .pages-grid {
+  .pages-container {
     grid-template-columns: 1fr;
     gap: var(--spacing-md);
+  }
+  
+  .page-form-row {
+    grid-template-columns: 1fr;
   }
   
   .modal-content {
@@ -706,7 +855,7 @@ onMounted(async () => {
   }
   
   .page-form-card {
-    padding: var(--spacing-md);
+    padding: var(--spacing-sm);
   }
 }
 </style>

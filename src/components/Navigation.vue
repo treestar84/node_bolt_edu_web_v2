@@ -3,7 +3,6 @@
     <div class="container">
       <div class="nav-content">
         <router-link to="/" class="nav-brand">
-          <span class="brand-icon">🎓</span>
           <span class="brand-text">{{ authStore.siteName }}</span>
         </router-link>
         
@@ -15,7 +14,6 @@
             class="nav-item"
             :class="{ active: $route.path === item.path }"
           >
-            <span class="nav-icon">{{ item.icon }}</span>
             <span class="nav-text">{{ item.name }}</span>
           </router-link>
         </div>
@@ -44,7 +42,7 @@
           
           <div class="user-menu" v-if="authStore.isAuthenticated">
             <router-link to="/settings" class="btn btn-sm btn-secondary">
-              ⚙️ 설정
+              설정
             </router-link>
           </div>
           
@@ -68,10 +66,11 @@ const store = useAppStore();
 const authStore = useAuthStore();
 
 const menuItems = computed(() => [
-  { name: '단어학습', path: '/words', icon: '📚' },
-  { name: '퀴즈', path: '/quiz', icon: '❓' },
-  { name: '퍼즐', path: '/puzzle', icon: '🧩' },
-  { name: '책읽기', path: '/books', icon: '📖' }
+  { name: '단어학습', path: '/words' },
+  { name: '퀴즈', path: '/quiz' },
+  { name: '퍼즐', path: '/puzzle' },
+  { name: '책읽기', path: '/books' },
+  { name: '달성도', path: '/achievements' }
 ]);
 
 const toggleLanguage = () => {
@@ -103,12 +102,13 @@ const toggleLanguage = () => {
   gap: var(--spacing-sm);
   text-decoration: none;
   color: var(--color-text-primary);
-  font-weight: 600;
-  font-size: 1.25rem;
+  font-weight: 800;
+  font-size: 1.5rem;
+  letter-spacing: -0.02em;
 }
 
-.brand-icon {
-  font-size: 1.5rem;
+.brand-text {
+  color: var(--color-text-primary);
 }
 
 .nav-menu {
@@ -126,7 +126,7 @@ const toggleLanguage = () => {
   border-radius: var(--radius-md);
   text-decoration: none;
   color: var(--color-text-secondary);
-  font-weight: 500;
+  font-weight: 600;
   transition: all 0.2s ease;
   min-width: 100px;
   justify-content: center;
@@ -139,8 +139,9 @@ const toggleLanguage = () => {
   transform: translateY(-2px);
 }
 
-.nav-icon {
-  font-size: 1.2rem;
+.nav-text {
+  color: inherit;
+  font-weight: inherit;
 }
 
 .nav-controls {
@@ -160,7 +161,7 @@ const toggleLanguage = () => {
   padding: var(--spacing-xs) var(--spacing-sm);
   border-radius: var(--radius-md);
   font-size: 0.75rem;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .language-toggle {
@@ -176,6 +177,8 @@ const toggleLanguage = () => {
   background: transparent;
   min-height: 36px;
   padding: var(--spacing-sm) var(--spacing-md);
+  color: var(--color-text-primary);
+  font-weight: 600;
 }
 
 .language-toggle .btn.active {

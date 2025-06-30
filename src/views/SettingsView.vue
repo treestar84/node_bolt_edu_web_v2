@@ -76,12 +76,22 @@
                   :required="false"
                 />
                 <div class="form-hint">
-                  홈 화면에 표시될 대표 이미지를 설정하세요
+                  홈 화면에 표시될 대표 이미지를 설정하세요 (새로고침 후에도 유지됩니다)
+                </div>
+                
+                <!-- 현재 이미지 미리보기 -->
+                <div v-if="currentImagePreview" class="current-image-preview">
+                  <h4>현재 설정된 이미지:</h4>
+                  <img :src="currentImagePreview" alt="현재 메인 이미지" class="preview-image" />
                 </div>
               </div>
 
               <div v-if="authStore.error" class="error-message">
                 {{ authStore.error }}
+              </div>
+
+              <div v-if="saveSuccess" class="success-message">
+                ✅ 설정이 성공적으로 저장되었습니다!
               </div>
 
               <div class="form-actions">
@@ -113,7 +123,7 @@
               <div class="stat-item">
                 <div class="stat-icon">🧩</div>
                 <div class="stat-content">
-                  <div class="stat-value">{{ authStore.userProgress.quizScore }}</div>
+                  <div class="stat-value">{{ authStore.userProgress.quiz_score }}</div>
                   <div class="stat-label">퀴즈 점수</div>
                 </div>
               </div>
@@ -121,7 +131,7 @@
               <div class="stat-item">
                 <div class="stat-icon">🎯</div>
                 <div class="stat-content">
-                  <div class="stat-value">{{ authStore.userProgress.quizStreak }}</div>
+                  <div class="stat-value">{{ authStore.userProgress.quiz_streak }}</div>
                   <div class="stat-label">연속 정답</div>
                 </div>
               </div>
@@ -129,7 +139,7 @@
               <div class="stat-item">
                 <div class="stat-icon">🧩</div>
                 <div class="stat-content">
-                  <div class="stat-value">{{ authStore.userProgress.puzzleCompletions }}</div>
+                  <div class="stat-value">{{ authStore.userProgress.puzzle_completions }}</div>
                   <div class="stat-label">퍼즐 완성</div>
                 </div>
               </div>
@@ -137,7 +147,7 @@
               <div class="stat-item">
                 <div class="stat-icon">📚</div>
                 <div class="stat-content">
-                  <div class="stat-value">{{ authStore.userProgress.wordsLearned }}</div>
+                  <div class="stat-value">{{ authStore.userProgress.words_learned }}</div>
                   <div class="stat-label">학습한 단어</div>
                 </div>
               </div>
@@ -145,7 +155,7 @@
               <div class="stat-item">
                 <div class="stat-icon">📖</div>
                 <div class="stat-content">
-                  <div class="stat-value">{{ authStore.userProgress.booksRead }}</div>
+                  <div class="stat-value">{{ authStore.userProgress.books_read }}</div>
                   <div class="stat-label">읽은 책</div>
                 </div>
               </div>
@@ -178,16 +188,22 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, onMounted } from 'vue';
+import { reactive, computed, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import Navigation from '@/components/Navigation.vue';
 import FileUploadInput from '@/components/FileUploadInput.vue';
 import { useAuthStore } from '@/stores/auth';
 import { useContentStore } from '@/stores/content';
+import { useFileUpload } from '@/composables/useFileUpload';
 
 const router = useRouter();
 const authStore = useAuthStore();
 const contentStore = useContentStore();
+const { getUploadedFileUrl } = useFileUpload();
+
+const saveSuccess = ref(false);
+
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
 
 const formData = reactive({
   username: '',
@@ -195,6 +211,19 @@ const formData = reactive({
   siteName: '',
   childAge: 4,
   mainImageUrl: ''
+});
+
+// 현재 이미지 미리보기 계산
+const currentImagePreview = computed(() => {
+  const imageUrl = formData.mainImageUrl || authStore.userProfile?.mainImageUrl;
+  
+  if (!imageUrl) return null;
+  
+  if (imageUrl.startsWith('/uploads/')) {
+    return '/server' + imageUrl;
+  }
+  
+  return imageUrl;
 });
 
 const loadCurrentSettings = () => {
@@ -208,6 +237,8 @@ const loadCurrentSettings = () => {
 };
 
 const saveSettings = async () => {
+  console.log('💾 Saving settings with mainImageUrl:', formData.mainImageUrl);
+  
   const success = await authStore.updateSettings({
     userType: formData.userType,
     siteName: formData.siteName,
@@ -216,14 +247,25 @@ const saveSettings = async () => {
   });
 
   if (success) {
+    console.log('✅ Settings saved successfully');
+    saveSuccess.value = true;
+    
+    // 성공 메시지를 3초 후 숨김
+    setTimeout(() => {
+      saveSuccess.value = false;
+    }, 3000);
+    
     // Reload content with new age filter
     await contentStore.loadContent();
-    router.push('/');
+    
+    // 홈페이지로 리다이렉트하지 않고 현재 페이지에 머물기
+    console.log('🔄 Settings updated, staying on settings page');
   }
 };
 
 const resetForm = () => {
   loadCurrentSettings();
+  saveSuccess.value = false;
 };
 
 const handleLogout = async () => {
@@ -312,6 +354,29 @@ onMounted(() => {
   cursor: not-allowed;
 }
 
+.current-image-preview {
+  margin-top: var(--spacing-md);
+  padding: var(--spacing-md);
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-md);
+  text-align: center;
+}
+
+.current-image-preview h4 {
+  font-size: 0.875rem;
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-sm);
+  font-weight: 600;
+}
+
+.preview-image {
+  max-width: 200px;
+  max-height: 150px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  object-fit: cover;
+}
+
 .form-actions {
   display: flex;
   gap: var(--spacing-md);
@@ -322,6 +387,17 @@ onMounted(() => {
   background: rgba(239, 68, 68, 0.1);
   border: 1px solid var(--color-danger);
   color: var(--color-danger);
+  padding: var(--spacing-md);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--spacing-lg);
+  text-align: center;
+  font-weight: 500;
+}
+
+.success-message {
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid var(--color-success);
+  color: var(--color-success);
   padding: var(--spacing-md);
   border-radius: var(--radius-md);
   margin-bottom: var(--spacing-lg);

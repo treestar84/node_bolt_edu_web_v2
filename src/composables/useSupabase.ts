@@ -8,13 +8,21 @@ if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error('Missing Supabase environment variables');
 }
 
-export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey);
+export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    persistSession: true,
+    autoRefreshToken: true,
+    detectSessionInUrl: true,
+    storage: window.localStorage,
+    storageKey: 'supabase.auth.token'
+  }
+});
 
 export function useSupabase() {
   return {
     supabase,
     
-    // Auth helpers - Enhanced with email confirmation disabled
+    // Auth helpers - Enhanced with better session management
     async signUp(username: string, password: string, userType: string, childAge: number) {
       try {
         console.log('🚀 Starting signup process for:', username);
@@ -481,7 +489,7 @@ export function useSupabase() {
       return data || [];
     },
 
-    // Progress helpers
+    // Progress helpers - FIXED: 올바른 필드명 사용
     async getUserProgress(userId: string) {
       console.log('📊 Getting user progress for:', userId);
       const { data, error } = await supabase
@@ -515,13 +523,13 @@ export function useSupabase() {
       return data;
     },
 
-    // Badges helpers
+    // Badges helpers - FIXED: 올바른 필드명 사용
     async getBadges() {
       console.log('🏆 Getting badges...');
       const { data, error } = await supabase
         .from('badges')
         .select('*')
-        .order('required_score');
+        .order('required_score'); // FIXED: 올바른 필드명
 
       if (error) {
         console.error('❌ Get badges error:', error);

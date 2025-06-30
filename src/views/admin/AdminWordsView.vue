@@ -6,10 +6,15 @@
       <div class="container">
         <div class="page-header">
           <h1 class="page-title">단어 관리</h1>
-          <button @click="showAddModal = true" class="btn btn-primary">
-            <span>➕</span>
-            새 단어 추가
-          </button>
+          <div class="header-actions">
+            <div class="admin-type-indicator" v-if="isSystemAdmin">
+              <span class="admin-badge">시스템 관리자</span>
+            </div>
+            <button @click="showAddModal = true" class="btn btn-primary">
+              <span>➕</span>
+              새 단어 추가
+            </button>
+          </div>
         </div>
 
         <div class="words-table-container">
@@ -25,6 +30,7 @@
               <div class="header-cell">단어</div>
               <div class="header-cell">카테고리</div>
               <div class="header-cell">나이</div>
+              <div class="header-cell" v-if="isSystemAdmin">소유권</div>
               <div class="header-cell">작업</div>
             </div>
             
@@ -47,6 +53,11 @@
               </div>
               <div class="cell age-cell">
                 <span class="age-range">{{ word.minAge }}-{{ word.maxAge }}세</span>
+              </div>
+              <div class="cell owner-cell" v-if="isSystemAdmin">
+                <span class="owner-tag" :class="word.ownerType">
+                  {{ word.ownerType === 'global' ? '공용' : '개인' }}
+                </span>
               </div>
               <div class="cell actions-cell">
                 <button @click="editWord(word)" class="btn btn-sm btn-secondary">
@@ -162,6 +173,35 @@
             </div>
           </div>
 
+          <!-- 시스템 관리자만 소유권 선택 가능 -->
+          <div v-if="isSystemAdmin" class="form-group">
+            <label class="form-label">소유권 설정</label>
+            <div class="ownership-options">
+              <label class="radio-option">
+                <input 
+                  type="radio" 
+                  v-model="formData.ownerType" 
+                  value="global"
+                  name="ownerType"
+                />
+                <span class="radio-text">
+                  <strong>공용</strong> - 모든 사용자에게 표시
+                </span>
+              </label>
+              <label class="radio-option">
+                <input 
+                  type="radio" 
+                  v-model="formData.ownerType" 
+                  value="user"
+                  name="ownerType"
+                />
+                <span class="radio-text">
+                  <strong>개인</strong> - 나만 볼 수 있음
+                </span>
+              </label>
+            </div>
+          </div>
+
           <div v-if="error" class="error-message">
             {{ error }}
           </div>
@@ -205,14 +245,16 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue';
+import { ref, reactive, computed, onMounted } from 'vue';
 import AdminHeader from '@/components/AdminHeader.vue';
 import FileUploadInput from '@/components/FileUploadInput.vue';
 import { useAppStore } from '@/stores/app';
+import { useAuthStore } from '@/stores/auth';
 import { useFileUpload } from '@/composables/useFileUpload';
 import type { WordItem } from '@/types';
 
 const store = useAppStore();
+const authStore = useAuthStore();
 const { getUploadedFileUrl } = useFileUpload();
 
 const showAddModal = ref(false);
@@ -223,6 +265,13 @@ const wordToDelete = ref<WordItem | null>(null);
 const isLoading = ref(false);
 const error = ref('');
 
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
+
+// 시스템 관리자 여부 확인
+const isSystemAdmin = computed(() => {
+  return authStore.userProfile?.userType === 'teacher' || authStore.userProfile?.userType === 'director';
+});
+
 const formData = reactive({
   name: '',
   nameEn: '',
@@ -231,7 +280,8 @@ const formData = reactive({
   audioEn: '',
   category: '',
   minAge: 3,
-  maxAge: 6
+  maxAge: 6,
+  ownerType: 'user' as 'global' | 'user'
 });
 
 const getCategoryName = (category: string) => {
@@ -249,7 +299,14 @@ const getCategoryName = (category: string) => {
 
 const getImageUrl = (url: string): string => {
   if (url.startsWith('/uploads/')) {
-    return getUploadedFileUrl(url.replace('/uploads/', '')) || url;
+    return '/server' + url;
+  }
+  return url;
+};
+
+const getAudioUrl = (url: string): string => {
+  if (url.startsWith('/uploads/')) {
+    return '/server' + url;
   }
   return url;
 };
@@ -263,6 +320,8 @@ const resetForm = () => {
   formData.category = '';
   formData.minAge = 3;
   formData.maxAge = 6;
+  // 시스템 관리자는 기본적으로 공용으로, 일반 사용자는 개인으로 설정
+  formData.ownerType = isSystemAdmin.value ? 'global' : 'user';
   error.value = '';
 };
 
@@ -283,6 +342,7 @@ const editWord = (word: WordItem) => {
   formData.category = word.category;
   formData.minAge = word.minAge;
   formData.maxAge = word.maxAge;
+  formData.ownerType = word.ownerType;
   showEditModal.value = true;
 };
 
@@ -296,31 +356,24 @@ const saveWord = async () => {
   error.value = '';
 
   try {
+    const wordData = {
+      name: formData.name,
+      nameEn: formData.nameEn,
+      imageUrl: formData.imageUrl,
+      audioKo: formData.audioKo,
+      audioEn: formData.audioEn,
+      category: formData.category,
+      minAge: formData.minAge,
+      maxAge: formData.maxAge,
+      ownerType: formData.ownerType,
+      ownerId: formData.ownerType === 'user' ? authStore.user?.id : undefined
+    };
+
     if (showAddModal.value) {
-      await store.addWord({
-        name: formData.name,
-        nameEn: formData.nameEn,
-        imageUrl: formData.imageUrl,
-        audioKo: formData.audioKo,
-        audioEn: formData.audioEn,
-        category: formData.category,
-        minAge: formData.minAge,
-        maxAge: formData.maxAge,
-        ownerType: 'global',
-        ownerId: undefined
-      });
+      await store.addWord(wordData);
       console.log('✅ Word added successfully');
     } else if (showEditModal.value && editingWord.value) {
-      await store.updateWord(editingWord.value.id, {
-        name: formData.name,
-        nameEn: formData.nameEn,
-        imageUrl: formData.imageUrl,
-        audioKo: formData.audioKo,
-        audioEn: formData.audioEn,
-        category: formData.category,
-        minAge: formData.minAge,
-        maxAge: formData.maxAge
-      });
+      await store.updateWord(editingWord.value.id, wordData);
       console.log('✅ Word updated successfully');
     }
     
@@ -360,6 +413,9 @@ onMounted(async () => {
   // 페이지 로드 시 최신 데이터 가져오기
   console.log('🔄 Loading words data...');
   await store.loadWords();
+  
+  // 폼 초기값 설정
+  resetForm();
 });
 </script>
 
@@ -378,6 +434,28 @@ onMounted(async () => {
   justify-content: space-between;
   align-items: center;
   margin-bottom: var(--spacing-2xl);
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.admin-type-indicator {
+  display: flex;
+  align-items: center;
+}
+
+.admin-badge {
+  background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+  color: white;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-md);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .page-title {
@@ -420,11 +498,15 @@ onMounted(async () => {
 
 .table-header {
   display: grid;
-  grid-template-columns: 100px 1fr 150px 100px 200px;
+  grid-template-columns: 100px 1fr 150px 100px 100px 200px;
   gap: var(--spacing-md);
   padding: var(--spacing-lg);
   background: var(--color-bg-secondary);
   border-bottom: 1px solid var(--color-border);
+}
+
+.table-header.with-owner {
+  grid-template-columns: 100px 1fr 150px 100px 100px 200px;
 }
 
 .header-cell {
@@ -437,11 +519,15 @@ onMounted(async () => {
 
 .table-row {
   display: grid;
-  grid-template-columns: 100px 1fr 150px 100px 200px;
+  grid-template-columns: 100px 1fr 150px 100px 100px 200px;
   gap: var(--spacing-md);
   padding: var(--spacing-lg);
   border-bottom: 1px solid var(--color-border);
   transition: background-color 0.2s ease;
+}
+
+.table-row.with-owner {
+  grid-template-columns: 100px 1fr 150px 100px 100px 200px;
 }
 
 .table-row:hover {
@@ -502,8 +588,61 @@ onMounted(async () => {
   font-weight: 500;
 }
 
+.owner-tag {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.owner-tag.global {
+  background: var(--color-success);
+  color: white;
+}
+
+.owner-tag.user {
+  background: var(--color-bg-secondary);
+  color: var(--color-text-secondary);
+}
+
 .actions-cell {
   gap: var(--spacing-sm);
+}
+
+.ownership-options {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  background: var(--color-bg-secondary);
+  padding: var(--spacing-lg);
+  border-radius: var(--radius-md);
+}
+
+.radio-option {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  cursor: pointer;
+  padding: var(--spacing-md);
+  border-radius: var(--radius-sm);
+  transition: background-color 0.2s ease;
+}
+
+.radio-option:hover {
+  background: var(--color-bg-hover);
+}
+
+.radio-option input[type="radio"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--color-primary);
+}
+
+.radio-text {
+  color: var(--color-text-primary);
+  font-size: 0.875rem;
 }
 
 .modal-overlay {
@@ -632,6 +771,10 @@ onMounted(async () => {
     flex-direction: column;
     gap: var(--spacing-lg);
     align-items: stretch;
+  }
+  
+  .header-actions {
+    justify-content: space-between;
   }
   
   .table-header,

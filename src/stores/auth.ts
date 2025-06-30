@@ -263,7 +263,7 @@ export const useAuthStore = defineStore('auth', () => {
     }
   };
 
-  // Update user progress
+  // Update user progress - Supabase 연동 추가
   const updateProgress = async (updates: Partial<UserProgress>) => {
     if (!user.value || !userProgress.value) {
       console.error('⚠️ No user or progress to update');

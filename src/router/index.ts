@@ -51,6 +51,12 @@ const routes = [
     meta: { requiresAuth: true }
   },
   {
+    path: '/achievements',
+    name: 'Achievements',
+    component: () => import('@/views/AchievementsView.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
     path: '/admin',
     name: 'AdminLogin',
     component: () => import('@/views/admin/AdminLoginView.vue')
