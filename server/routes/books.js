@@ -63,10 +63,10 @@ router.post('/', authenticateApiKey, async (req, res) => {
     // Validate each page
     for (let i = 0; i < pages.length; i++) {
       const page = pages[i];
-      if (!page.imageUrl || !page.audio) {
+      if (!page.imageUrl || !(page.audio || page.audioUrl)) {
         return res.status(400).json({
           error: 'Bad request',
-          message: `Page ${i + 1} must have imageUrl and audio`
+          message: `Page ${i + 1} must have imageUrl and audioUrl`
         });
       }
     }
@@ -77,8 +77,8 @@ router.post('/', authenticateApiKey, async (req, res) => {
       pages: pages.map((page, index) => ({
         id: uuidv4(),
         imageUrl: page.imageUrl.trim(),
-        audio: page.audio.trim(),
-        text: page.text ? page.text.trim() : undefined
+        audioUrl: (page.audioUrl || page.audio || '').trim(),
+        textContent: page.textContent ? page.textContent.trim() : (page.text ? page.text.trim() : undefined)
       }))
     };
     
@@ -128,25 +128,25 @@ router.post('/complete', authenticateApiKey, async (req, res) => {
         {
           id: uuidv4(),
           imageUrl: page1Image.trim(),
-          audio: page1Audio.trim(),
+          audioUrl: page1Audio.trim(),
           text: page1Text ? page1Text.trim() : undefined
         },
         {
           id: uuidv4(),
           imageUrl: page2Image.trim(),
-          audio: page2Audio.trim(),
+          audioUrl: page2Audio.trim(),
           text: page2Text ? page2Text.trim() : undefined
         },
         {
           id: uuidv4(),
           imageUrl: page3Image.trim(),
-          audio: page3Audio.trim(),
+          audioUrl: page3Audio.trim(),
           text: page3Text ? page3Text.trim() : undefined
         },
         {
           id: uuidv4(),
           imageUrl: page4Image.trim(),
-          audio: page4Audio.trim(),
+          audioUrl: page4Audio.trim(),
           text: page4Text ? page4Text.trim() : undefined
         }
       ]
@@ -183,12 +183,11 @@ router.put('/:id', authenticateApiKey, async (req, res) => {
           message: 'Exactly 4 pages are required'
         });
       }
-      
       updateData.pages = pages.map((page, index) => ({
         id: page.id || uuidv4(),
         imageUrl: page.imageUrl ? page.imageUrl.trim() : '',
-        audio: page.audio ? page.audio.trim() : '',
-        text: page.text ? page.text.trim() : undefined
+        audioUrl: (page.audioUrl || page.audio || '').trim(),
+        textContent: page.textContent ? page.textContent.trim() : (page.text ? page.text.trim() : undefined)
       }));
     }
     

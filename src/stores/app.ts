@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { ref, computed } from 'vue';
+import { ref, computed, toRaw } from 'vue';
 import { useSupabase } from '@/composables/useSupabase';
 import type { WordItem, Book, Quiz, Badge, ApiKey, Language } from '@/types';
 
@@ -398,32 +398,26 @@ export const useAppStore = defineStore('app', () => {
   const addBook = async (book: Omit<Book, 'id'>) => {
     try {
       console.log('➕ Adding book to database:', book.title);
-      
       // 관리자 권한 확인을 위해 현재 사용자 정보 가져오기
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         throw new Error('사용자 인증이 필요합니다.');
       }
-
       // 사용자 프로필 확인
       const { data: profile, error: profileError } = await supabase
         .from('user_profiles')
         .select('user_type')
         .eq('user_id', user.id)
         .single();
-
       if (profileError) {
         console.error('❌ Error getting user profile:', profileError);
         throw new Error('사용자 프로필을 확인할 수 없습니다.');
       }
-
       // 관리자 권한이 있는 경우 global로, 일반 사용자는 user로 설정
       const ownerType = (profile.user_type === 'teacher' || profile.user_type === 'director') ? 'global' : 'user';
       const ownerId = ownerType === 'user' ? user.id : null;
-
       console.log('👤 User type:', profile.user_type, '| Owner type:', ownerType);
-      
-      // 먼저 책 정보 삽입
+      // 1. 책 먼저 저장
       const { data: bookData, error: bookError } = await supabase
         .from('books')
         .insert({
@@ -436,49 +430,64 @@ export const useAppStore = defineStore('app', () => {
         })
         .select()
         .single();
-
       if (bookError) {
         console.error('❌ Error adding book:', bookError);
         throw bookError;
       }
-
-      // 책 페이지들 삽입
-      const pagesData = book.pages.map((page, index) => {
-        if (!page.imageUrl || page.imageUrl === '' || !page.audioUrl || page.audioUrl === '') {
-          throw new Error(`${index + 1}장의 이미지와 음성은 필수입니다.`);
+      // 2. 페이지 데이터 준비 (snake_case, 필수값 체크, toRaw로 프록시 해제, _value fallback)
+      const pagesData = book.pages.map((page, idx) => {
+        const rawPage = toRaw(page);
+        // 1. camelCase 우선
+        let imageUrl = rawPage.imageUrl;
+        let audioUrl = rawPage.audioUrl;
+        let textContent = rawPage.textContent;
+        // 2. snake_case fallback (as any)
+        if ((!imageUrl || !audioUrl) && ((rawPage as any).image_url || (rawPage as any).audio_url)) {
+          imageUrl = (rawPage as any).image_url;
+          audioUrl = (rawPage as any).audio_url;
+          textContent = (rawPage as any).text_content;
+        }
+        // 3. _value fallback (camelCase/snake_case 모두)
+        const rawValue = (rawPage as any)._value;
+        if ((!imageUrl || !audioUrl) && rawValue) {
+          imageUrl = rawValue.imageUrl || rawValue.image_url;
+          audioUrl = rawValue.audioUrl || rawValue.audio_url;
+          textContent = rawValue.textContent || rawValue.text_content;
+        }
+        if (!imageUrl || !audioUrl) {
+          console.log('DEBUG page structure', idx, rawPage);
+          throw new Error(`페이지 ${idx + 1}에 이미지/음성 파일이 누락되었습니다.`);
         }
         return {
           book_id: bookData.id,
-          page_number: index + 1,
-          image_url: page.imageUrl,
-          audio_url: page.audioUrl,
-          text_content: page.textContent || null
+          page_number: idx + 1,
+          image_url: imageUrl,
+          audio_url: audioUrl,
+          text_content: textContent || null
         };
       });
-
+      // 3. book_pages insert
       const { data: pagesResult, error: pagesError } = await supabase
         .from('book_pages')
         .insert(pagesData)
         .select();
-
       if (pagesError) {
-        console.error('❌ Error adding book pages:', pagesError);
+        console.error('❌ Error adding book pages:', pagesError, pagesError.details, pagesError.hint);
         // 책 삭제 후 에러 던지기
         await supabase.from('books').delete().eq('id', bookData.id);
         throw pagesError;
       }
-
+      // 4. 성공 로그
+      console.log('✅ Book and pages added:', bookData, pagesResult);
       // 로컬 상태 업데이트
       const newBook = transformBookFromDB({
         ...bookData,
         book_pages: pagesResult
       });
       currentBooks.value.unshift(newBook);
-      
-      console.log('✅ Book added successfully:', newBook.title);
       return newBook;
-    } catch (error) {
-      console.error('💥 Error in addBook:', error);
+    } catch (error: any) {
+      console.error('💥 Error in addBook:', error, error?.details, error?.hint);
       throw error;
     }
   };
@@ -517,18 +526,13 @@ export const useAppStore = defineStore('app', () => {
           .eq('book_id', id);
 
         // 새 페이지 삽입
-        const pagesData = updates.pages.map((page, index) => {
-          if (!page.imageUrl || !page.audioUrl || page.imageUrl === '' || page.audioUrl === '') {
-            throw new Error(`${index + 1}장의 이미지와 음성은 필수입니다.`);
-          }
-          return {
-            book_id: id,
-            page_number: index + 1,
-            image_url: page.imageUrl,
-            audio_url: page.audioUrl,
-            text_content: page.textContent || null
-          };
-        });
+        const pagesData = updates.pages.map((page, index) => ({
+          book_id: id,
+          page_number: index + 1,
+          image_url: page.imageUrl || '',
+          audio_url: page.audioUrl || '',
+          text_content: page.textContent || null
+        }));
 
         const { data: pagesResult, error: pagesError } = await supabase
           .from('book_pages')
@@ -620,15 +624,15 @@ export const useAppStore = defineStore('app', () => {
     maxAge: dbBook.max_age,
     ownerType: dbBook.owner_type,
     ownerId: dbBook.owner_id,
-    pages: (dbBook.book_pages || [])
-      .sort((a: any, b: any) => a.page_number - b.page_number)
+    pages: (dbBook.book_pages || dbBook.pages || [])
+      .sort((a: any, b: any) => (a.page_number || a.pageNumber || 0) - (b.page_number || b.pageNumber || 0))
       .map((page: any) => ({
         id: page.id,
-        bookId: page.book_id,
-        pageNumber: page.page_number,
-        imageUrl: page.image_url,
-        audioUrl: page.audio_url,
-        textContent: page.text_content
+        bookId: page.book_id || page.bookId || '',
+        pageNumber: page.page_number || page.pageNumber || 0,
+        imageUrl: page.image_url || page.imageUrl || '',
+        audioUrl: page.audio_url || page.audioUrl || page.audio || '',
+        textContent: page.text_content || page.textContent || page.text || ''
       })),
     createdAt: dbBook.created_at,
     updatedAt: dbBook.updated_at
@@ -855,6 +859,23 @@ export const useAppStore = defineStore('app', () => {
     }
   };
 
+  const getImageUrl = (url: string | undefined | null): string => {
+    if (!url) return '';
+    // 이미 http(s)로 시작하면 그대로 반환
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      return url;
+    }
+    // /uploads/로 시작하면 /server 붙이기
+    if (url.startsWith('/uploads/')) {
+      return '/server' + url;
+    }
+    // /server/uploads/로 시작하면 그대로 반환
+    if (url.startsWith('/server/uploads/')) {
+      return url;
+    }
+    return url;
+  };
+
   return {
     // State
     currentLanguage,
@@ -898,6 +919,7 @@ export const useAppStore = defineStore('app', () => {
     verifyAdminToken,
     fetchApiKeys,
     createApiKey,
-    deleteApiKey
+    deleteApiKey,
+    getImageUrl
   };
 });

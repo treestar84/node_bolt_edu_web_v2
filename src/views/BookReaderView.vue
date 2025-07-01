@@ -35,13 +35,13 @@
         <div class="book-page">
           <div class="page-image">
             <template v-if="currentPage && currentPage.imageUrl">
-              <img :src="getImageUrl(currentPage.imageUrl)" :alt="`페이지 ${currentPageIndex + 1}`" />
+              <img :src="store.getImageUrl(currentPage.imageUrl)" :alt="`페이지 ${currentPageIndex + 1}`" />
             </template>
             <template v-else>
               <div class="missing-media">이미지가 없습니다</div>
             </template>
-            <div class="page-text" v-if="currentPage?.text">
-              {{ currentPage.text }}
+            <div class="page-text" v-if="currentPage?.textContent">
+              {{ currentPage.textContent }}
             </div>
           </div>
           
@@ -50,12 +50,12 @@
               @click="playPageAudio" 
               class="audio-button"
               :class="{ playing: isPlaying }"
-              :disabled="!currentPage || !currentPage.audio"
+              :disabled="!currentPage || !currentPage.audioUrl"
             >
               <span class="audio-icon">{{ isPlaying ? '🔊' : '🔈' }}</span>
               <span>음성 듣기</span>
             </button>
-            <template v-if="!currentPage || !currentPage.audio">
+            <template v-if="!currentPage || !currentPage.audioUrl">
               <div class="missing-media">오디오가 없습니다</div>
             </template>
             
@@ -150,22 +150,6 @@ const currentPage = computed(() => {
   return book.value.pages[currentPageIndex.value];
 });
 
-const getImageUrl = (url: string | undefined | null): string => {
-  if (!url) return '';
-  if (url.startsWith('/uploads/')) {
-    return '/server' + url;
-  }
-  return url;
-};
-
-const getAudioUrl = (url: string | undefined | null): string => {
-  if (!url) return '';
-  if (url.startsWith('/uploads/')) {
-    return '/server' + url;
-  }
-  return url;
-};
-
 const goBack = () => {
   router.push('/books');
 };
@@ -190,9 +174,9 @@ const goToPage = (index: number) => {
 };
 
 const playPageAudio = async () => {
-  if (currentPage.value && currentPage.value.audio) {
+  if (currentPage.value && currentPage.value.audioUrl) {
     try {
-      const audioUrl = getAudioUrl(currentPage.value.audio);
+      const audioUrl = store.getImageUrl(currentPage.value.audioUrl);
       if (!audioUrl) return;
       const duration = await playAudio(audioUrl);
       

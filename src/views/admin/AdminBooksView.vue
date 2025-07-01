@@ -162,7 +162,7 @@
                         label="페이지 이미지"
                         placeholder="https://example.com/page1.jpg"
                         file-type="image"
-                        :required="true"
+                        :required="false"
                       />
                     </div>
 
@@ -173,7 +173,7 @@
                         label="페이지 음성"
                         placeholder="/audio/book1-page1.mp3"
                         file-type="audio"
-                        :required="true"
+                        :required="false"
                       />
                     </div>
                   </div>
@@ -235,7 +235,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted } from 'vue';
+import { ref, reactive, computed, onMounted, watch } from 'vue';
 import AdminHeader from '@/components/AdminHeader.vue';
 import FileUploadInput from '@/components/FileUploadInput.vue';
 import { useAppStore } from '@/stores/app';
@@ -262,7 +262,7 @@ const isSystemAdmin = computed(() => {
   return authStore.userProfile?.userType === 'teacher' || authStore.userProfile?.userType === 'director';
 });
 
-const createEmptyPage = () => ({
+const createEmptyPage = () => reactive({
   imageUrl: '',
   audioUrl: '',
   textContent: ''
@@ -274,12 +274,12 @@ const formData = reactive({
   minAge: 3,
   maxAge: 6,
   ownerType: 'user' as 'global' | 'user',
-  pages: [
+  pages: reactive([
     createEmptyPage(),
     createEmptyPage(),
     createEmptyPage(),
     createEmptyPage()
-  ]
+  ])
 });
 
 const getImageUrl = (url: string): string => {
@@ -294,14 +294,13 @@ const resetForm = () => {
   formData.coverImage = '';
   formData.minAge = 3;
   formData.maxAge = 6;
-  // 시스템 관리자는 기본적으로 공용으로, 일반 사용자는 개인으로 설정
   formData.ownerType = isSystemAdmin.value ? 'global' : 'user';
-  formData.pages = [
+  formData.pages = reactive([
     createEmptyPage(),
     createEmptyPage(),
     createEmptyPage(),
     createEmptyPage()
-  ];
+  ]);
   error.value = '';
 };
 
@@ -319,19 +318,17 @@ const editBook = (book: Book) => {
   formData.minAge = book.minAge;
   formData.maxAge = book.maxAge;
   formData.ownerType = book.ownerType;
-  
-  // Fill pages data
-  formData.pages = book.pages.map(page => ({
-    imageUrl: page.imageUrl,
-    audioUrl: page.audioUrl,
-    textContent: page.textContent || ''
-  }));
-  
-  // Ensure we have exactly 4 pages
+  formData.pages = book.pages.map(page =>
+    reactive({
+      imageUrl: page.imageUrl,
+      audioUrl: page.audioUrl,
+      textContent: page.textContent || ''
+    })
+  );
   while (formData.pages.length < 4) {
     formData.pages.push(createEmptyPage());
   }
-  
+  error.value = '';
   showEditModal.value = true;
 };
 
@@ -341,33 +338,28 @@ const saveBook = async () => {
     return;
   }
 
-  // Validate all pages have required fields
-  for (let i = 0; i < formData.pages.length; i++) {
-    const page = formData.pages[i];
-    if (!page.imageUrl || !page.audioUrl) {
-      error.value = `${i + 1}장의 이미지와 음성은 필수입니다.`;
-      return;
-    }
-  }
+  // 저장 직전 값 점검
+  console.log('pages before save', JSON.parse(JSON.stringify(formData.pages)));
+
+  // undefined/null → '' 강제 보정
+  formData.pages.forEach(page => {
+    if (page.imageUrl == null) page.imageUrl = '';
+    if (page.audioUrl == null) page.audioUrl = '';
+  });
 
   isLoading.value = true;
   error.value = '';
 
   try {
-    // pagesData를 snake_case로 변환 (값이 없으면 에러)
-    const pagesData = formData.pages.map((page, index) => {
-      if (!page.imageUrl || !page.audioUrl) {
-        throw new Error(`${index + 1}장의 이미지와 음성은 필수입니다.`);
-      }
-      return {
-        id: `${Date.now()}-${index}`,
-        book_id: '', // Will be set by the store
-        page_number: index + 1,
-        image_url: page.imageUrl,
-        audio_url: page.audioUrl,
-        text_content: page.textContent || null
-      };
-    });
+    // pagesData를 snake_case로 변환 (값이 없어도 등록)
+    const pagesData = formData.pages.map((page, index) => ({
+      id: `${Date.now()}-${index}`,
+      book_id: '', // Will be set by the store
+      page_number: index + 1,
+      image_url: page.imageUrl,
+      audio_url: page.audioUrl,
+      text_content: page.textContent || null
+    }));
 
     const bookData = {
       title: formData.title,
@@ -427,6 +419,28 @@ onMounted(async () => {
   // 폼 초기값 설정
   resetForm();
 });
+
+watch(
+  () => formData.pages.map(page => page.imageUrl),
+  (newVals, oldVals) => {
+    newVals.forEach((val, idx) => {
+      if (val !== oldVals[idx]) {
+        console.log(`Page ${idx + 1} imageUrl changed:`, val);
+      }
+    });
+  }
+);
+
+watch(
+  () => formData.pages.map(page => page.audioUrl),
+  (newVals, oldVals) => {
+    newVals.forEach((val, idx) => {
+      if (val !== oldVals[idx]) {
+        console.log(`Page ${idx + 1} audioUrl changed:`, val);
+      }
+    });
+  }
+);
 </script>
 
 <style scoped>

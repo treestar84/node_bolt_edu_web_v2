@@ -136,6 +136,13 @@ export const addBook = async (bookData) => {
   const newBook = {
     id: uuidv4(),
     ...bookData,
+    pages: Array.isArray(bookData.pages)
+      ? bookData.pages.map(page => ({
+          ...page,
+          audioUrl: page.audioUrl || page.audio || '',
+          audio: undefined
+        }))
+      : [],
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString()
   };
@@ -155,6 +162,13 @@ export const updateBook = async (id, updateData) => {
   books[index] = {
     ...books[index],
     ...updateData,
+    pages: Array.isArray(updateData.pages)
+      ? updateData.pages.map(page => ({
+          ...page,
+          audioUrl: page.audioUrl || page.audio || '',
+          audio: undefined
+        }))
+      : books[index].pages,
     updatedAt: new Date().toISOString()
   };
   
