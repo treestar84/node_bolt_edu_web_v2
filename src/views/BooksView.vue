@@ -11,9 +11,9 @@
           </p>
         </div>
 
-        <div v-if="store.currentBooks.length > 0" class="books-grid">
+        <div v-if="contentStore.books.length > 0" class="books-grid">
           <div 
-            v-for="book in store.currentBooks" 
+            v-for="book in contentStore.books" 
             :key="book.id"
             class="book-card fade-in"
             @click="openBook(book.id)"

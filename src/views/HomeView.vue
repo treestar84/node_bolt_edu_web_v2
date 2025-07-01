@@ -100,7 +100,9 @@ import BadgeDisplay from '@/components/BadgeDisplay.vue';
 import { useAuthStore } from '@/stores/auth';
 import { useContentStore } from '@/stores/content';
 import { useFileUpload } from '@/composables/useFileUpload';
+import { useAppStore } from '@/stores/app';
 
+const store = useAppStore();
 const authStore = useAuthStore();
 const contentStore = useContentStore();
 const { getUploadedFileUrl } = useFileUpload();

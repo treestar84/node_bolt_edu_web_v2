@@ -190,14 +190,14 @@ const learnedWordsSet = ref(new Set<string>());
 const itemsPerPage = 10;
 
 const categories = computed(() => {
-  const cats = ['all', ...new Set(store.currentWords.map(w => w.category))];
+  const cats = ['all', ...new Set(contentStore.words.map(w => w.category))];
   return cats;
 });
 
 const filteredWords = computed(() => {
   let words = selectedCategory.value === 'all' 
-    ? [...store.currentWords] 
-    : store.currentWords.filter(w => w.category === selectedCategory.value);
+    ? [...contentStore.words] 
+    : contentStore.words.filter(w => w.category === selectedCategory.value);
   
   // Shuffle words for learning mode
   if (viewMode.value === 'single') {

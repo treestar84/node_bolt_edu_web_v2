@@ -71,29 +71,18 @@ export const useAppStore = defineStore('app', () => {
   // 공용 콘텐츠 우선 로드 (인증 없이도 접근 가능) - 개선된 버전
   const loadWords = async () => {
     try {
-      console.log('📚 Loading words from database (public access)...');
-      
-      // 공용 단어를 우선으로 로드 (인증 없이도 접근 가능)
+      console.log('📚 Loading words from database (all words, no owner_type restriction)...');
       const { data, error } = await supabase
         .from('words')
         .select('*')
-        .eq('owner_type', 'global') // 공용 단어만 로드
         .order('created_at', { ascending: false });
-
       if (error) {
         console.error('❌ Error loading words:', error);
-        // 에러가 발생해도 빈 배열로 초기화하여 앱이 동작하도록 함
         currentWords.value = [];
         return;
       }
-
-      // 데이터베이스 형식을 프론트엔드 형식으로 변환
       currentWords.value = (data || []).map(transformWordFromDB);
       console.log('✅ Words loaded:', currentWords.value.length);
-      console.log('📊 Words breakdown:', {
-        global: currentWords.value.filter(w => w.ownerType === 'global').length,
-        user: currentWords.value.filter(w => w.ownerType === 'user').length
-      });
     } catch (error) {
       console.error('💥 Error in loadWords:', error);
       currentWords.value = [];
@@ -103,63 +92,22 @@ export const useAppStore = defineStore('app', () => {
   // 공용 책 우선 로드 (인증 없이도 접근 가능)
   const loadBooks = async () => {
     try {
-      console.log('📖 Loading books from database (public access)...');
+      console.log('📖 Loading books from database (all books, no owner_type restriction)...');
       let data, error;
-      // 동적으로 authStore import (Pinia store 내부에서 순환참조 방지)
-      let user = null;
-      let userProfile = null;
-      try {
-        const { useAuthStore } = await import('./auth');
-        const authStore = useAuthStore();
-        user = authStore.user;
-        userProfile = authStore.userProfile;
-      } catch (e) {
-        console.warn('authStore not available:', e);
-      }
-
-      if (user && userProfile) {
-        // 로그인된 경우: 관리자면 전체, 일반이면 본인+공용
-        const isAdmin = userProfile.userType === 'teacher' || userProfile.userType === 'director';
-        if (isAdmin) {
-          ({ data, error } = await supabase
-            .from('books')
-            .select(`*, book_pages (*)`)
-            .order('created_at', { ascending: false })
-          );
-        } else {
-          ({ data, error } = await supabase
-            .from('books')
-            .select(`*, book_pages (*)`)
-            .or(`owner_type.eq.global,owner_id.eq.${user.id}`)
-            .order('created_at', { ascending: false })
-          );
-        }
-      } else {
-        // 비로그인: 공용 책만
-        ({ data, error } = await supabase
-          .from('books')
-          .select(`*, book_pages (*)`)
-          .eq('owner_type', 'global')
-          .order('created_at', { ascending: false })
-        );
-      }
-
+      ({ data, error } = await supabase
+        .from('books')
+        .select(`*, book_pages (*)`)
+        .order('created_at', { ascending: false })
+      );
       if (error) {
         console.error('❌ Error loading books:', error);
         currentBooks.value = [];
         return;
       }
-
-      // 데이터베이스 형식을 프론트엔드 형식으로 변환
       currentBooks.value = (data || []).map(transformBookFromDB);
       console.log('✅ Books loaded:', currentBooks.value.length);
-      console.log('📊 Books breakdown:', {
-        global: currentBooks.value.filter(b => b.ownerType === 'global').length,
-        user: currentBooks.value.filter(b => b.ownerType === 'user').length
-      });
     } catch (error) {
-      console.error('💥 Error in loadBooks:', error);
-      currentBooks.value = [];
+      console.error('💥 Error loading books:', error);
     }
   };
 
@@ -876,6 +824,27 @@ export const useAppStore = defineStore('app', () => {
     return url;
   };
 
+  const loadPublicContent = async () => {
+    try {
+      console.log('🌐 Loading public content only...');
+      await loadAllData();
+      currentWords.value = currentWords.value;
+      currentBooks.value = currentBooks.value;
+      currentBadges.value = currentBadges.value;
+      // 강제 디버깅 로그
+      console.log('DEBUG words:', currentWords.value);
+      console.log('DEBUG books:', currentBooks.value);
+      console.log('DEBUG badges:', currentBadges.value);
+      console.log('✅ Public content loaded:', {
+        words: currentWords.value.length,
+        books: currentBooks.value.length,
+        badges: currentBadges.value.length
+      });
+    } catch (err: any) {
+      console.error('❌ Error loading public content:', err);
+    }
+  };
+
   return {
     // State
     currentLanguage,
@@ -920,6 +889,7 @@ export const useAppStore = defineStore('app', () => {
     fetchApiKeys,
     createApiKey,
     deleteApiKey,
-    getImageUrl
+    getImageUrl,
+    loadPublicContent
   };
 });
