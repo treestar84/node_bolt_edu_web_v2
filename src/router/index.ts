@@ -5,8 +5,7 @@ const routes = [
   {
     path: '/',
     name: 'Home',
-    component: () => import('@/views/HomeView.vue'),
-    meta: { requiresAuth: true }
+    component: () => import('@/views/HomeView.vue')
   },
   {
     path: '/login',
@@ -23,38 +22,32 @@ const routes = [
   {
     path: '/words',
     name: 'Words',
-    component: () => import('@/views/WordsView.vue'),
-    meta: { requiresAuth: true }
+    component: () => import('@/views/WordsView.vue')
   },
   {
     path: '/quiz',
     name: 'Quiz',
-    component: () => import('@/views/QuizView.vue'),
-    meta: { requiresAuth: true }
+    component: () => import('@/views/QuizView.vue')
   },
   {
     path: '/puzzle',
     name: 'Puzzle',
-    component: () => import('@/views/PuzzleView.vue'),
-    meta: { requiresAuth: true }
+    component: () => import('@/views/PuzzleView.vue')
   },
   {
     path: '/books',
     name: 'Books',
-    component: () => import('@/views/BooksView.vue'),
-    meta: { requiresAuth: true }
+    component: () => import('@/views/BooksView.vue')
   },
   {
     path: '/book/:id',
     name: 'BookReader',
-    component: () => import('@/views/BookReaderView.vue'),
-    meta: { requiresAuth: true }
+    component: () => import('@/views/BookReaderView.vue')
   },
   {
     path: '/achievements',
     name: 'Achievements',
-    component: () => import('@/views/AchievementsView.vue'),
-    meta: { requiresAuth: true }
+    component: () => import('@/views/AchievementsView.vue')
   },
   {
     path: '/admin',

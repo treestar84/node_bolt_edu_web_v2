@@ -44,11 +44,17 @@
             <router-link to="/settings" class="btn btn-sm btn-secondary">
               설정
             </router-link>
+            <router-link to="/admin" class="btn btn-sm btn-secondary">
+              관리자
+            </router-link>
           </div>
           
-          <div v-else class="auth-buttons">
+          <div class="auth-buttons" v-else>
             <router-link to="/login" class="btn btn-sm btn-primary">
               로그인
+            </router-link>
+            <router-link to="/admin" class="btn btn-sm btn-secondary">
+              관리자
             </router-link>
           </div>
         </div>
