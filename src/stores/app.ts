@@ -212,27 +212,24 @@ export const useAppStore = defineStore('app', () => {
       
       // 관리자 권한 확인을 위해 현재 사용자 정보 가져오기
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        throw new Error('사용자 인증이 필요합니다.');
+      let ownerId = null;
+      let ownerType = 'user'; // 항상 'user'로 저장
+      if (user) {
+        ownerId = user.id;
+        // 사용자 프로필 확인 (로그인한 경우만)
+        const { data: profile, error: profileError } = await supabase
+          .from('user_profiles')
+          .select('user_type')
+          .eq('user_id', user.id)
+          .single();
+        if (profileError) {
+          console.error('❌ Error getting user profile:', profileError);
+          throw new Error('사용자 프로필을 확인할 수 없습니다.');
+        }
+        ownerType = (profile.user_type === 'teacher' || profile.user_type === 'admin') ? 'global' : 'user';
       }
 
-      // 사용자 프로필 확인
-      const { data: profile, error: profileError } = await supabase
-        .from('user_profiles')
-        .select('user_type')
-        .eq('user_id', user.id)
-        .single();
-
-      if (profileError) {
-        console.error('❌ Error getting user profile:', profileError);
-        throw new Error('사용자 프로필을 확인할 수 없습니다.');
-      }
-
-      // 관리자 권한이 있는 경우 global로, 일반 사용자는 user로 설정
-      const ownerType = (profile.user_type === 'teacher' || profile.user_type === 'director') ? 'global' : 'user';
-      const ownerId = ownerType === 'user' ? user.id : null;
-
-      console.log('👤 User type:', profile.user_type, '| Owner type:', ownerType);
+      console.log('👤 User type:', ownerType);
 
       const { data, error } = await supabase
         .from('words')
@@ -348,39 +345,39 @@ export const useAppStore = defineStore('app', () => {
       console.log('➕ Adding book to database:', book.title);
       // 관리자 권한 확인을 위해 현재 사용자 정보 가져오기
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        throw new Error('사용자 인증이 필요합니다.');
+      let ownerId = null;
+      let ownerType = 'user'; // 항상 'user'로 저장
+      if (user) {
+        ownerId = user.id;
+        // 사용자 프로필 확인 (로그인한 경우만)
+        const { data: profile, error: profileError } = await supabase
+          .from('user_profiles')
+          .select('user_type')
+          .eq('user_id', user.id)
+          .single();
+        if (profileError) {
+          console.error('❌ Error getting user profile:', profileError);
+          throw new Error('사용자 프로필을 확인할 수 없습니다.');
+        }
+        ownerType = (profile.user_type === 'teacher' || profile.user_type === 'admin') ? 'global' : 'user';
       }
-      // 사용자 프로필 확인
-      const { data: profile, error: profileError } = await supabase
-        .from('user_profiles')
-        .select('user_type')
-        .eq('user_id', user.id)
-        .single();
-      if (profileError) {
-        console.error('❌ Error getting user profile:', profileError);
-        throw new Error('사용자 프로필을 확인할 수 없습니다.');
-      }
-      // 관리자 권한이 있는 경우 global로, 일반 사용자는 user로 설정
-      const ownerType = (profile.user_type === 'teacher' || profile.user_type === 'director') ? 'global' : 'user';
-      const ownerId = ownerType === 'user' ? user.id : null;
-      console.log('👤 User type:', profile.user_type, '| Owner type:', ownerType);
+      console.log('👤 User type:', ownerType);
       // 1. 책 먼저 저장
       const { data: bookData, error: bookError } = await supabase
         .from('books')
         .insert({
           title: book.title,
           cover_image: book.coverImage,
-          min_age: book.minAge || 3,
-          max_age: book.maxAge || 6,
+          min_age: book.minAge,
+          max_age: book.maxAge,
           owner_type: ownerType,
-          owner_id: ownerId
+          owner_id: ownerId,
         })
         .select()
         .single();
-      if (bookError) {
-        console.error('❌ Error adding book:', bookError);
-        throw bookError;
+      if (bookError || !bookData) {
+        console.error('❌ Error inserting book:', bookError, bookData);
+        throw new Error('책 등록에 실패했습니다. (권한/정책/DB 오류)');
       }
       // 2. 페이지 데이터 준비 (snake_case, 필수값 체크, toRaw로 프록시 해제, _value fallback)
       const pagesData = book.pages.map((page, idx) => {
