@@ -5,9 +5,9 @@
     <main class="main-content">
       <div class="container">
         <div class="page-header">
-          <h1 class="page-title">단어 학습</h1>
+          <h1 class="page-title">{{$t('page.title')}}</h1>
           <p class="page-description">
-            이미지를 클릭하면 {{ store.currentLanguage === 'ko' ? '한국어' : '영어' }} 음성을 들을 수 있어요
+            {{$t('page.desc', { lang: store.currentLanguage === 'ko' ? '한국어' : '영어' })}}
           </p>
         </div>
 
@@ -37,7 +37,7 @@
               class="btn btn-sm"
               :class="selectedCategory === category ? 'btn-primary' : 'btn-secondary'"
             >
-              {{ getCategoryName(category) }}
+              {{$t('categories.'+category)}}
             </button>
           </div>
         </div>
@@ -82,6 +82,8 @@
         <div v-else-if="viewMode === 'single'" class="single-view">
           <div v-if="filteredWords.length > 0" class="learning-container">
             <div class="learning-header">
+              <div class="learning-desc">{{$t('page.singleDesc')}}</div>
+              <div class="content-count">{{$t('page.contentCount', { count: filteredWords.length })}}</div>
               <div class="progress-info">
                 <span class="current-word">{{ currentWordIndex + 1 }} / {{ filteredWords.length }}</span>
                 <div class="progress-bar">
@@ -99,7 +101,7 @@
                     v-model="autoAdvanceEnabled"
                     @change="toggleAutoAdvance"
                   />
-                  <span class="toggle-text">자동 넘김 (10초)</span>
+                  <span class="toggle-text">{{$t('page.autoAdvance')}}</span>
                 </label>
               </div>
             </div>
@@ -118,14 +120,14 @@
                 :disabled="currentWordIndex === 0"
                 class="btn btn-lg btn-secondary"
               >
-                ← 이전
+                {{$t('page.prev')}}
               </button>
               
               <button 
                 @click="shuffleWords"
                 class="btn btn-lg btn-secondary"
               >
-                🔀 섞기
+                {{$t('page.shuffle')}}
               </button>
               
               <button 
@@ -133,7 +135,7 @@
                 :disabled="currentWordIndex === filteredWords.length - 1"
                 class="btn btn-lg btn-secondary"
               >
-                다음 →
+                {{$t('page.next')}}
               </button>
             </div>
 
@@ -146,7 +148,7 @@
                 ></div>
               </div>
               <div class="progress-text">
-                {{ Math.ceil((100 - autoAdvanceProgress) / 100 * 10) }}초 후 다음 단어
+                {{ Math.ceil((100 - autoAdvanceProgress) / 100 * 10) }}초 후 {{$t('page.next')}} 단어
               </div>
             </div>
           </div>
@@ -154,11 +156,9 @@
 
         <div v-if="filteredWords.length === 0" class="empty-state">
           <div class="empty-icon">📚</div>
-          <h3>아직 단어가 없습니다</h3>
-          <p>관리자 페이지에서 새로운 단어를 추가해보세요</p>
-          <router-link to="/admin" class="btn btn-primary">
-            관리자 페이지로 이동
-          </router-link>
+          <h3>{{$t('page.emptyTitle')}}</h3>
+          <p>{{$t('page.emptyDesc')}}</p>
+          <router-link to="/admin" class="btn btn-primary">{{$t('page.adminBtn')}}</router-link>
         </div>
       </div>
     </main>
@@ -172,10 +172,12 @@ import WordCard from '@/components/WordCard.vue';
 import { useAppStore } from '@/stores/app';
 import { useAuthStore } from '@/stores/auth';
 import { useContentStore } from '@/stores/content';
+import { useI18n } from 'vue-i18n';
 
 const store = useAppStore();
 const authStore = useAuthStore();
 const contentStore = useContentStore();
+const { t, messages } = useI18n();
 
 const selectedCategory = ref('all');
 const viewMode = ref<'grid' | 'single'>('single'); // Default to learning mode
@@ -189,10 +191,7 @@ const learnedWordsSet = ref(new Set<string>());
 
 const itemsPerPage = 10;
 
-const categories = computed(() => {
-  const cats = ['all', ...new Set(contentStore.words.map(w => w.category))];
-  return cats;
-});
+const categories = computed(() => Object.keys(messages.value[store.currentLanguage].categories));
 
 const filteredWords = computed(() => {
   let words = selectedCategory.value === 'all' 
@@ -468,6 +467,16 @@ onUnmounted(() => {
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   padding: var(--spacing-xl);
+}
+
+.learning-desc {
+  font-size: 1.125rem;
+  color: var(--color-text-primary);
+}
+
+.content-count {
+  font-size: 1.125rem;
+  color: var(--color-text-secondary);
 }
 
 .progress-info {

@@ -31,7 +31,7 @@
 
         <div class="login-info">
           <p class="info-text">
-            <strong>기본 비밀번호:</strong> admin123
+            <strong>비밀번호:</strong> angelyrlove@naver.com 문의해주세요
           </p>
           <router-link to="/" class="back-link">
             ← 메인 페이지로 돌아가기

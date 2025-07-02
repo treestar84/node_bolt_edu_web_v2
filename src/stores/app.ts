@@ -2,6 +2,7 @@ import { defineStore } from 'pinia';
 import { ref, computed, toRaw } from 'vue';
 import { useSupabase } from '@/composables/useSupabase';
 import type { WordItem, Book, Quiz, Badge, ApiKey, Language } from '@/types';
+import { i18n } from '@/main';
 
 export const useAppStore = defineStore('app', () => {
   const { supabase } = useSupabase();
@@ -66,6 +67,9 @@ export const useAppStore = defineStore('app', () => {
   // Actions
   const setLanguage = (language: Language) => {
     currentLanguage.value = language;
+    if (i18n.global) {
+      i18n.global.locale.value = language;
+    }
   };
 
   // 공용 콘텐츠 우선 로드 (인증 없이도 접근 가능) - 개선된 버전
@@ -204,9 +208,10 @@ export const useAppStore = defineStore('app', () => {
 
   // 단어 추가 (관리자 권한 확인 개선)
   const addWord = async (word: Omit<WordItem, 'id'>) => {
-    if (!word.imageUrl || word.imageUrl === '' || !word.audioKo || word.audioKo === '' || !word.audioEn || word.audioEn === '') {
-      throw new Error('이미지와 한/영 음성은 필수입니다.');
+    if (!word.imageUrl || word.imageUrl === '') {
+      throw new Error('이미지는 필수입니다.');
     }
+    // 음성 파일은 선택이므로 필수 체크 제거
     try {
       console.log('➕ Adding word to database:', word.name);
       

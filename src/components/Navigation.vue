@@ -14,7 +14,7 @@
             class="nav-item"
             :class="{ active: $route.path === item.path }"
           >
-            <span class="nav-text">{{ item.name }}</span>
+            <span class="nav-text">{{$t('menu.'+item.key)}}</span>
           </router-link>
         </div>
 
@@ -42,19 +42,19 @@
           
           <div class="user-menu" v-if="authStore.isAuthenticated">
             <router-link to="/settings" class="btn btn-sm btn-secondary">
-              설정
+              {{$t('menu.settings')}}
             </router-link>
             <router-link to="/admin" class="btn btn-sm btn-secondary">
-              관리자
+              {{$t('menu.admin')}}
             </router-link>
           </div>
           
           <div class="auth-buttons" v-else>
             <router-link to="/login" class="btn btn-sm btn-primary">
-              로그인
+              {{$t('menu.login')}}
             </router-link>
             <router-link to="/admin" class="btn btn-sm btn-secondary">
-              관리자
+              {{$t('menu.admin')}}
             </router-link>
           </div>
         </div>
@@ -72,11 +72,11 @@ const store = useAppStore();
 const authStore = useAuthStore();
 
 const menuItems = computed(() => [
-  { name: '단어학습', path: '/words' },
-  { name: '퀴즈', path: '/quiz' },
-  { name: '퍼즐', path: '/puzzle' },
-  { name: '책읽기', path: '/books' },
-  { name: '달성도', path: '/achievements' }
+  { key: 'words', path: '/words' },
+  { key: 'quiz', path: '/quiz' },
+  { key: 'puzzle', path: '/puzzle' },
+  { key: 'storybook', path: '/books' },
+  { key: 'achievements', path: '/achievements' }
 ]);
 
 const toggleLanguage = () => {
@@ -93,6 +93,8 @@ const toggleLanguage = () => {
   top: 0;
   z-index: 100;
   backdrop-filter: blur(10px);
+  font-family: 'Pretendard', 'Noto Sans KR', Arial, sans-serif !important;
+  letter-spacing: -0.01em;
 }
 
 .nav-content {
@@ -122,6 +124,8 @@ const toggleLanguage = () => {
   gap: var(--spacing-md);
   flex: 1;
   justify-content: center;
+  font-family: 'Pretendard', 'Noto Sans KR', Arial, sans-serif !important;
+  letter-spacing: -0.01em;
 }
 
 .nav-item {
@@ -136,6 +140,8 @@ const toggleLanguage = () => {
   transition: all 0.2s ease;
   min-width: 100px;
   justify-content: center;
+  font-family: 'Pretendard', 'Noto Sans KR', Arial, sans-serif !important;
+  letter-spacing: -0.01em;
 }
 
 .nav-item:hover,
@@ -148,6 +154,8 @@ const toggleLanguage = () => {
 .nav-text {
   color: inherit;
   font-weight: inherit;
+  font-family: 'Pretendard', 'Noto Sans KR', Arial, sans-serif !important;
+  letter-spacing: -0.01em;
 }
 
 .nav-controls {

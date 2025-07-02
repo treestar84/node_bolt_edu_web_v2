@@ -5,24 +5,24 @@
     <main class="main-content">
       <div class="container">
         <div class="page-header">
-          <h1 class="page-title">나의 달성도</h1>
+          <h1 class="page-title">{{$t('achievements.title')}}</h1>
           <p class="page-description">
-            지금까지의 학습 성과와 획득한 뱃지를 확인해보세요
+            {{$t('achievements.description')}}
           </p>
         </div>
 
         <!-- 로딩 상태 -->
         <div v-if="contentStore.isLoading" class="loading-state">
           <div class="spinner"></div>
-          <p>달성도를 불러오는 중...</p>
+          <p>{{$t('achievements.loading')}}</p>
         </div>
 
         <!-- 에러 상태 -->
         <div v-else-if="contentStore.error" class="error-state">
           <div class="error-icon">⚠️</div>
-          <h3>데이터를 불러올 수 없습니다</h3>
+          <h3>{{$t('achievements.errorTitle')}}</h3>
           <p>{{ contentStore.error }}</p>
-          <button @click="reloadContent" class="btn btn-primary">다시 시도</button>
+          <button @click="reloadContent" class="btn btn-primary">{{$t('achievements.retry')}}</button>
         </div>
 
         <!-- 정상 상태 -->
@@ -30,7 +30,7 @@
           <!-- 획득한 뱃지 섹션 - 최상단에 모든 뱃지 표시 -->
           <section class="earned-badges-section">
             <div class="section-header">
-              <h2 class="section-title">🏆 획득한 뱃지</h2>
+              <h2 class="section-title">{{$t('achievements.earnedBadges')}}</h2>
               <div class="badge-count">
                 <span class="count">{{ displayedBadges.length }}</span>
                 <span class="total">/ {{ contentStore.badges.length }}</span>
@@ -51,7 +51,7 @@
                   <div class="badge-category">{{ getCategoryName(badge.category) }}</div>
                 </div>
                 <div class="earned-indicator">
-                  <span class="earned-text">획득!</span>
+                  <span class="earned-text">{{$t('achievements.earned')}}</span>
                 </div>
               </div>
             </div>
@@ -59,14 +59,14 @@
             <!-- 뱃지가 없는 경우 -->
             <div v-if="displayedBadges.length === 0" class="no-badges">
               <div class="no-badges-icon">🎯</div>
-              <h3>아직 획득한 뱃지가 없습니다</h3>
-              <p>학습을 시작해서 첫 번째 뱃지를 획득해보세요!</p>
+              <h3>{{$t('achievements.noBadges')}}</h3>
+              <p>{{$t('achievements.startLearning')}}</p>
               <div class="quick-actions">
                 <router-link to="/quiz" class="btn btn-primary">
-                  퀴즈 시작하기
+                  {{$t('achievements.startQuiz')}}
                 </router-link>
                 <router-link to="/words" class="btn btn-secondary">
-                  단어 학습하기
+                  {{$t('achievements.startWords')}}
                 </router-link>
               </div>
             </div>
@@ -74,7 +74,7 @@
 
           <!-- 다음 목표 섹션 -->
           <section v-if="nextBadges.length > 0" class="next-goals-section">
-            <h2 class="section-title">🎯 다음 목표</h2>
+            <h2 class="section-title">{{$t('achievements.nextGoals')}}</h2>
             <div class="next-badges-grid">
               <div 
                 v-for="badge in nextBadges" 
@@ -103,7 +103,7 @@
 
           <!-- 학습 통계 섹션 - 컴팩트하게 -->
           <section class="stats-section">
-            <h2 class="section-title">📊 학습 통계</h2>
+            <h2 class="section-title">{{$t('achievements.learningStats')}}</h2>
             
             <div class="stats-grid" v-if="authStore.userProgress">
               <div class="stat-card quiz">

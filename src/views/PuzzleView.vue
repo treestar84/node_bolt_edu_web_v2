@@ -7,9 +7,9 @@
         <!-- Puzzle Selection Screen -->
         <div v-if="gameState === 'selection'" class="puzzle-selection">
           <div class="page-header">
-            <h1 class="page-title">퍼즐 맞추기</h1>
+            <h1 class="page-title">{{$t('puzzle.title')}}</h1>
             <p class="page-description">
-              재미있는 퍼즐을 선택해서 맞춰보세요!
+              {{$t('puzzle.select')}}
             </p>
           </div>
 
@@ -24,7 +24,7 @@
                 <img :src="getImageUrl(option.imageUrl)" :alt="option.name" />
                 <div class="play-overlay">
                   <span class="play-icon">🧩</span>
-                  <span class="play-text">퍼즐 시작</span>
+                  <span class="play-text">{{$t('puzzle.start')}}</span>
                 </div>
               </div>
               <div class="option-info">
@@ -35,21 +35,21 @@
           </div>
 
           <div class="difficulty-selector">
-            <h3>난이도 선택</h3>
+            <h3>{{$t('puzzle.chooseLevel')}}</h3>
             <div class="difficulty-buttons">
               <button 
                 @click="puzzleDifficulty = '3x2'"
                 class="btn"
                 :class="puzzleDifficulty === '3x2' ? 'btn-primary' : 'btn-secondary'"
               >
-                🟢 쉬움 (6조각)
+                🟢 {{$t('puzzle.easy')}}
               </button>
               <button 
                 @click="puzzleDifficulty = '3x3'"
                 class="btn"
                 :class="puzzleDifficulty === '3x3' ? 'btn-primary' : 'btn-secondary'"
               >
-                🟡 보통 (9조각)
+                🟡 {{$t('puzzle.normal')}}
               </button>
             </div>
           </div>
@@ -59,11 +59,11 @@
         <div v-else-if="gameState === 'playing'" class="puzzle-game">
           <div class="game-header">
             <button @click="goHome" class="btn btn-secondary home-btn">
-              🏠 홈으로
+              🏠 {{$t('puzzle.goHome')}}
             </button>
-            <h2 class="puzzle-title">{{ getCurrentName(selectedPuzzle!) }} 퍼즐</h2>
+            <h2 class="puzzle-title">{{ getCurrentName(selectedPuzzle!) }} {{$t('puzzle.title')}}</h2>
             <button @click="resetPuzzle" class="btn btn-secondary reset-btn">
-              🔄 다시하기
+              🔄 {{$t('puzzle.playAgain')}}
             </button>
           </div>
 
@@ -103,7 +103,7 @@
 
             <!-- Puzzle Pieces - 실제로 잘린 이미지 조각들 -->
             <div class="puzzle-pieces-container">
-              <h3 class="pieces-title">퍼즐 조각</h3>
+              <h3 class="pieces-title">{{$t('puzzle.piece')}}</h3>
               <div class="puzzle-pieces">
                 <div 
                   v-for="piece in shuffledPieces" 
@@ -138,7 +138,7 @@
               <div class="celebration-icon">🎉</div>
               <div class="confetti" v-for="i in 30" :key="i" :style="getConfettiStyle(i)"></div>
             </div>
-            <h2 class="completion-title">잘했어요!</h2>
+            <h2 class="completion-title">{{$t('puzzle.complete')}}</h2>
             <h3 class="completion-subtitle">{{ getCurrentName(selectedPuzzle!) }} 완성!</h3>
             
             <div class="completed-puzzle">
@@ -156,10 +156,10 @@
 
             <div class="completion-actions">
               <button @click="playAgain" class="btn btn-primary btn-lg">
-                🧩 다시 퍼즐하기
+                🧩 {{$t('puzzle.playAgain')}}
               </button>
               <button @click="goHome" class="btn btn-secondary btn-lg">
-                🏠 홈으로 가기
+                🏠 {{$t('puzzle.goHome')}}
               </button>
             </div>
           </div>
@@ -167,10 +167,10 @@
 
         <div v-if="store.currentWords.length === 0" class="empty-state">
           <div class="empty-icon">🧩</div>
-          <h3>퍼즐할 이미지가 없습니다</h3>
-          <p>단어 학습에 이미지를 추가해주세요</p>
+          <h3>{{$t('puzzle.noImage')}}</h3>
+          <p>{{$t('puzzle.addWord')}}</p>
           <router-link to="/admin/words" class="btn btn-primary">
-            단어 추가하러 가기
+            {{$t('puzzle.addWord')}}
           </router-link>
         </div>
       </div>

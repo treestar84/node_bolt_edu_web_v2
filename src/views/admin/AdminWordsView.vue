@@ -118,25 +118,29 @@
 
           <div class="form-row">
             <div class="form-group">
-              <label class="form-label">한국어 음성</label>
+              <label class="form-label">한국어 음성 <span class="optional">(선택, 없으면 자동 음성)</span></label>
               <FileUploadInput
                 v-model="formData.audioKo"
-                label="한국어 음성"
+                :label="$t('admin.audioKoLabel')"
                 placeholder="/audio/cat-ko.mp3"
                 file-type="audio"
-                :required="true"
+                :required="false"
               />
             </div>
             <div class="form-group">
-              <label class="form-label">영어 음성</label>
+              <label class="form-label">영어 음성 <span class="optional">(선택, 없으면 자동 음성)</span></label>
               <FileUploadInput
                 v-model="formData.audioEn"
-                label="영어 음성"
+                :label="$t('admin.audioEnLabel')"
                 placeholder="/audio/cat-en.mp3"
                 file-type="audio"
-                :required="true"
+                :required="false"
               />
             </div>
+          </div>
+
+          <div class="form-hint tts-guide">
+            음성 파일을 등록하지 않으면, 브라우저의 TTS(음성 합성)로 자동 안내됩니다.
           </div>
 
           <div class="form-row">
@@ -144,13 +148,9 @@
               <label class="form-label">카테고리</label>
               <select v-model="formData.category" class="form-input" required>
                 <option value="">카테고리 선택</option>
-                <option value="animals">동물</option>
-                <option value="fruits">과일</option>
-                <option value="vehicles">탈것</option>
-                <option value="objects">사물</option>
-                <option value="nature">자연</option>
-                <option value="toys">장난감</option>
-                <option value="clothes">옷</option>
+                <option v-for="key in categoryKeys" :key="key" :value="key">
+                  {{ getCategoryName(key) }}
+                </option>
               </select>
             </div>
             <div class="form-group">
@@ -252,10 +252,12 @@ import { useAppStore } from '@/stores/app';
 import { useAuthStore } from '@/stores/auth';
 import { useFileUpload } from '@/composables/useFileUpload';
 import type { WordItem } from '@/types';
+import { useI18n } from 'vue-i18n';
 
 const store = useAppStore();
 const authStore = useAuthStore();
 const { getUploadedFileUrl } = useFileUpload();
+const { t, messages } = useI18n();
 
 const showAddModal = ref(false);
 const showEditModal = ref(false);
@@ -284,17 +286,10 @@ const formData = reactive({
   ownerType: 'user' as 'global' | 'user'
 });
 
+const categoryKeys = computed(() => Object.keys(messages.value[store.currentLanguage].categories).filter(key => key !== 'all'));
+
 const getCategoryName = (category: string) => {
-  const categoryNames: Record<string, string> = {
-    'animals': '동물',
-    'fruits': '과일',
-    'vehicles': '탈것',
-    'objects': '사물',
-    'nature': '자연',
-    'toys': '장난감',
-    'clothes': '옷'
-  };
-  return categoryNames[category] || category;
+  return t('categories.' + category);
 };
 
 const getImageUrl = (url: string): string => {
@@ -763,6 +758,18 @@ onMounted(async () => {
 
 .delete-warning {
   color: var(--color-danger);
+  font-size: 0.875rem;
+}
+
+.form-hint {
+  margin-top: var(--spacing-lg);
+  margin-bottom: var(--spacing-md);
+  color: var(--color-text-secondary);
+  font-size: 0.875rem;
+}
+
+.tts-guide {
+  color: var(--color-text-secondary);
   font-size: 0.875rem;
 }
 

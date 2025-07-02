@@ -8,7 +8,7 @@
     </div>
     <div class="card-content">
       <h3 class="word-name">{{ currentName }}</h3>
-      <span class="word-category">{{ word.category }}</span>
+      <span class="word-category">{{$t('categories.'+word.category)}}</span>
     </div>
   </div>
 </template>
@@ -62,7 +62,7 @@ const getAudioUrl = (url: string): string => {
 
 const playWordAudio = async () => {
   try {
-    await playAudio(currentAudioUrl.value);
+    await playAudio(currentAudioUrl.value, currentName.value);
     emit('audio-played');
   } catch (error) {
     console.warn('Audio playback failed:', error);

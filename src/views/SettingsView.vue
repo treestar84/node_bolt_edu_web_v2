@@ -5,9 +5,9 @@
     <main class="main-content">
       <div class="container">
         <div class="page-header">
-          <h1 class="page-title">설정</h1>
+          <h1 class="page-title">{{$t('settings.title')}}</h1>
           <p class="page-description">
-            개인 맞춤 설정을 변경하세요
+            {{$t('settings.desc')}}
           </p>
         </div>
 
@@ -19,12 +19,12 @@
             
             <form @submit.prevent="saveSettings" class="settings-form">
               <div class="form-group">
-                <label class="form-label">아이디</label>
+                <label class="form-label">{{$t('settings.username')}}</label>
                 <input 
                   v-model="formData.username" 
                   type="text" 
                   class="form-input" 
-                  placeholder="아이디를 입력하세요"
+                  placeholder="{{$t('settings.usernamePlaceholder')}}"
                   required 
                   disabled
                 />
@@ -34,55 +34,53 @@
               </div>
 
               <div class="form-group">
-                <label class="form-label">사용자 유형</label>
+                <label class="form-label">{{$t('settings.userType')}}</label>
                 <select v-model="formData.userType" class="form-input" required>
-                  <option value="parent">엄마 (일반 사용자)</option>
-                  <option value="teacher">어린이집 선생님</option>
-                  <option value="director">원장</option>
+                  <option value="parent">{{$t('settings.parent')}}</option>
+                  <option value="teacher">{{$t('settings.teacher')}}</option>
+                  <option value="director">{{$t('settings.director')}}</option>
                 </select>
               </div>
 
               <div class="form-group">
-                <label class="form-label">사이트 이름</label>
+                <label class="form-label">{{$t('settings.siteName')}}</label>
                 <input 
                   v-model="formData.siteName" 
                   type="text" 
                   class="form-input" 
-                  placeholder="사이트 이름을 입력하세요"
+                  placeholder="{{$t('settings.siteNamePlaceholder')}}"
                   required 
                 />
               </div>
 
               <div class="form-group">
-                <label class="form-label">자녀 나이</label>
+                <label class="form-label">{{$t('settings.childAge')}}</label>
                 <select v-model.number="formData.childAge" class="form-input" required>
-                  <option value="3">3세</option>
-                  <option value="4">4세</option>
-                  <option value="5">5세</option>
-                  <option value="6">6세</option>
+                  <option value="3">{{$t('settings.age3')}}</option>
+                  <option value="4">{{$t('settings.age4')}}</option>
+                  <option value="5">{{$t('settings.age5')}}</option>
+                  <option value="6">{{$t('settings.age6')}}</option>
                 </select>
                 <div class="form-hint">
-                  나이에 맞는 콘텐츠가 자동으로 필터링됩니다
+                  {{$t('settings.childAgeHint')}}
                 </div>
               </div>
 
               <div class="form-group">
-                <label class="form-label">메인 이미지</label>
+                <label class="form-label">{{$t('settings.mainImage')}}</label>
                 <FileUploadInput
                   v-model="formData.mainImageUrl"
-                  label="메인 이미지"
-                  placeholder="https://example.com/image.jpg"
+
+                  :placeholder="$t('settings.mainImagePlaceholder')"
                   file-type="image"
                   :required="false"
                 />
                 <div class="form-hint">
-                  홈 화면에 표시될 대표 이미지를 설정하세요 (새로고침 후에도 유지됩니다)
+                  {{$t('settings.mainImageHint')}}
                 </div>
-                
-                <!-- 현재 이미지 미리보기 -->
                 <div v-if="currentImagePreview" class="current-image-preview">
-                  <h4>현재 설정된 이미지:</h4>
-                  <img :src="currentImagePreview" alt="현재 메인 이미지" class="preview-image" />
+                  <h4>{{$t('settings.currentImage')}}</h4>
+                  <img :src="currentImagePreview" :alt="$t('settings.currentImageAlt')" class="preview-image" />
                 </div>
               </div>
 
@@ -91,7 +89,7 @@
               </div>
 
               <div v-if="saveSuccess" class="success-message">
-                ✅ 설정이 성공적으로 저장되었습니다!
+                {{$t('settings.saveSuccess')}}
               </div>
 
               <div class="form-actions">
@@ -249,15 +247,12 @@ const saveSettings = async () => {
   if (success) {
     console.log('✅ Settings saved successfully');
     saveSuccess.value = true;
-    
-    // 성공 메시지를 3초 후 숨김
     setTimeout(() => {
       saveSuccess.value = false;
     }, 3000);
-    
-    // Reload content with new age filter
     await contentStore.loadContent();
-    
+    // 프로필 즉시 갱신 (홈 메인 이미지 바로 반영)
+    await authStore.loadUserProfile();
     // 홈페이지로 리다이렉트하지 않고 현재 페이지에 머물기
     console.log('🔄 Settings updated, staying on settings page');
   }

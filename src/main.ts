@@ -3,12 +3,318 @@ import { createPinia } from 'pinia';
 import router from './router';
 import './style.css';
 import App from './App.vue';
+import { createI18n } from 'vue-i18n';
+
+const messages = {
+  ko: {
+    menu: {
+      home: '홈',
+      words: '단어학습',
+      quiz: '퀴즈',
+      puzzle: '퍼즐',
+      storybook: '스토리북',
+      achievements: '달성도',
+      books: '책',
+      badges: '뱃지',
+      login: '로그인',
+      logout: '로그아웃',
+      mypage: '마이페이지',
+      settings: '설정',
+      admin: '관리자'
+    },
+    landing: {
+      welcome: '환영합니다!',
+      description: '이곳은 어린이 영어 학습 플랫폼입니다.'
+    },
+    categories: {
+      all: '전체',
+      animals: '동물',
+      fruits: '과일',
+      vehicles: '탈것',
+      objects: '사물',
+      nature: '자연',
+      toys: '장난감',
+      clothes: '옷',
+      other: '기타',
+      person: '사람',
+      letter: '글자'
+    },
+    page: {
+      title: '단어 학습',
+      desc: '이미지를 클릭하면 {lang} 음성을 들을 수 있어요',
+      singleDesc: '이미지를 누르면 음성과 함께 단어를 배워요',
+      autoAdvance: '자동 넘김 (10초)',
+      prev: '이전',
+      next: '다음',
+      shuffle: '섞기',
+      emptyTitle: '아직 단어가 없습니다',
+      emptyDesc: '관리자 페이지에서 새로운 단어를 추가해보세요',
+      adminBtn: '관리자 페이지로 이동',
+      contentCount: '{count}개 콘텐츠'
+    },
+    quiz: {
+      title: '퀴즈',
+      score: '점수',
+      streak: '연속 정답',
+      start: '퀴즈 시작',
+      findAnswer: '정답을 찾아보세요!',
+      startGame: '시작하기',
+      listen: '음성 듣기',
+      correct: '정답!',
+      wrong: '오답!',
+      badge: '새로운 뱃지 획득!',
+      notEnough: '퀴즈를 시작하려면 단어가 3개 이상 필요합니다.',
+      needThree: '단어를 3개 이상 추가해주세요.',
+      goWords: '단어 추가하러 가기'
+    },
+    puzzle: {
+      title: '퍼즐 맞추기',
+      select: '퍼즐을 선택하세요',
+      start: '시작하기',
+      chooseLevel: '난이도 선택',
+      easy: '쉬움',
+      normal: '보통',
+      goHome: '홈으로',
+      playAgain: '다시하기',
+      piece: '퍼즐 조각',
+      complete: '퍼즐 완성!',
+      noImage: '이미지가 없습니다',
+      addWord: '단어를 추가해주세요',
+      pieceCount: '{count}조각'
+    },
+    achievements: {
+      title: '달성도',
+      description: '지금까지의 학습 성과와 획득한 뱃지를 확인해보세요',
+      loading: '달성도를 불러오는 중...',
+      errorTitle: '데이터를 불러올 수 없습니다',
+      retry: '다시 시도',
+      earnedBadges: '🏆 획득한 뱃지',
+      earned: '획득!',
+      noBadges: '아직 획득한 뱃지가 없습니다',
+      startLearning: '학습을 시작해서 첫 번째 뱃지를 획득해보세요!',
+      startQuiz: '퀴즈 시작하기',
+      startWords: '단어 학습하기',
+      nextGoals: '🎯 다음 목표',
+      learningStats: '📊 학습 통계',
+      quizScore: '퀴즈 점수',
+      quizStreak: '연속 정답',
+      puzzleCompletions: '퍼즐 완성',
+      wordsLearned: '학습한 단어',
+      booksRead: '읽은 책',
+      wordsTotal: '총 {total}개 중',
+      booksTotal: '총 {total}권 중',
+      nextBadge: '다음 목표',
+      categoryQuiz: '퀴즈',
+      categoryPuzzle: '퍼즐',
+      categoryWords: '단어',
+      categoryBooks: '책'
+    },
+    settings: {
+      title: '설정',
+      desc: '개인 맞춤 설정을 변경하세요',
+      username: '아이디',
+      usernamePlaceholder: '아이디를 입력하세요',
+      userType: '사용자 유형',
+      parent: '엄마 (일반 사용자)',
+      teacher: '어린이집 선생님',
+      director: '원장',
+      siteName: '사이트 이름',
+      siteNamePlaceholder: '사이트 이름을 입력하세요',
+      childAge: '자녀 나이',
+      age3: '3세',
+      age4: '4세',
+      age5: '5세',
+      age6: '6세',
+      childAgeHint: '나이에 맞는 콘텐츠가 자동으로 필터링됩니다',
+      mainImage: '메인 이미지',
+      mainImagePlaceholder: 'https://example.com/image.jpg',
+      mainImageHint: '홈 화면에 표시될 대표 이미지를 설정하세요 (새로고침 후에도 유지됩니다)',
+      currentImage: '현재 설정된 이미지:',
+      currentImageAlt: '현재 메인 이미지',
+      saveSuccess: '✅ 설정이 성공적으로 저장되었습니다!'
+    },
+    admin: {
+      panel: '관리자 패널',
+      dashboard: '대시보드',
+      words: '단어 관리',
+      books: '책 관리',
+      badges: '뱃지 관리',
+      users: '사용자 관리',
+      add: '추가',
+      edit: '수정',
+      delete: '삭제',
+      confirmDelete: '정말로 삭제하시겠습니까?',
+      cancel: '취소',
+      save: '저장',
+      systemAdmin: '시스템 관리자',
+      global: '공용',
+      personal: '개인',
+      noData: '등록된 데이터가 없습니다',
+      addFirst: '첫 번째 항목을 추가해보세요'
+    }
+  },
+  en: {
+    menu: {
+      home: 'Home',
+      words: 'Words',
+      quiz: 'Quiz',
+      puzzle: 'Puzzle',
+      storybook: 'Storybook',
+      achievements: 'Achievements',
+      books: 'Books',
+      badges: 'Badges',
+      login: 'Login',
+      logout: 'Logout',
+      mypage: 'My Page',
+      settings: 'Settings',
+      admin: 'Admin'
+    },
+    landing: {
+      welcome: 'Welcome!',
+      description: 'This is an English learning platform for kids.'
+    },
+    categories: {
+      all: 'All',
+      animals: 'Animals',
+      fruits: 'Fruits',
+      vehicles: 'Vehicles',
+      objects: 'Objects',
+      nature: 'Nature',
+      toys: 'Toys',
+      clothes: 'Clothes',
+      other: 'Other',
+      person: 'Person',
+      letter: 'Letter'
+    },
+    page: {
+      title: 'Word Learning',
+      desc: 'Click the image to hear the {lang} audio.',
+      singleDesc: 'Click the image to learn the word with audio.',
+      autoAdvance: 'Auto advance (10s)',
+      prev: 'Prev',
+      next: 'Next',
+      shuffle: 'Shuffle',
+      emptyTitle: 'No words yet',
+      emptyDesc: 'Add new words from the admin page.',
+      adminBtn: 'Go to Admin Page',
+      contentCount: '{count} contents'
+    },
+    quiz: {
+      title: 'Quiz',
+      score: 'Score',
+      streak: 'Streak',
+      start: 'Start Quiz',
+      findAnswer: 'Find the correct answer!',
+      startGame: 'Start',
+      listen: 'Listen',
+      correct: 'Correct!',
+      wrong: 'Wrong!',
+      badge: 'New badge unlocked!',
+      notEnough: 'You need at least 3 words to start the quiz.',
+      needThree: 'Please add at least 3 words.',
+      goWords: 'Go to add words'
+    },
+    puzzle: {
+      title: 'Puzzle',
+      select: 'Select a puzzle',
+      start: 'Start',
+      chooseLevel: 'Choose difficulty',
+      easy: 'Easy',
+      normal: 'Normal',
+      goHome: 'Home',
+      playAgain: 'Play Again',
+      piece: 'Puzzle Piece',
+      complete: 'Puzzle Complete!',
+      noImage: 'No image',
+      addWord: 'Please add a word',
+      pieceCount: '{count} pieces'
+    },
+    achievements: {
+      title: 'Achievements',
+      description: 'Check your learning progress and earned badges so far.',
+      loading: 'Loading achievements...',
+      errorTitle: 'Unable to load data',
+      retry: 'Retry',
+      earnedBadges: '🏆 Earned Badges',
+      earned: 'Earned!',
+      noBadges: 'No badges earned yet',
+      startLearning: 'Start learning to earn your first badge!',
+      startQuiz: 'Start Quiz',
+      startWords: 'Start Words',
+      nextGoals: '🎯 Next Goals',
+      learningStats: '📊 Learning Stats',
+      quizScore: 'Quiz Score',
+      quizStreak: 'Streak',
+      puzzleCompletions: 'Puzzle Completions',
+      wordsLearned: 'Words Learned',
+      booksRead: 'Books Read',
+      wordsTotal: 'Out of {total}',
+      booksTotal: 'Out of {total}',
+      nextBadge: 'Next Goal',
+      categoryQuiz: 'Quiz',
+      categoryPuzzle: 'Puzzle',
+      categoryWords: 'Words',
+      categoryBooks: 'Books'
+    },
+    settings: {
+      title: 'Settings',
+      desc: 'Change your personal settings',
+      username: 'Username',
+      usernamePlaceholder: 'Enter your username',
+      userType: 'User Type',
+      parent: 'Parent (General User)',
+      teacher: 'Kindergarten Teacher',
+      director: 'Director',
+      siteName: 'Site Name',
+      siteNamePlaceholder: 'Enter site name',
+      childAge: 'Child Age',
+      age3: 'Age 3',
+      age4: 'Age 4',
+      age5: 'Age 5',
+      age6: 'Age 6',
+      childAgeHint: 'Content will be filtered by age',
+      mainImage: 'Main Image',
+      mainImagePlaceholder: 'https://example.com/image.jpg',
+      mainImageHint: 'Set the main image for the home screen (persists after refresh)',
+      currentImage: 'Current Image:',
+      currentImageAlt: 'Current main image',
+      saveSuccess: '✅ Settings saved successfully!'
+    },
+    admin: {
+      panel: 'Admin Panel',
+      dashboard: 'Dashboard',
+      words: 'Word Management',
+      books: 'Book Management',
+      badges: 'Badge Management',
+      users: 'User Management',
+      add: 'Add',
+      edit: 'Edit',
+      delete: 'Delete',
+      confirmDelete: 'Are you sure you want to delete?',
+      cancel: 'Cancel',
+      save: 'Save',
+      systemAdmin: 'System Admin',
+      global: 'Global',
+      personal: 'Personal',
+      noData: 'No data registered',
+      addFirst: 'Add the first item'
+    }
+  }
+};
+
+const i18n = createI18n({
+  legacy: false,
+  locale: 'ko',
+  fallbackLocale: 'en',
+  messages
+});
 
 const app = createApp(App);
 const pinia = createPinia();
 
 app.use(pinia);
 app.use(router);
+app.use(i18n);
 
 // Initialize auth store and load content
 import { useAuthStore } from '@/stores/auth';
@@ -69,3 +375,5 @@ initializeApp().then(() => {
   // 초기화 실패해도 앱은 마운트
   app.mount('#app');
 });
+
+export { i18n };

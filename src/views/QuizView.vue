@@ -5,14 +5,14 @@
     <main class="main-content">
       <div class="container">
         <div class="quiz-header">
-          <h1 class="page-title">퀴즈 게임</h1>
+          <h1 class="page-title">{{$t('quiz.title')}}</h1>
           <div class="quiz-stats">
             <div class="stat">
-              <span class="stat-label">점수</span>
+              <span class="stat-label">{{$t('quiz.score')}}</span>
               <span class="stat-value">{{ authStore.userProgress?.quiz_score || 0 }}</span>
             </div>
             <div class="stat">
-              <span class="stat-label">연속 정답</span>
+              <span class="stat-label">{{$t('quiz.streak')}}</span>
               <span class="stat-value">{{ authStore.userProgress?.quiz_streak || 0 }}</span>
             </div>
           </div>
@@ -23,10 +23,10 @@
 
         <div v-if="!gameStarted" class="game-start">
           <div class="start-card">
-            <h2>퀴즈 게임을 시작해볼까요?</h2>
-            <p>음성을 듣고 정답 이미지를 찾아보세요!</p>
+            <h2>{{$t('quiz.start')}}</h2>
+            <p>{{$t('quiz.findAnswer')}}</p>
             <button @click="startGame" class="btn btn-primary btn-lg">
-              게임 시작하기
+              {{$t('quiz.startGame')}}
             </button>
           </div>
         </div>
@@ -34,9 +34,9 @@
         <div v-else-if="currentQuiz" class="quiz-game">
           <!-- 퀴즈 질문 패널을 최상단으로 이동 -->
           <div class="quiz-question">
-            <h2>음성을 듣고 정답을 찾아보세요</h2>
+            <h2>{{$t('quiz.findAnswer')}}</h2>
             <button @click="playQuizAudio" class="audio-button" :class="{ playing: isPlaying }">
-              <span class="audio-text">다시 듣기</span>
+              <span class="audio-text">{{$t('quiz.listen')}}</span>
             </button>
           </div>
 
@@ -63,12 +63,12 @@
           <div v-if="showResult" class="quiz-result">
             <div v-if="isCorrect" class="result-correct">
               <div class="celebration-container">
-                <div class="celebration-text">정답입니다!</div>
+                <div class="celebration-text">{{$t('quiz.correct')}}</div>
                 <div class="confetti" v-for="i in 20" :key="i" :style="getConfettiStyle(i)"></div>
               </div>
-              <h3>잘했어요!</h3>
+              <h3>{{$t('quiz.correct')}}</h3>
               <div v-if="newBadgeUnlocked" class="new-badge-notification">
-                <div class="badge-unlock-text">새로운 뱃지 획득!</div>
+                <div class="badge-unlock-text">{{$t('quiz.badge')}}</div>
                 <div class="unlocked-badge">
                   <span class="unlocked-badge-icon">{{ newBadgeUnlocked.icon }}</span>
                   <span class="unlocked-badge-name">{{ newBadgeUnlocked.name }}</span>
@@ -76,16 +76,16 @@
               </div>
             </div>
             <div v-else class="result-incorrect">
-              <h3>다시 한번 도전해보세요!</h3>
+              <h3>{{$t('quiz.wrong')}}</h3>
             </div>
           </div>
         </div>
 
         <div v-else class="no-words">
-          <h3>퀴즈할 단어가 부족합니다</h3>
-          <p>최소 3개 이상의 단어가 필요합니다</p>
+          <h3>{{$t('quiz.notEnough')}}</h3>
+          <p>{{$t('quiz.needThree')}}</p>
           <router-link to="/words" class="btn btn-primary">
-            단어 학습하러 가기
+            {{$t('quiz.goWords')}}
           </router-link>
         </div>
       </div>
@@ -180,7 +180,10 @@ const generateNewQuiz = () => {
 
 const playQuizAudio = () => {
   if (currentQuiz.value) {
-    playAudio(currentQuiz.value.audioUrl);
+    // 정답 단어 객체 찾기
+    const correctOption = currentQuiz.value.options.find(opt => opt.id === currentQuiz.value?.correctAnswerId);
+    const fallbackText = store.currentLanguage === 'ko' ? correctOption?.name : correctOption?.nameEn;
+    playAudio(currentQuiz.value.audioUrl, fallbackText);
   }
 };
 

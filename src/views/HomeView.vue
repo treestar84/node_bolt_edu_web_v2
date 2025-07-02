@@ -24,7 +24,7 @@
                 You are my heart outside my body.
               </h1>
               <p class="hero-description fade-in">
-                {{ authStore.childAge }}세 {{ authStore.userProfile?.username }}님을 위한 맞춤형 학습 콘텐츠
+                {{$t('landing.description')}}
               </p>
               
               <div class="hero-actions fade-in">
