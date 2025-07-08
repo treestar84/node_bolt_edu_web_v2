@@ -21,7 +21,7 @@
               class="puzzle-option-card"
             >
               <div class="option-image">
-                <img :src="getImageUrl(option.imageUrl)" :alt="option.name" />
+                <img :src="getImageUrl(option.imageUrl)" :alt="option.name" :style="{ aspectRatio: puzzleAspectRatio }" />
                 <div class="play-overlay">
                   <span class="play-icon">🧩</span>
                   <span class="play-text">{{$t('puzzle.start')}}</span>
@@ -142,7 +142,7 @@
             <h3 class="completion-subtitle">{{ getCurrentName(selectedPuzzle!) }} 완성!</h3>
             
             <div class="completed-puzzle">
-              <img :src="getImageUrl(selectedPuzzle!.imageUrl)" :alt="getCurrentName(selectedPuzzle!)" />
+              <img :src="getImageUrl(selectedPuzzle!.imageUrl)" :alt="getCurrentName(selectedPuzzle!)" :style="{ aspectRatio: puzzleAspectRatio }" />
             </div>
 
             <div v-if="newBadgeUnlocked" class="new-badge-notification">
@@ -179,7 +179,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch, nextTick } from 'vue';
 import Navigation from '@/components/Navigation.vue';
 import { useAppStore } from '@/stores/app';
 import { useAuthStore } from '@/stores/auth';
@@ -212,7 +212,9 @@ const puzzlePieces = ref<PuzzlePiece[]>([]);
 const shuffledPieces = ref<PuzzlePiece[]>([]);
 const completedPieces = ref(0);
 const newBadgeUnlocked = ref<Badge | null>(null);
-const puzzleBoard = ref<HTMLElement>();
+const puzzleBoard = ref<HTMLElement | null>(null);
+const boardWidth = ref(0);
+const boardHeight = ref(0);
 
 // Touch handling
 const draggedPiece = ref<PuzzlePiece | null>(null);
@@ -237,6 +239,18 @@ const gridRows = computed(() => {
   return puzzleDifficulty.value === '3x2' ? 2 : 3;
 });
 
+const puzzleAspectRatio = computed(() => {
+  return puzzleDifficulty.value === '3x2' ? '3 / 2' : '1 / 1';
+});
+
+const updateBoardDimensions = () => {
+  if (puzzleBoard.value) {
+    boardWidth.value = puzzleBoard.value.offsetWidth;
+    boardHeight.value = puzzleBoard.value.offsetHeight;
+    console.log(`[Puzzle] Board dimensions: ${boardWidth.value}x${boardHeight.value}`);
+  }
+};
+
 const getImageUrl = (url: string): string => {
   if (url.startsWith('/uploads/')) {
     return '/server' + url;
@@ -248,7 +262,8 @@ const getCurrentName = (word: WordItem): string => {
   return store.currentLanguage === 'ko' ? word.name : word.nameEn;
 };
 
-// 퍼즐 조각의 이미지 스타일을 계산하여 실제로 이미지를 자르는 효과
+
+
 const getPieceImageStyle = (pieceIndex: number) => {
   const cols = gridCols.value;
   const rows = gridRows.value;
@@ -259,9 +274,7 @@ const getPieceImageStyle = (pieceIndex: number) => {
   return {
     width: `${cols * 100}%`,
     height: `${rows * 100}%`,
-    objectFit: 'cover' as const,
     objectPosition: `-${col * 100}% -${row * 100}%`,
-    transform: `translate(-${col * (100 / cols)}%, -${row * (100 / rows)}%)`,
     pointerEvents: 'none' as const,
     userSelect: 'none' as const,
     WebkitUserDrag: 'none' as const,
@@ -313,6 +326,8 @@ const handleDragStart = (event: DragEvent, piece: PuzzlePiece) => {
     const clonedElement = dragElement.cloneNode(true) as HTMLElement;
     clonedElement.style.opacity = '0.8';
     clonedElement.style.transform = 'scale(0.9)';
+    clonedElement.style.width = '120px'; /* Set explicit width */
+    clonedElement.style.height = '120px'; /* Set explicit height */
     
     // 임시로 DOM에 추가
     document.body.appendChild(clonedElement);
@@ -599,7 +614,17 @@ const getConfettiStyle = (index: number) => {
 };
 
 onMounted(() => {
-  // Initialize puzzle options
+  nextTick(() => {
+    updateBoardDimensions();
+  });
+  window.addEventListener('resize', updateBoardDimensions);
+});
+
+// Watch for puzzleDifficulty changes to update board dimensions
+watch(puzzleDifficulty, () => {
+  nextTick(() => {
+    updateBoardDimensions();
+  });
 });
 </script>
 
@@ -797,13 +822,13 @@ onMounted(() => {
   border-radius: var(--radius-lg);
   padding: var(--spacing-lg);
   width: 600px;
-  height: 400px;
+  aspect-ratio: 3 / 2; /* Maintain 3:2 aspect ratio for 3x2 grid */
   box-shadow: var(--shadow-lg);
 }
 
 .puzzle-board.grid-3x3 {
   grid-template-rows: repeat(3, 1fr);
-  height: 600px;
+  aspect-ratio: 1 / 1; /* Maintain 1:1 aspect ratio for 3x3 grid */
 }
 
 .puzzle-slot {
@@ -850,6 +875,7 @@ onMounted(() => {
   height: 100%;
   overflow: hidden;
   position: relative;
+  aspect-ratio: 1 / 1;
 }
 
 .placed-piece-image {
@@ -860,6 +886,7 @@ onMounted(() => {
   -moz-user-drag: none;
   -o-user-drag: none;
   pointer-events: none;
+  object-fit: none; /* Re-add object-fit: none */
 }
 
 .empty-slot {
@@ -917,22 +944,23 @@ onMounted(() => {
   transform: scale(0.95);
 }
 
-/* 퍼즐 조각 이미지를 실제로 자르는 효과 */
 .piece-image-container {
   width: 100%;
   height: 100%;
   overflow: hidden;
   position: relative;
+  aspect-ratio: 1 / 1;
 }
 
 .piece-image {
-  display: block;
+  border-radius: var(--radius-sm);
   user-select: none;
   -webkit-user-drag: none;
   -khtml-user-drag: none;
   -moz-user-drag: none;
   -o-user-drag: none;
   pointer-events: none;
+  object-fit: none;
 }
 
 .piece-number {
@@ -1122,11 +1150,11 @@ onMounted(() => {
   
   .puzzle-board {
     width: 500px;
-    height: 333px;
+    /* height: 333px; */ /* Removed fixed height */
   }
   
   .puzzle-board.grid-3x3 {
-    height: 500px;
+    /* height: 500px; */ /* Removed fixed height */
   }
   
   .puzzle-pieces-container {
