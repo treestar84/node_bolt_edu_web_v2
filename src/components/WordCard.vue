@@ -69,6 +69,10 @@ const playWordAudio = async () => {
     emit('audio-played'); // Still emit for auto-advance
   }
 };
+
+defineExpose({
+  playWordAudio
+});
 </script>
 
 <style scoped>

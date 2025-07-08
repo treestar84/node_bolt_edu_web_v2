@@ -5,55 +5,51 @@ export function useAudio() {
   const currentAudio = ref<HTMLAudioElement | null>(null);
   const audioDuration = ref(0);
 
-  const playAudio = async (audioUrl: string, fallbackText?: string): Promise<number> => {
-    return new Promise((resolve) => {
-      try {
-        // Stop current audio if playing
-        if (currentAudio.value) {
-          currentAudio.value.pause();
-          currentAudio.value.currentTime = 0;
+  const playAudio = (audioUrl: string, fallbackText?: string): Promise<number> => {
+    return new Promise((resolve, reject) => {
+      let fallbackHasBeenCalled = false;
+      const callFallbackOnce = () => {
+        if (!fallbackHasBeenCalled) {
+          fallbackHasBeenCalled = true;
+          handleAudioFallback(audioUrl, fallbackText);
         }
+      };
 
-        // Create new audio instance with the actual URL
-        const audio = new Audio(audioUrl);
-        currentAudio.value = audio;
-        isPlaying.value = true;
+      // Stop current audio if playing
+      if (currentAudio.value) {
+        currentAudio.value.pause();
+        currentAudio.value.currentTime = 0;
+      }
 
-        // Handle metadata loaded to get duration
-        audio.addEventListener('loadedmetadata', () => {
-          audioDuration.value = audio.duration || 2;
-        });
+      const audio = new Audio(audioUrl);
+      currentAudio.value = audio;
+      isPlaying.value = true;
 
-        // Handle successful audio load and play
-        audio.addEventListener('canplaythrough', () => {
-          audio.play().then(() => {
-            // Audio started playing successfully
-          }).catch((error) => {
-            handleAudioFallback(audioUrl, fallbackText);
-            resolve(2);
-          });
-        });
+      audio.addEventListener('loadedmetadata', () => {
+        audioDuration.value = audio.duration || 2;
+      });
 
-        // Handle audio end
-        audio.addEventListener('ended', () => {
+      audio.play().catch((error) => {
+        if (error.name === 'NotAllowedError') {
+          console.warn('Autoplay was blocked by the browser.');
           isPlaying.value = false;
           currentAudio.value = null;
-          resolve(audioDuration.value || 2);
-        });
-
-        // Handle audio error - use text-to-speech as fallback
-        audio.addEventListener('error', () => {
-          handleAudioFallback(audioUrl, fallbackText);
-          resolve(2);
-        });
-
-        // Set source and load
-        audio.load();
-
-      } catch (error) {
-        handleAudioFallback(audioUrl, fallbackText);
+          return reject(error); // Reject promise to be caught by the component
+        }
+        callFallbackOnce();
         resolve(2);
-      }
+      });
+
+      audio.addEventListener('ended', () => {
+        isPlaying.value = false;
+        currentAudio.value = null;
+        resolve(audioDuration.value || 2);
+      });
+
+      audio.addEventListener('error', (e) => {
+        callFallbackOnce();
+        resolve(2); // Resolve to avoid unhandled promise rejection
+      });
     });
   };
 

@@ -56,13 +56,13 @@ export const useContentStore = defineStore('content', () => {
   const nextBadge = computed(() => {
     if (!authStore.userProgress) return null;
     
-    const unlockedBadgeIds = userBadges.value.map(ub => ub.badge_id);
+    const unlockedBadgeIds = userBadges.value.map(ub => ub.badgeId);
     const lockedBadges = badges.value.filter(b => !unlockedBadgeIds.includes(b.id));
     
     if (lockedBadges.length === 0) return null;
     
     return lockedBadges.reduce((next, badge) => {
-      if (!next || badge.required_score < next.required_score) {
+      if (!next || badge.requiredScore < next.requiredScore) {
         return badge;
       }
       return next;

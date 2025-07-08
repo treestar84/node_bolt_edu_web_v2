@@ -6,20 +6,7 @@
       <div class="container">
         <div class="quiz-header">
           <h1 class="page-title">{{$t('quiz.title')}}</h1>
-          <div class="quiz-stats">
-            <div class="stat">
-              <span class="stat-label">{{$t('quiz.score')}}</span>
-              <span class="stat-value">{{ authStore.userProgress?.quiz_score || 0 }}</span>
-            </div>
-            <div class="stat">
-              <span class="stat-label">{{$t('quiz.streak')}}</span>
-              <span class="stat-value">{{ authStore.userProgress?.quiz_streak || 0 }}</span>
-            </div>
-          </div>
         </div>
-
-        <!-- Badge Display -->
-        <BadgeDisplay />
 
         <div v-if="!gameStarted" class="game-start">
           <div class="start-card">
@@ -87,6 +74,21 @@
           <router-link to="/words" class="btn btn-primary">
             {{$t('quiz.goWords')}}
           </router-link>
+        </div>
+
+        <!-- Quiz Stats and Badges -->
+        <div class="quiz-footer-stats">
+          <div class="quiz-stats">
+            <div class="stat">
+              <span class="stat-label">{{$t('quiz.score')}}</span>
+              <span class="stat-value">{{ authStore.userProgress?.quiz_score || 0 }}</span>
+            </div>
+            <div class="stat">
+              <span class="stat-label">{{$t('quiz.streak')}}</span>
+              <span class="stat-value">{{ authStore.userProgress?.quiz_streak || 0 }}</span>
+            </div>
+          </div>
+          <BadgeDisplay />
         </div>
       </div>
     </main>
@@ -367,7 +369,10 @@ onMounted(() => {
 }
 
 .main-content {
-  padding: var(--spacing-lg) 0; /* 상단 패딩을 줄여서 네비게이션과 더 가깝게 */
+  padding: var(--spacing-lg) 0;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
 }
 
 .quiz-header {
@@ -389,14 +394,27 @@ onMounted(() => {
   display: flex;
   justify-content: center;
   gap: var(--spacing-xl);
+  width: 100%;
 }
 
 .stat {
+  flex: 1;
   text-align: center;
-  background: var(--color-bg-card);
+  background: var(--color-bg-secondary);
   padding: var(--spacing-md) var(--spacing-lg);
   border-radius: var(--radius-md);
   border: 1px solid var(--color-border);
+}
+
+.quiz-footer-stats {
+  background: var(--color-bg-card);
+  border-top: 1px solid var(--color-border);
+  padding: var(--spacing-md);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-xl); /* Add margin to separate from content above */
 }
 
 .stat-label {
@@ -418,7 +436,7 @@ onMounted(() => {
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 50vh;
+  flex-grow: 1; /* Allow it to grow and take available space */
 }
 
 .start-card {
@@ -505,6 +523,18 @@ onMounted(() => {
   grid-template-columns: repeat(3, 1fr);
   gap: var(--spacing-lg);
   margin-bottom: var(--spacing-xl); /* 하단 마진 줄임 */
+}
+
+@media (max-width: 768px) {
+  .quiz-options {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .quiz-options {
+    grid-template-columns: 1fr;
+  }
 }
 
 .quiz-option {
@@ -714,7 +744,7 @@ onMounted(() => {
   }
   
   .quiz-option img {
-    height: 120px;
+    height: 100px;
   }
   
   .start-card {

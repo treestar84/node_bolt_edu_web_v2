@@ -41,6 +41,19 @@ export const useAuthStore = defineStore('auth', () => {
   };
 
   // Load user profile and progress
+  // Data transformation function
+  const transformProgressFromDB = (dbProgress: any): UserProgress => ({
+    id: dbProgress.id,
+    userId: dbProgress.user_id,
+    quizScore: dbProgress.quiz_score,
+    quizStreak: dbProgress.quiz_streak,
+    puzzleCompletions: dbProgress.puzzle_completions,
+    wordsLearned: dbProgress.words_learned,
+    booksRead: dbProgress.books_read,
+    updatedAt: dbProgress.updated_at
+  });
+
+  // Load user profile and progress
   const loadUserProfile = async () => {
     if (!user.value) {
       console.log('⚠️ No user to load profile for');
@@ -63,8 +76,8 @@ export const useAuthStore = defineStore('auth', () => {
           .single();
         
         if (progressResult.data) {
-          userProgress.value = progressResult.data;
-          console.log('✅ Progress loaded:', progressResult.data);
+          userProgress.value = transformProgressFromDB(progressResult.data);
+          console.log('✅ Progress loaded:', userProgress.value);
         } else {
           console.log('📊 No progress found, creating initial progress...');
           // Create initial progress if it doesn't exist
@@ -82,8 +95,8 @@ export const useAuthStore = defineStore('auth', () => {
             .single();
           
           if (newProgress) {
-            userProgress.value = newProgress;
-            console.log('✅ Initial progress created:', newProgress);
+            userProgress.value = transformProgressFromDB(newProgress);
+            console.log('✅ Initial progress created:', userProgress.value);
           }
         }
       } catch (progressError: any) {
@@ -273,16 +286,31 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       console.log('📈 Updating user progress:', updates);
       
-      const updatedProgress = await supabase
+      // Convert camelCase updates to snake_case for DB
+      const dbUpdates: any = {};
+      for (const key in updates) {
+        if (Object.prototype.hasOwnProperty.call(updates, key)) {
+          const snakeCaseKey = key.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`);
+          dbUpdates[snakeCaseKey] = (updates as any)[key];
+        }
+      }
+      dbUpdates.updated_at = new Date().toISOString();
+
+      const { data, error: updateError } = await supabase
         .from('user_progress')
-        .update({ ...updates, updated_at: new Date().toISOString() })
+        .update(dbUpdates)
         .eq('user_id', user.value.id)
         .select()
         .single();
 
-      if (updatedProgress.data) {
-        userProgress.value = { ...userProgress.value, ...updatedProgress.data };
-        console.log('✅ Progress updated successfully');
+      if (updateError) {
+        console.error('❌ Error updating progress:', updateError);
+        throw updateError;
+      }
+
+      if (data) {
+        userProgress.value = transformProgressFromDB(data);
+        console.log('✅ Progress updated successfully', userProgress.value);
       }
 
       return true;

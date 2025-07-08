@@ -1140,63 +1140,26 @@ onMounted(() => {
   }
 }
 
-@media (max-width: 768px) {
-  .puzzle-options {
-    grid-template-columns: 1fr;
-    gap: var(--spacing-lg);
-  }
-  
-  .difficulty-buttons {
-    flex-direction: column;
-    gap: var(--spacing-md);
-  }
-  
-  .game-header {
-    flex-direction: column;
-    gap: var(--spacing-md);
-    text-align: center;
-  }
-  
-  .puzzle-title {
-    margin: 0;
-  }
-  
+@media (max-width: 540px) {
   .puzzle-board {
-    width: 350px;
-    height: 233px;
-    gap: 2px;
-    padding: var(--spacing-md);
+    width: 100%;
+    height: auto;
+    aspect-ratio: 3 / 2;
   }
-  
+
   .puzzle-board.grid-3x3 {
-    height: 350px;
+    aspect-ratio: 1 / 1;
   }
-  
-  .puzzle-slot {
-    border-width: 1px;
-  }
-  
-  .empty-slot {
-    font-size: 1.5rem;
-  }
-  
+
   .puzzle-pieces {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: var(--spacing-sm);
   }
-  
+
   .puzzle-piece {
-    width: 100px;
-    height: 100px;
-  }
-  
-  .completion-actions {
-    flex-direction: column;
-    gap: var(--spacing-md);
-  }
-  
-  .completed-puzzle {
-    width: 150px;
-    height: 150px;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1 / 1;
   }
 }
 </style>

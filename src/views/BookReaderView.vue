@@ -1,12 +1,32 @@
 <template>
   <div class="book-reader">
     <div class="reader-header">
-      <button @click="goBack" class="btn btn-secondary">
-        ← 뒤로가기
-      </button>
-      <h1 class="book-title">{{ book?.title }}</h1>
-      <div class="page-indicator">
-        {{ currentPageIndex + 1 }} / {{ book?.pages.length }}
+      <div class="header-top-row">
+        <button @click="goBack" class="btn btn-secondary">
+          ← 뒤로가기
+        </button>
+        <div class="title-and-page-indicator">
+          <h1 class="book-title">{{ book?.title }}</h1>
+          <div class="page-indicator">
+            {{ currentPageIndex + 1 }} / {{ book?.pages.length }}
+          </div>
+        </div>
+      </div>
+      <div class="header-bottom-row">
+        <button
+          @click="previousPage"
+          :disabled="currentPageIndex === 0"
+          class="btn btn-lg btn-secondary navigation-btn"
+        >
+          ← 이전
+        </button>
+        <button
+          @click="nextPage"
+          :disabled="currentPageIndex === book.pages.length - 1"
+          class="btn btn-lg btn-secondary navigation-btn"
+        >
+          다음 →
+        </button>
       </div>
     </div>
 
@@ -71,35 +91,6 @@
             </div>
           </div>
         </div>
-      </div>
-
-      <div class="navigation-controls">
-        <button 
-          @click="previousPage" 
-          :disabled="currentPageIndex === 0"
-          class="btn btn-lg btn-secondary"
-        >
-          ← 이전
-        </button>
-        
-        <div class="page-dots">
-          <button 
-            v-for="(page, index) in book.pages" 
-            :key="page.id"
-            @click="goToPage(index)"
-            class="page-dot"
-            :class="{ active: index === currentPageIndex }"
-          >
-          </button>
-        </div>
-        
-        <button 
-          @click="nextPage" 
-          :disabled="currentPageIndex === book.pages.length - 1"
-          class="btn btn-lg btn-secondary"
-        >
-          다음 →
-        </button>
       </div>
 
       <!-- Auto-play progress indicator -->
@@ -173,7 +164,16 @@ const goToPage = (index: number) => {
   currentPageIndex.value = index;
 };
 
+const onImageError = (event: Event) => {
+  const target = event.target as HTMLImageElement;
+  target.style.display = 'none';
+  // You can also replace it with a placeholder image
+  // target.src = '/path/to/placeholder.png';
+};
+
 const playPageAudio = async () => {
+  stopAudio(); // Stop any currently playing audio first
+  stopAudio(); // Stop any currently playing audio first
   if (currentPage.value && currentPage.value.audioUrl) {
     try {
       const audioUrl = store.getImageUrl(currentPage.value.audioUrl);
@@ -181,8 +181,8 @@ const playPageAudio = async () => {
       const duration = await playAudio(audioUrl);
       
       if (autoPlayEnabled.value) {
-        // Calculate delay: audio duration + 5-7 seconds
-        const additionalDelay = Math.random() * 2000 + 5000; // 5-7 seconds
+        // Calculate delay: audio duration + 2 seconds
+        const additionalDelay = 2000; // 2 seconds
         autoPlayDelay.value = (duration * 1000) + additionalDelay;
         startAutoPlayTimer();
       }
@@ -190,7 +190,7 @@ const playPageAudio = async () => {
       console.warn('Audio playback failed:', error);
       if (autoPlayEnabled.value) {
         // Use default delay if audio fails
-        autoPlayDelay.value = 7000;
+        autoPlayDelay.value = 2000;
         startAutoPlayTimer();
       }
     }
@@ -247,9 +247,10 @@ const toggleAutoPlay = () => {
 // Watch for page changes
 watch(currentPageIndex, () => {
   clearAutoPlayTimers();
-  setTimeout(() => {
-    playPageAudio();
-  }, 500);
+  // Automatic audio playback removed to comply with autoplay policies
+  // setTimeout(() => {
+  //   playPageAudio();
+  // }, 500);
 });
 
 onMounted(async () => {
@@ -257,10 +258,10 @@ onMounted(async () => {
   if (store.currentBooks.length === 0) {
     await store.loadBooks();
   }
-  // Auto-play first page audio
-  setTimeout(() => {
-    playPageAudio();
-  }, 1000);
+  // Automatic audio playback removed to comply with autoplay policies
+  // setTimeout(() => {
+  //   playPageAudio();
+  // }, 1000);
 });
 
 onUnmounted(() => {
@@ -269,6 +270,35 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
+.autoplay-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.overlay-content {
+  background: white;
+  padding: var(--spacing-xl);
+  border-radius: var(--radius-lg);
+  text-align: center;
+}
+
+.overlay-content h2 {
+  font-size: 1.5rem;
+  margin-bottom: var(--spacing-md);
+}
+
+.overlay-content p {
+  margin-bottom: var(--spacing-lg);
+}
+
 .book-reader {
   min-height: 100vh;
   background: linear-gradient(135deg, var(--color-bg-primary) 0%, var(--color-bg-secondary) 100%);
@@ -278,23 +308,51 @@ onUnmounted(() => {
 
 .reader-header {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+  flex-direction: column; /* Stack rows vertically */
+  align-items: center; /* Center content horizontally */
   padding: var(--spacing-lg) var(--spacing-xl);
   background: var(--color-bg-card);
   border-bottom: 1px solid var(--color-border);
   position: sticky;
   top: 0;
   z-index: 10;
+  gap: var(--spacing-md); /* Gap between rows */
+}
+
+.header-top-row,
+.header-bottom-row {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  justify-content: space-between; /* Distribute items */
+  gap: var(--spacing-md);
+}
+
+.header-top-row {
+  margin-bottom: var(--spacing-sm); /* Space between top and bottom row */
+}
+
+.reader-header .btn {
+  flex-shrink: 0; /* Prevent buttons from shrinking */
+}
+
+.title-and-page-indicator {
+  flex: 1; /* Allow this section to take available space */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  margin: 0 var(--spacing-lg); /* Add horizontal margin */
 }
 
 .book-title {
   font-size: 1.5rem;
   font-weight: 600;
   color: var(--color-text-primary);
-  text-align: center;
-  flex: 1;
-  margin: 0 var(--spacing-lg);
+  /* text-align: center; */
+  /* flex: 1; */
+  margin: 0; /* Remove margin as it's handled by parent */
 }
 
 .page-indicator {
@@ -304,6 +362,7 @@ onUnmounted(() => {
   background: var(--color-bg-secondary);
   padding: var(--spacing-sm) var(--spacing-md);
   border-radius: var(--radius-md);
+  margin-top: var(--spacing-xs); /* Space between title and page indicator */
 }
 
 .reader-content {
@@ -338,6 +397,18 @@ onUnmounted(() => {
   position: relative;
   width: 100%;
   height: 500px;
+}
+
+@media (max-width: 768px) {
+  .page-image {
+    height: 350px;
+  }
+}
+
+@media (max-width: 480px) {
+  .page-image {
+    height: 250px;
+  }
 }
 
 .page-image img {
@@ -419,39 +490,7 @@ onUnmounted(() => {
   accent-color: var(--color-primary);
 }
 
-.navigation-controls {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-xl);
-  width: 100%;
-  max-width: 600px;
-  justify-content: space-between;
-}
 
-.page-dots {
-  display: flex;
-  gap: var(--spacing-sm);
-}
-
-.page-dot {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  border: none;
-  background: var(--color-border);
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.page-dot.active {
-  background: var(--color-primary);
-  transform: scale(1.2);
-}
-
-.page-dot:hover {
-  background: var(--color-primary);
-  opacity: 0.7;
-}
 
 .auto-play-progress {
   position: fixed;
@@ -516,14 +555,38 @@ onUnmounted(() => {
 
 @media (max-width: 768px) {
   .reader-header {
-    flex-direction: column;
-    gap: var(--spacing-md);
     padding: var(--spacing-md);
+    gap: var(--spacing-sm); /* Adjust gap between rows */
+  }
+
+  .header-top-row {
+    flex-wrap: wrap; /* Allow items to wrap */
+    justify-content: center; /* Center items when wrapped */
+    gap: var(--spacing-sm);
+  }
+
+  .header-top-row .btn {
+    flex-grow: 1; /* Allow back button to grow */
+  }
+
+  .title-and-page-indicator {
+    order: -1; /* Move title and page indicator to the top */
+    width: 100%; /* Take full width */
+    margin: 0; /* Remove horizontal margin */
+  }
+
+  .header-bottom-row {
+    flex-wrap: wrap; /* Allow buttons to wrap */
+    justify-content: center; /* Center buttons */
+    gap: var(--spacing-sm);
+  }
+
+  .header-bottom-row .navigation-btn {
+    flex-grow: 1; /* Allow navigation buttons to grow */
   }
   
   .book-title {
     font-size: 1.25rem;
-    margin: 0;
   }
   
   .reader-content {
@@ -532,22 +595,13 @@ onUnmounted(() => {
   }
   
   .page-image {
-    height: 350px;
+    height: auto;
+    aspect-ratio: 4 / 3;
   }
   
   .page-text {
     font-size: 1.125rem;
     padding: var(--spacing-lg) var(--spacing-md) var(--spacing-md);
-  }
-  
-  .navigation-controls {
-    flex-direction: column;
-    gap: var(--spacing-lg);
-  }
-  
-  .navigation-controls > .btn {
-    width: 100%;
-    max-width: 200px;
   }
   
   .audio-button {

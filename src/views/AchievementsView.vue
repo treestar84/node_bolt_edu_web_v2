@@ -900,52 +900,144 @@ onMounted(async () => {
   font-size: 0.8rem;
 }
 
-@media (max-width: 768px) {
-  .page-title {
-    font-size: 1.5rem;
-  }
-  
-  .earned-badges-grid,
-  .next-badges-grid {
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-    gap: var(--spacing-xs);
-  }
-  
-  .stats-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: var(--spacing-xs);
-  }
-  
-  .progress-cards {
-    grid-template-columns: 1fr;
-    gap: var(--spacing-sm);
-  }
-  
-  .section-header {
-    flex-direction: column;
-    gap: var(--spacing-xs);
-    text-align: center;
-  }
-  
-  .quick-actions {
-    flex-direction: column;
-    align-items: center;
-  }
-  
-  .stat-card {
-    padding: var(--spacing-xs);
-  }
-  
-  .stat-icon {
-    font-size: 1rem;
-  }
-  
-  .stat-value {
-    font-size: 1rem;
-  }
-  
-  .debug-actions {
-    flex-direction: column;
-  }
+.main-content {
+  padding: var(--spacing-md) 0;
+}
+
+.page-title {
+  font-size: 1.5rem;
+}
+
+.page-description {
+  font-size: 0.8rem;
+}
+
+.earned-badges-section,
+.next-goals-section,
+.stats-section,
+.progress-section {
+  padding: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+}
+
+.section-title {
+  font-size: 1rem;
+}
+
+.badge-count {
+  font-size: 0.8rem;
+}
+
+.count {
+  font-size: 1rem;
+}
+
+.earned-badges-grid,
+.next-badges-grid {
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: var(--spacing-xs);
+}
+
+.badge-card {
+  min-height: 100px;
+  padding: var(--spacing-xs);
+}
+
+.badge-icon {
+  font-size: 1.2rem;
+}
+
+.badge-name {
+  font-size: 0.7rem;
+}
+
+.badge-description {
+  font-size: 0.6rem;
+}
+
+.badge-category {
+  font-size: 0.5rem;
+}
+
+.earned-indicator {
+  font-size: 0.5rem;
+}
+
+.progress-text {
+  font-size: 0.6rem;
+}
+
+.stats-grid {
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--spacing-xs);
+}
+
+.stat-card {
+  padding: var(--spacing-xs);
+  gap: var(--spacing-xs);
+}
+
+.stat-icon {
+  font-size: 1rem;
+}
+
+.stat-value {
+  font-size: 1rem;
+}
+
+.stat-label {
+  font-size: 0.6rem;
+}
+
+.stat-sub {
+  font-size: 0.5rem;
+}
+
+.progress-cards {
+  grid-template-columns: 1fr;
+  gap: var(--spacing-md);
+}
+
+.progress-card {
+  padding: var(--spacing-md);
+}
+
+.progress-title {
+  font-size: 0.8rem;
+}
+
+.circular-progress {
+  margin-bottom: var(--spacing-sm);
+}
+
+.progress-circle {
+  width: 50px;
+  height: 50px;
+}
+
+.progress-circle::before {
+  width: 35px;
+  height: 35px;
+}
+
+.progress-percentage {
+  font-size: 0.7rem;
+}
+
+.progress-description {
+  font-size: 0.6rem;
+}
+
+.category-label {
+  font-size: 0.6rem;
+}
+
+.category-value {
+  font-size: 0.6rem;
+}
+
+.debug-toggle {
+  font-size: 0.7rem;
+  padding: var(--spacing-xs);
 }
 </style>

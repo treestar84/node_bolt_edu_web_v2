@@ -89,7 +89,13 @@
 
 ---
 
-## 5. 기타
+## 5. 데이터베이스
+
+- supabase/migrations/: Supabase 데이터베이스 스키마 변경 내역을 관리하는 마이그레이션 파일들이 위치합니다. `supabase cli`를 통해 관리됩니다.
+
+---
+
+## 6. 기타
 
 - .env: VITE_API_BASE_URL, VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY 등 환경변수 필요
 - vite.config.ts: /server 프록시 설정 필수 (로컬 개발시)

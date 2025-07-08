@@ -447,19 +447,54 @@ onMounted(() => {
     margin: 0 var(--spacing-md);
   }
   
+  .page-title {
+    font-size: 2rem;
+  }
+
+  .page-description {
+    font-size: 1rem;
+  }
+
+  .settings-card {
+    padding: var(--spacing-md);
+  }
+
+  .card-header h2 {
+    font-size: 1.125rem;
+  }
+
+  .settings-form {
+    padding: var(--spacing-md);
+  }
+
+  .form-label {
+    font-size: 0.875rem;
+  }
+
+  .form-input {
+    padding: var(--spacing-sm);
+    font-size: 0.875rem;
+  }
+
+  .form-hint {
+    font-size: 0.75rem;
+  }
+  
   .form-actions {
     flex-direction: column;
   }
   
   .stats-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
     gap: var(--spacing-md);
+    padding: var(--spacing-md);
   }
   
   .stat-item {
     flex-direction: column;
     text-align: center;
     gap: var(--spacing-sm);
+    padding: var(--spacing-sm);
   }
   
   .stat-icon {
@@ -468,6 +503,14 @@ onMounted(() => {
   
   .stat-value {
     font-size: 1.25rem;
+  }
+
+  .stat-label {
+    font-size: 0.75rem;
+  }
+
+  .account-actions {
+    padding: var(--spacing-md);
   }
 }
 </style>

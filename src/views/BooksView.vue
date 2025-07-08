@@ -253,20 +253,24 @@ const openBook = async (bookId: string) => {
 
 @media (max-width: 768px) {
   .books-grid {
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
     gap: var(--spacing-lg);
   }
   
   .book-cover {
-    height: 250px;
+    height: 180px;
   }
   
   .book-info {
-    padding: var(--spacing-lg);
+    padding: var(--spacing-md);
   }
   
   .book-title {
-    font-size: 1.25rem;
+    font-size: 1.125rem;
+  }
+  
+  .page-count {
+    font-size: 0.75rem;
   }
   
   .play-overlay {

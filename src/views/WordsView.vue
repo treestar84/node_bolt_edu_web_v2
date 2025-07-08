@@ -81,31 +81,6 @@
         <!-- Single Card Learning Mode -->
         <div v-else-if="viewMode === 'single'" class="single-view">
           <div v-if="filteredWords.length > 0" class="learning-container">
-            <div class="learning-header">
-              <div class="learning-desc">{{$t('page.singleDesc')}}</div>
-              <div class="content-count">{{$t('page.contentCount', { count: filteredWords.length })}}</div>
-              <div class="progress-info">
-                <span class="current-word">{{ currentWordIndex + 1 }} / {{ filteredWords.length }}</span>
-                <div class="progress-bar">
-                  <div 
-                    class="progress-fill" 
-                    :style="{ width: `${((currentWordIndex + 1) / filteredWords.length) * 100}%` }"
-                  ></div>
-                </div>
-              </div>
-              
-              <div class="auto-advance-controls">
-                <label class="auto-advance-toggle">
-                  <input 
-                    type="checkbox" 
-                    v-model="autoAdvanceEnabled"
-                    @change="toggleAutoAdvance"
-                  />
-                  <span class="toggle-text">{{$t('page.autoAdvance')}}</span>
-                </label>
-              </div>
-            </div>
-
             <div class="single-word-card">
               <WordCard 
                 :word="currentWord" 
@@ -139,6 +114,31 @@
               </button>
             </div>
 
+            <div class="learning-header">
+              <div class="learning-desc">{{$t('page.singleDesc')}}</div>
+              <div class="content-count">{{$t('page.contentCount', { count: filteredWords.length })}}</div>
+              <div class="progress-info">
+                <span class="current-word">{{ currentWordIndex + 1 }} / {{ filteredWords.length }}</span>
+                <div class="progress-bar">
+                  <div 
+                    class="progress-fill" 
+                    :style="{ width: `${((currentWordIndex + 1) / filteredWords.length) * 100}%` }"
+                  ></div>
+                </div>
+              </div>
+              
+              <div class="auto-advance-controls">
+                <label class="auto-advance-toggle">
+                  <input 
+                    type="checkbox" 
+                    v-model="autoAdvanceEnabled"
+                    @change="toggleAutoAdvance"
+                  />
+                  <span class="toggle-text">{{$t('page.autoAdvance')}}</span>
+                </label>
+              </div>
+            </div>
+
             <!-- Auto-advance progress indicator -->
             <div v-if="autoAdvanceEnabled && autoAdvanceProgress > 0" class="auto-advance-progress">
               <div class="progress-bar">
@@ -146,9 +146,6 @@
                   class="progress-fill" 
                   :style="{ width: `${autoAdvanceProgress}%` }"
                 ></div>
-              </div>
-              <div class="progress-text">
-                {{ Math.ceil((100 - autoAdvanceProgress) / 100 * 10) }}초 후 {{$t('page.next')}} 단어
               </div>
             </div>
           </div>
@@ -162,6 +159,37 @@
         </div>
       </div>
     </main>
+
+    <div class="content-controls">
+      <div class="view-mode-toggle">
+        <button 
+          @click="viewMode = 'grid'"
+          class="btn btn-sm"
+          :class="viewMode === 'grid' ? 'btn-primary' : 'btn-secondary'"
+        >
+          📱 전체보기
+        </button>
+        <button 
+          @click="viewMode = 'single'"
+          class="btn btn-sm"
+          :class="viewMode === 'single' ? 'btn-primary' : 'btn-secondary'"
+        >
+          🎯 학습모드
+        </button>
+      </div>
+      
+      <div class="category-filter">
+        <button 
+          v-for="category in categories" 
+          :key="category"
+          @click="selectedCategory = category"
+          class="btn btn-sm"
+          :class="selectedCategory === category ? 'btn-primary' : 'btn-secondary'"
+        >
+          {{$t('categories.'+category)}}
+        </button>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -309,7 +337,7 @@ const startAutoAdvanceTimer = () => {
   clearAutoAdvanceTimers();
   autoAdvanceProgress.value = 0;
   
-  const totalTime = 10000; // 10 seconds
+  const totalTime = 3000; // 3 seconds
   const progressInterval = 50; // Update every 50ms
   const progressStep = (progressInterval / totalTime) * 100;
   
@@ -374,6 +402,35 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
+.autoplay-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.overlay-content {
+  background: white;
+  padding: var(--spacing-xl);
+  border-radius: var(--radius-lg);
+  text-align: center;
+}
+
+.overlay-content h2 {
+  font-size: 1.5rem;
+  margin-bottom: var(--spacing-md);
+}
+
+.overlay-content p {
+  margin-bottom: var(--spacing-lg);
+}
+
 .words-view {
   min-height: 100vh;
   background: linear-gradient(135deg, var(--color-bg-primary) 0%, var(--color-bg-secondary) 100%);
@@ -381,6 +438,7 @@ onUnmounted(() => {
 
 .main-content {
   padding: var(--spacing-2xl) 0;
+  padding-bottom: 150px; /* Adjust based on content-controls height */
 }
 
 .page-header {
@@ -406,11 +464,18 @@ onUnmounted(() => {
 }
 
 .content-controls {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--spacing-lg);
-  margin-bottom: var(--spacing-2xl);
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+  background: var(--color-bg-card);
+  border-top: 1px solid var(--color-border);
+  z-index: 999;
 }
 
 .view-mode-toggle {
@@ -433,6 +498,13 @@ onUnmounted(() => {
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: var(--spacing-xl);
   margin-bottom: var(--spacing-2xl);
+}
+
+@media (max-width: 640px) {
+  .words-grid {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: var(--spacing-lg);
+  }
 }
 
 .pagination {
@@ -458,15 +530,26 @@ onUnmounted(() => {
   text-align: center;
 }
 
-.learning-header {
+.learning-header.compact {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
   gap: var(--spacing-lg);
-  margin-bottom: var(--spacing-2xl);
+  margin-bottom: var(--spacing-lg);
   background: var(--color-bg-card);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
-  padding: var(--spacing-xl);
+  padding: var(--spacing-md) var(--spacing-lg);
+}
+
+.learning-header .progress-info {
+  flex-grow: 1;
+}
+
+.learning-header .current-word {
+  font-size: 0.875rem;
+  margin-bottom: var(--spacing-xs);
 }
 
 .learning-desc {
@@ -537,9 +620,15 @@ onUnmounted(() => {
 
 .learning-controls {
   display: flex;
-  justify-content: center;
-  gap: var(--spacing-lg);
+  justify-content: space-around;
+  gap: var(--spacing-sm);
   margin-bottom: var(--spacing-xl);
+}
+
+.learning-controls .btn {
+  flex: 1;
+  padding: var(--spacing-sm) var(--spacing-md); /* Smaller padding */
+  font-size: 0.875rem; /* Smaller font size */
 }
 
 .auto-advance-progress {
@@ -608,21 +697,44 @@ onUnmounted(() => {
     padding: var(--spacing-sm) var(--spacing-md);
     font-size: 0.875rem;
   }
-  
-  .learning-controls {
+
+  .learning-container {
+    display: flex;
     flex-direction: column;
-    gap: var(--spacing-md);
+    height: calc(100vh - 150px); /* Adjust based on header height */
   }
-  
-  .learning-controls .btn {
-    width: 100%;
-    max-width: 200px;
-    margin: 0 auto;
+
+  .learning-header {
+    flex-shrink: 0;
   }
-  
+
+  .single-word-card {
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: var(--spacing-md);
+    min-height: 0; /* Prevent flexbox overflow */
+  }
+
   .single-word-card :deep(.word-card) {
     transform: none;
     max-width: none;
+    width: 100%;
+    height: 100%;
+  }
+  
+  .learning-controls {
+    flex-shrink: 0;
+    display: flex;
+    justify-content: space-around;
+    gap: var(--spacing-sm);
+  }
+  
+  .learning-controls .btn {
+    flex: 1;
+    padding: var(--spacing-sm) var(--spacing-md); /* Smaller padding */
+    font-size: 0.875rem; /* Smaller font size */
   }
   
   .auto-advance-progress {

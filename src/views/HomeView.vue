@@ -422,34 +422,51 @@ const features = computed(() => [
 }
 
 @media (max-width: 768px) {
+  .hero-section {
+    min-height: 60vh;
+  }
+
   .hero-content-wrapper {
     grid-template-columns: 1fr;
     gap: var(--spacing-xl);
     text-align: center;
-    padding: var(--spacing-2xl) 0;
+    padding: var(--spacing-xl) 0;
   }
   
   .hero-title {
-    font-size: 2.5rem;
+    font-size: 2rem;
   }
   
   .hero-description {
-    font-size: 1.125rem;
+    font-size: 1rem;
   }
   
   .hero-actions {
     flex-direction: column;
     align-items: center;
   }
+
+  .hero-actions .btn {
+    width: 100%;
+    max-width: 250px;
+  }
   
   .floating-cards {
-    height: 200px;
+    height: 150px;
     order: -1;
   }
   
   .floating-card {
-    width: 80px;
-    height: 80px;
+    width: 70px;
+    height: 70px;
+  }
+  
+  .features-section {
+    padding: var(--spacing-xl) 0;
+  }
+  
+  .section-title {
+    font-size: 2rem;
   }
   
   .features-grid {
@@ -459,6 +476,10 @@ const features = computed(() => [
   
   .feature-link {
     padding: var(--spacing-xl);
+  }
+  
+  .stats-section {
+    padding: var(--spacing-xl) 0;
   }
   
   .stats-grid {

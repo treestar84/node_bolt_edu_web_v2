@@ -205,6 +205,25 @@ const toggleLanguage = () => {
   gap: var(--spacing-sm);
 }
 
+@media (max-width: 1024px) {
+  .nav-content {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .nav-menu {
+    order: 3;
+    width: 100%;
+    justify-content: center;
+    margin-top: var(--spacing-md);
+  }
+  .nav-brand {
+    order: 1;
+  }
+  .nav-controls {
+    order: 2;
+  }
+}
+
 @media (max-width: 768px) {
   .nav-content {
     flex-direction: column;
@@ -214,6 +233,7 @@ const toggleLanguage = () => {
   .nav-menu {
     order: 2;
     width: 100%;
+    flex-wrap: wrap;
   }
   
   .nav-controls {
