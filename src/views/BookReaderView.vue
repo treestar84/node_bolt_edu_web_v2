@@ -119,7 +119,7 @@ import { useFileUpload } from '@/composables/useFileUpload';
 const route = useRoute();
 const router = useRouter();
 const store = useAppStore();
-const { isPlaying, playAudio } = useAudio();
+const { isPlaying, playAudio, stopAudio } = useAudio();
 const { getUploadedFileUrl } = useFileUpload();
 
 const currentPageIndex = ref(0);
@@ -172,7 +172,6 @@ const onImageError = (event: Event) => {
 };
 
 const playPageAudio = async () => {
-  stopAudio(); // Stop any currently playing audio first
   stopAudio(); // Stop any currently playing audio first
   if (currentPage.value && currentPage.value.audioUrl) {
     try {
@@ -247,10 +246,10 @@ const toggleAutoPlay = () => {
 // Watch for page changes
 watch(currentPageIndex, () => {
   clearAutoPlayTimers();
-  // Automatic audio playback removed to comply with autoplay policies
-  // setTimeout(() => {
-  //   playPageAudio();
-  // }, 500);
+    // Automatic audio playback removed to comply with autoplay policies
+  setTimeout(() => {
+    playPageAudio();
+  }, 500);
 });
 
 onMounted(async () => {
@@ -258,10 +257,10 @@ onMounted(async () => {
   if (store.currentBooks.length === 0) {
     await store.loadBooks();
   }
-  // Automatic audio playback removed to comply with autoplay policies
-  // setTimeout(() => {
-  //   playPageAudio();
-  // }, 1000);
+    // Automatic audio playback removed to comply with autoplay policies
+  setTimeout(() => {
+    playPageAudio();
+  }, 1000);
 });
 
 onUnmounted(() => {
