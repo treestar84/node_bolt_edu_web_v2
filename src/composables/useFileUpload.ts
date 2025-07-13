@@ -1,5 +1,11 @@
 import { ref } from 'vue';
 
+export interface ImageDimensions {
+  width: number;
+  height: number;
+  aspectRatio: number;
+}
+
 export function useFileUpload() {
   const isUploading = ref(false);
   const uploadProgress = ref(0);
@@ -54,6 +60,105 @@ export function useFileUpload() {
     return null;
   };
 
+  // 이미지 크기 추출 함수
+  const getImageDimensions = (file: File): Promise<ImageDimensions> => {
+    return new Promise((resolve, reject) => {
+      if (!file.type.startsWith('image/')) {
+        reject(new Error('Not an image file'));
+        return;
+      }
+
+      const img = new Image();
+      const url = URL.createObjectURL(file);
+
+      img.onload = () => {
+        const dimensions: ImageDimensions = {
+          width: img.naturalWidth,
+          height: img.naturalHeight,
+          aspectRatio: img.naturalWidth / img.naturalHeight
+        };
+        
+        URL.revokeObjectURL(url);
+        resolve(dimensions);
+      };
+
+      img.onerror = () => {
+        URL.revokeObjectURL(url);
+        reject(new Error('Failed to load image'));
+      };
+
+      img.src = url;
+    });
+  };
+
+  // 향상된 업로드 함수 (이미지 크기 정보 포함)
+  const uploadFileWithDimensions = async (
+    file: File, 
+    type: 'image' | 'audio'
+  ): Promise<{ url: string; dimensions?: ImageDimensions }> => {
+    try {
+      isUploading.value = true;
+      uploadProgress.value = 0;
+
+      let dimensions: ImageDimensions | undefined;
+      
+      // 이미지인 경우 크기 정보 추출
+      if (type === 'image') {
+        try {
+          dimensions = await getImageDimensions(file);
+          console.log('🖼️ Image dimensions extracted:', dimensions);
+        } catch (error) {
+          console.warn('Failed to extract image dimensions:', error);
+        }
+      }
+
+      const formData = new FormData();
+      formData.append(type, file);
+      
+      // 이미지 크기 정보도 함께 전송
+      if (dimensions) {
+        formData.append('imageWidth', dimensions.width.toString());
+        formData.append('imageHeight', dimensions.height.toString());
+        formData.append('imageAspectRatio', dimensions.aspectRatio.toString());
+      }
+
+      const endpoint = type === 'image' ? '/api/upload/image' : '/api/upload/audio';
+
+      // 업로드 진행률 시뮬레이션
+      const progressInterval = setInterval(() => {
+        uploadProgress.value += 10;
+        if (uploadProgress.value >= 90) {
+          clearInterval(progressInterval);
+        }
+      }, 100);
+
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        body: formData,
+      });
+
+      clearInterval(progressInterval);
+      uploadProgress.value = 100;
+
+      if (!response.ok) {
+        throw new Error(`Upload failed: ${response.status} ${response.statusText}`);
+      }
+
+      const result = await response.json();
+      if (result.success && result.data?.url) {
+        return { 
+          url: result.data.url,
+          dimensions
+        };
+      } else {
+        throw new Error(result.message || 'Upload failed');
+      }
+    } finally {
+      isUploading.value = false;
+      uploadProgress.value = 0;
+    }
+  };
+
   const validateFile = (file: File, type: 'image' | 'audio'): { valid: boolean; error?: string } => {
     const maxSize = 10 * 1024 * 1024; // 10MB
     if (file.size > maxSize) {
@@ -77,6 +182,8 @@ export function useFileUpload() {
     isUploading,
     uploadProgress,
     uploadFile,
+    uploadFileWithDimensions,
+    getImageDimensions,
     getUploadedFileUrl,
     validateFile
   };

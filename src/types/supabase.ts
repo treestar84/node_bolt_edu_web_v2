@@ -49,6 +49,9 @@ export interface Database {
           max_age: number;
           owner_type: 'global' | 'user';
           owner_id: string | null;
+          image_width: number | null;
+          image_height: number | null;
+          image_aspect_ratio: number | null;
           created_at: string;
           updated_at: string;
         };
@@ -64,6 +67,9 @@ export interface Database {
           max_age?: number;
           owner_type?: 'global' | 'user';
           owner_id?: string | null;
+          image_width?: number | null;
+          image_height?: number | null;
+          image_aspect_ratio?: number | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -79,6 +85,9 @@ export interface Database {
           max_age?: number;
           owner_type?: 'global' | 'user';
           owner_id?: string | null;
+          image_width?: number | null;
+          image_height?: number | null;
+          image_aspect_ratio?: number | null;
           created_at?: string;
           updated_at?: string;
         };

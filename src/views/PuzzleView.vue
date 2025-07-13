@@ -29,7 +29,15 @@
               </div>
               <div class="option-info">
                 <h3 class="option-name">{{ getCurrentName(option) }}</h3>
-                <div class="difficulty-badge">{{ puzzleDifficulty }}조각</div>
+                <div class="difficulty-info">
+                  <div class="difficulty-badge">
+                    {{ getPuzzlePieceCount(option) }}조각
+                  </div>
+                  <div v-if="option.imageAspectRatio" class="aspect-ratio-info">
+                    {{ option.imageWidth }}×{{ option.imageHeight }}
+                    ({{ option.imageAspectRatio.toFixed(2) }})
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -73,7 +81,11 @@
               <div 
                 class="puzzle-board" 
                 ref="puzzleBoard"
-                :class="{ 'grid-3x3': puzzleDifficulty === '3x3' }"
+                :style="{
+                  gridTemplateColumns: `repeat(${gridCols}, 1fr)`,
+                  gridTemplateRows: `repeat(${gridRows}, 1fr)`,
+                  aspectRatio: puzzleAspectRatio
+                }"
               >
                 <div 
                   v-for="(slot, index) in puzzleSlots" 
@@ -85,14 +97,10 @@
                   @dragenter.prevent
                 >
                   <div v-if="slot.filled && slot.piecePosition !== undefined" class="placed-piece">
-                    <div class="placed-piece-image-container">
-                      <img 
-                        :src="getImageUrl(selectedPuzzle!.imageUrl)" 
-                        :alt="`조각 ${slot.piecePosition + 1}`"
-                        :style="getPieceImageStyle(slot.piecePosition)"
-                        class="placed-piece-image"
-                      />
-                    </div>
+                    <div 
+                      class="placed-piece-image"
+                      :style="getPieceImageStyle(slot.piecePosition)"
+                    ></div>
                   </div>
                   <div v-else class="empty-slot">
                     {{ index + 1 }}
@@ -117,12 +125,11 @@
                   @touchend="handleTouchEnd"
                 >
                   <div class="piece-image-container">
-                    <img 
-                      :src="getImageUrl(selectedPuzzle!.imageUrl)" 
-                      :alt="`조각 ${piece.correctPosition + 1}`"
+                    <div 
                       :style="getPieceImageStyle(piece.correctPosition)"
                       class="piece-image"
-                    />
+                      :title="`조각 ${piece.correctPosition + 1}`"
+                    ></div>
                   </div>
                   <div class="piece-number">{{ piece.correctPosition + 1 }}</div>
                 </div>
@@ -223,23 +230,83 @@ const touchOffset = ref({ x: 0, y: 0 });
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
 
 const puzzleOptions = computed(() => {
-  const words = store.currentWords.filter(w => w.imageUrl);
+  const words = store.currentWords.filter(w => {
+    if (!w.imageUrl) return false;
+    
+    // 이미지 크기 정보가 있다면 최소 크기 확인
+    if (w.imageWidth && w.imageHeight) {
+      const minSize = 300; // 최소 300px
+      const minPixels = 90000; // 최소 픽셀 수 (300x300)
+      
+      // 너무 작은 이미지 제외
+      if (w.imageWidth < minSize || w.imageHeight < minSize) {
+        console.log(`🚫 Image too small for puzzle: ${w.name} (${w.imageWidth}x${w.imageHeight})`);
+        return false;
+      }
+      
+      // 총 픽셀 수가 너무 적은 이미지 제외
+      if (w.imageWidth * w.imageHeight < minPixels) {
+        console.log(`🚫 Image resolution too low for puzzle: ${w.name} (${w.imageWidth * w.imageHeight} pixels)`);
+        return false;
+      }
+    }
+    
+    return true;
+  });
+  
   return words.sort(() => Math.random() - 0.5).slice(0, 3);
 });
 
+// 이미지 비율에 따른 최적 퍼즐 레이아웃 계산
+const optimalPuzzleLayout = computed(() => {
+  if (!selectedPuzzle.value?.imageAspectRatio) {
+    // 기본 레이아웃
+    return puzzleDifficulty.value === '3x2' ? { cols: 3, rows: 2 } : { cols: 3, rows: 3 };
+  }
+
+  const aspectRatio = selectedPuzzle.value.imageAspectRatio;
+  
+  if (puzzleDifficulty.value === '3x2') {
+    // 쉬운 난이도: 6조각
+    if (aspectRatio > 1.4) {
+      return { cols: 3, rows: 2 }; // 가로형
+    } else if (aspectRatio < 0.7) {
+      return { cols: 2, rows: 3 }; // 세로형
+    } else {
+      return { cols: 3, rows: 2 }; // 기본
+    }
+  } else {
+    // 보통 난이도: 9조각
+    if (aspectRatio > 1.4) {
+      return { cols: 4, rows: 2 }; // 가로형 (8조각)
+    } else if (aspectRatio < 0.7) {
+      return { cols: 2, rows: 4 }; // 세로형 (8조각)
+    } else {
+      return { cols: 3, rows: 3 }; // 정사각형
+    }
+  }
+});
+
 const totalPieces = computed(() => {
-  return puzzleDifficulty.value === '3x2' ? 6 : 9;
+  const layout = optimalPuzzleLayout.value;
+  return layout.cols * layout.rows;
 });
 
 const gridCols = computed(() => {
-  return puzzleDifficulty.value === '3x2' ? 3 : 3;
+  return optimalPuzzleLayout.value.cols;
 });
 
 const gridRows = computed(() => {
-  return puzzleDifficulty.value === '3x2' ? 2 : 3;
+  return optimalPuzzleLayout.value.rows;
 });
 
 const puzzleAspectRatio = computed(() => {
+  // 이미지 크기 정보가 있다면 실제 비율 사용, 없다면 기본값
+  if (selectedPuzzle.value?.imageAspectRatio) {
+    return selectedPuzzle.value.imageAspectRatio.toString();
+  }
+  
+  // 기본값: 난이도에 따른 비율
   return puzzleDifficulty.value === '3x2' ? '3 / 2' : '1 / 1';
 });
 
@@ -262,8 +329,36 @@ const getCurrentName = (word: WordItem): string => {
   return store.currentLanguage === 'ko' ? word.name : word.nameEn;
 };
 
+// 특정 이미지에 대한 퍼즐 조각 수 계산
+const getPuzzlePieceCount = (word: WordItem): number => {
+  if (!word.imageAspectRatio) {
+    return puzzleDifficulty.value === '3x2' ? 6 : 9;
+  }
+
+  const aspectRatio = word.imageAspectRatio;
+  
+  if (puzzleDifficulty.value === '3x2') {
+    if (aspectRatio > 1.4) {
+      return 6; // 3×2
+    } else if (aspectRatio < 0.7) {
+      return 6; // 2×3
+    } else {
+      return 6; // 3×2
+    }
+  } else {
+    if (aspectRatio > 1.4) {
+      return 8; // 4×2
+    } else if (aspectRatio < 0.7) {
+      return 8; // 2×4
+    } else {
+      return 9; // 3×3
+    }
+  }
+};
 
 
+
+// 검증된 CSS background-position 방식으로 퍼즐 조각 계산
 const getPieceImageStyle = (pieceIndex: number) => {
   const cols = gridCols.value;
   const rows = gridRows.value;
@@ -271,10 +366,20 @@ const getPieceImageStyle = (pieceIndex: number) => {
   const col = pieceIndex % cols;
   const row = Math.floor(pieceIndex / cols);
   
+  // CSS-Tricks에서 검증된 공식 사용
+  // background-position: (x / (cols - 1)) * 100%, (y / (rows - 1)) * 100%
+  // background-size: cols * 100%, rows * 100%
+  
+  const xPercent = cols > 1 ? (col / (cols - 1)) * 100 : 0;
+  const yPercent = rows > 1 ? (row / (rows - 1)) * 100 : 0;
+  
   return {
-    width: `${cols * 100}%`,
-    height: `${rows * 100}%`,
-    objectPosition: `-${col * 100}% -${row * 100}%`,
+    width: '100%',
+    height: '100%',
+    backgroundImage: `url(${getImageUrl(selectedPuzzle.value!.imageUrl)})`,
+    backgroundSize: `${cols * 100}% ${rows * 100}%`,
+    backgroundPosition: `${xPercent}% ${yPercent}%`,
+    backgroundRepeat: 'no-repeat',
     pointerEvents: 'none' as const,
     userSelect: 'none' as const,
     WebkitUserDrag: 'none' as const,
@@ -744,6 +849,13 @@ watch(puzzleDifficulty, () => {
   margin-bottom: var(--spacing-sm);
 }
 
+.difficulty-info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  align-items: center;
+}
+
 .difficulty-badge {
   background: var(--color-bg-secondary);
   color: var(--color-text-secondary);
@@ -751,6 +863,16 @@ watch(puzzleDifficulty, () => {
   border-radius: var(--radius-sm);
   font-size: 0.875rem;
   font-weight: 500;
+}
+
+.aspect-ratio-info {
+  background: var(--color-primary);
+  color: white;
+  padding: 2px var(--spacing-xs);
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-weight: 600;
+  opacity: 0.9;
 }
 
 .difficulty-selector {
@@ -814,21 +936,14 @@ watch(puzzleDifficulty, () => {
 
 .puzzle-board {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  grid-template-rows: repeat(2, 1fr);
   gap: 3px;
   background: var(--color-bg-card);
   border: 2px solid var(--color-border);
   border-radius: var(--radius-lg);
   padding: var(--spacing-lg);
   width: 600px;
-  aspect-ratio: 3 / 2; /* Maintain 3:2 aspect ratio for 3x2 grid */
   box-shadow: var(--shadow-lg);
-}
-
-.puzzle-board.grid-3x3 {
-  grid-template-rows: repeat(3, 1fr);
-  aspect-ratio: 1 / 1; /* Maintain 1:1 aspect ratio for 3x3 grid */
+  /* Grid layout and aspect ratio are set dynamically via :style */
 }
 
 .puzzle-slot {

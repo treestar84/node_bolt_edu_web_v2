@@ -93,18 +93,7 @@
         </div>
       </div>
 
-      <!-- Auto-play progress indicator -->
-      <div v-if="autoPlayEnabled && autoPlayProgress > 0" class="auto-play-progress">
-        <div class="progress-bar">
-          <div 
-            class="progress-fill" 
-            :style="{ width: `${autoPlayProgress}%` }"
-          ></div>
-        </div>
-        <div class="progress-text">
-          {{ Math.ceil((100 - autoPlayProgress) / 100 * autoPlayDelay / 1000) }}초 후 다음 페이지
-        </div>
-      </div>
+      
     </div>
   </div>
 </template>
@@ -124,10 +113,7 @@ const { getUploadedFileUrl } = useFileUpload();
 
 const currentPageIndex = ref(0);
 const autoPlayEnabled = ref(true);
-const autoPlayProgress = ref(0);
-const autoPlayDelay = ref(7000); // 7 seconds default delay
-const autoPlayTimer = ref<NodeJS.Timeout | null>(null);
-const progressTimer = ref<NodeJS.Timeout | null>(null);
+
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
 
@@ -147,20 +133,20 @@ const goBack = () => {
 
 const previousPage = () => {
   if (currentPageIndex.value > 0) {
-    clearAutoPlayTimers();
+    stopAudio();
     currentPageIndex.value--;
   }
 };
 
 const nextPage = () => {
   if (book.value && currentPageIndex.value < book.value.pages.length - 1) {
-    clearAutoPlayTimers();
+    stopAudio();
     currentPageIndex.value++;
   }
 };
 
 const goToPage = (index: number) => {
-  clearAutoPlayTimers();
+  stopAudio();
   currentPageIndex.value = index;
 };
 
@@ -177,94 +163,55 @@ const playPageAudio = async () => {
     try {
       const audioUrl = store.getImageUrl(currentPage.value.audioUrl);
       if (!audioUrl) return;
-      const duration = await playAudio(audioUrl);
-      
-      if (autoPlayEnabled.value) {
-        // Calculate delay: audio duration + 2 seconds
-        const additionalDelay = 2000; // 2 seconds
-        autoPlayDelay.value = (duration * 1000) + additionalDelay;
-        startAutoPlayTimer();
-      }
+
+      const onEnded = () => {
+        if (autoPlayEnabled.value) {
+          nextPage();
+        }
+      };
+
+      await playAudio(audioUrl, { onEnded });
+
     } catch (error) {
       console.warn('Audio playback failed:', error);
+      // If audio fails, and auto-play is on, still try to advance after a short delay
       if (autoPlayEnabled.value) {
-        // Use default delay if audio fails
-        autoPlayDelay.value = 2000;
-        startAutoPlayTimer();
+        setTimeout(() => {
+          nextPage();
+        }, 2000); // Fallback delay
       }
     }
   }
-};
-
-const startAutoPlayTimer = () => {
-  if (!autoPlayEnabled.value || !book.value) return;
-  
-  clearAutoPlayTimers();
-  autoPlayProgress.value = 0;
-  
-  // Progress animation
-  const progressInterval = 50; // Update every 50ms
-  const progressStep = (progressInterval / autoPlayDelay.value) * 100;
-  
-  progressTimer.value = setInterval(() => {
-    autoPlayProgress.value += progressStep;
-    if (autoPlayProgress.value >= 100) {
-      clearInterval(progressTimer.value!);
-    }
-  }, progressInterval);
-  
-  // Auto advance to next page
-  autoPlayTimer.value = setTimeout(() => {
-    if (currentPageIndex.value < book.value!.pages.length - 1) {
-      currentPageIndex.value++;
-    } else {
-      // End of book, stop auto-play
-      autoPlayEnabled.value = false;
-      autoPlayProgress.value = 0;
-    }
-  }, autoPlayDelay.value);
-};
-
-const clearAutoPlayTimers = () => {
-  if (autoPlayTimer.value) {
-    clearTimeout(autoPlayTimer.value);
-    autoPlayTimer.value = null;
-  }
-  if (progressTimer.value) {
-    clearInterval(progressTimer.value);
-    progressTimer.value = null;
-  }
-  autoPlayProgress.value = 0;
 };
 
 const toggleAutoPlay = () => {
-  if (!autoPlayEnabled.value) {
-    clearAutoPlayTimers();
-  }
+  // Now this function does nothing, but we keep it if you want to add logic later.
+  // For example, you might want to save the user's preference.
 };
 
-// Watch for page changes
-watch(currentPageIndex, () => {
-  clearAutoPlayTimers();
-    // Automatic audio playback removed to comply with autoplay policies
-  setTimeout(() => {
-    playPageAudio();
-  }, 500);
+// Watch for page changes to play audio automatically
+watch(currentPageIndex, (newIndex, oldIndex) => {
+  if (newIndex !== oldIndex) {
+    // A small delay can help ensure a smoother transition and that the new page is rendered.
+    setTimeout(() => {
+      playPageAudio();
+    }, 100);
+  }
 });
 
 onMounted(async () => {
-  // 책 데이터가 없으면 반드시 로드
+  // Load books if they aren't already in the store
   if (store.currentBooks.length === 0) {
     await store.loadBooks();
   }
-    // Automatic audio playback removed to comply with autoplay policies
+  // Play audio for the initial page
   setTimeout(() => {
     playPageAudio();
-  }, 1000);
+  }, 500); // A slightly longer delay on initial load might be needed
 });
 
 onUnmounted(() => {
-  clearAutoPlayTimers();
+  stopAudio(); // Ensure audio stops when the component is left
 });
 </script>
 

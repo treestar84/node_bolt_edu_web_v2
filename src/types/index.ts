@@ -10,6 +10,9 @@ export interface WordItem {
   maxAge: number;
   ownerType: 'global' | 'user';
   ownerId?: string;
+  imageWidth?: number;
+  imageHeight?: number;
+  imageAspectRatio?: number;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -21,6 +24,9 @@ export interface BookPage {
   imageUrl: string;
   audioUrl: string;
   textContent?: string;
+  imageWidth?: number;
+  imageHeight?: number;
+  imageAspectRatio?: number;
 }
 
 export interface Book {
@@ -32,6 +38,9 @@ export interface Book {
   ownerType: 'global' | 'user';
   ownerId?: string;
   pages: BookPage[];
+  coverImageWidth?: number;
+  coverImageHeight?: number;
+  coverImageAspectRatio?: number;
   createdAt?: string;
   updatedAt?: string;
 }

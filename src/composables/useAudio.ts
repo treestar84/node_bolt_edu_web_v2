@@ -5,13 +5,16 @@ export function useAudio() {
   const currentAudio = ref<HTMLAudioElement | null>(null);
   const audioDuration = ref(0);
 
-  const playAudio = (audioUrl: string, fallbackText?: string): Promise<number> => {
+  const playAudio = (
+    audioUrl: string,
+    options?: { fallbackText?: string; onEnded?: () => void }
+  ): Promise<number> => {
     return new Promise((resolve, reject) => {
       let fallbackHasBeenCalled = false;
       const callFallbackOnce = () => {
         if (!fallbackHasBeenCalled) {
           fallbackHasBeenCalled = true;
-          handleAudioFallback(audioUrl, fallbackText);
+          handleAudioFallback(audioUrl, options?.fallbackText);
         }
       };
 
@@ -43,6 +46,9 @@ export function useAudio() {
       audio.addEventListener('ended', () => {
         isPlaying.value = false;
         currentAudio.value = null;
+        if (options?.onEnded) {
+          options.onEnded();
+        }
         resolve(audioDuration.value || 2);
       });
 
@@ -117,17 +123,43 @@ export function useAudio() {
     if ('speechSynthesis' in window && textToSpeak) {
       const utterance = new SpeechSynthesisUtterance(textToSpeak);
       
-      // Set language based on filename
-      if (/[^a-zA-Z]/.test(textToSpeak)) {
+      // Enhanced language detection and settings
+      const isKorean = /[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/.test(textToSpeak);
+      
+      if (isKorean) {
+        // Korean TTS settings for more natural speech
         utterance.lang = 'ko-KR';
-        utterance.rate = 0.8; // Slower for children
+        utterance.rate = 0.6; // Much slower for Korean children
+        utterance.pitch = 1.1; // Slightly lower pitch for Korean
+        utterance.volume = 0.9;
+        
+        // Try to find Korean voice
+        const voices = speechSynthesis.getVoices();
+        const koreanVoice = voices.find(voice => 
+          voice.lang.startsWith('ko') || 
+          voice.name.includes('Korean') ||
+          voice.name.includes('한국어')
+        );
+        if (koreanVoice) {
+          utterance.voice = koreanVoice;
+        }
       } else {
+        // English TTS settings
         utterance.lang = 'en-US';
         utterance.rate = 0.7;
+        utterance.pitch = 1.2;
+        utterance.volume = 0.8;
+        
+        // Try to find child-friendly English voice
+        const voices = speechSynthesis.getVoices();
+        const englishVoice = voices.find(voice => 
+          voice.lang.startsWith('en') && 
+          (voice.name.includes('Female') || voice.name.includes('Woman'))
+        );
+        if (englishVoice) {
+          utterance.voice = englishVoice;
+        }
       }
-      
-      utterance.volume = 0.8;
-      utterance.pitch = 1.2; // Higher pitch for children
       
       utterance.onstart = () => {
         isPlaying.value = true;
@@ -143,7 +175,16 @@ export function useAudio() {
         currentAudio.value = null;
       };
       
-      speechSynthesis.speak(utterance);
+      // Wait for voices to load before speaking
+      const speakUtterance = () => {
+        speechSynthesis.speak(utterance);
+      };
+      
+      if (speechSynthesis.getVoices().length === 0) {
+        speechSynthesis.addEventListener('voiceschanged', speakUtterance, { once: true });
+      } else {
+        speakUtterance();
+      }
     } else {
       // Fallback: just show visual feedback
       isPlaying.value = true;
