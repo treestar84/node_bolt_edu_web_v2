@@ -725,17 +725,45 @@ onMounted(() => {
   }
 }
 
+/* Tablet optimizations */
+@media (max-width: 1024px) {
+  .quiz-options {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-lg);
+  }
+  
+  .quiz-option {
+    max-width: none;
+  }
+  
+  .quiz-option img {
+    height: 140px;
+  }
+  
+  .option-name {
+    font-size: 1rem;
+  }
+}
+
+/* Mobile optimizations */
 @media (max-width: 768px) {
   .main-content {
-    padding: var(--spacing-md) 0; /* 모바일에서도 상단 패딩 줄임 */
+    padding: var(--spacing-md) 0;
+  }
+  
+  .page-title {
+    font-size: 2rem;
   }
   
   .quiz-stats {
     gap: var(--spacing-md);
+    flex-wrap: wrap;
+    justify-content: center;
   }
   
   .stat {
     padding: var(--spacing-sm) var(--spacing-md);
+    font-size: 0.9rem;
   }
   
   .quiz-options {
@@ -743,8 +771,17 @@ onMounted(() => {
     gap: var(--spacing-md);
   }
   
+  .quiz-option {
+    max-width: none;
+  }
+  
   .quiz-option img {
-    height: 100px;
+    height: 120px;
+  }
+  
+  .option-name {
+    padding: var(--spacing-md);
+    font-size: 1rem;
   }
   
   .start-card {
@@ -754,7 +791,7 @@ onMounted(() => {
   
   .quiz-question {
     padding: var(--spacing-md);
-    margin-top: var(--spacing-sm); /* 모바일에서 더 가깝게 */
+    margin-top: var(--spacing-sm);
   }
   
   .quiz-question h2 {
@@ -764,6 +801,79 @@ onMounted(() => {
   .audio-button {
     padding: var(--spacing-md) var(--spacing-lg);
     font-size: 1rem;
+    min-height: 44px;
+  }
+  
+  .quiz-result {
+    padding: var(--spacing-lg);
+    margin: var(--spacing-md);
+  }
+  
+  .celebration-text {
+    font-size: 3rem;
+  }
+  
+  .result-correct h3,
+  .result-incorrect h3 {
+    font-size: 1.5rem;
+  }
+}
+
+/* Small mobile optimizations */
+@media (max-width: 480px) {
+  .quiz-options {
+    gap: var(--spacing-sm);
+  }
+  
+  .quiz-option img {
+    height: 100px;
+  }
+  
+  .option-name {
+    padding: var(--spacing-sm);
+    font-size: 0.9rem;
+  }
+  
+  .start-card {
+    padding: var(--spacing-lg);
+    margin: 0 var(--spacing-sm);
+  }
+  
+  .audio-button {
+    padding: var(--spacing-sm) var(--spacing-md);
+    font-size: 0.9rem;
+  }
+  
+  .celebration-text {
+    font-size: 2.5rem;
+  }
+}
+
+/* Touch-friendly improvements */
+@media (hover: none) and (pointer: coarse) {
+  .quiz-option {
+    min-height: 44px;
+  }
+  
+  .quiz-option:hover {
+    transform: none;
+  }
+  
+  .quiz-option:active {
+    transform: scale(0.95);
+    transition: transform 0.1s ease;
+  }
+  
+  .audio-button {
+    min-height: 44px;
+  }
+  
+  .audio-button:hover {
+    transform: none;
+  }
+  
+  .audio-button:active {
+    transform: scale(0.95);
   }
 }
 </style>

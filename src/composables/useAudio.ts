@@ -4,209 +4,244 @@ export function useAudio() {
   const isPlaying = ref(false);
   const currentAudio = ref<HTMLAudioElement | null>(null);
   const audioDuration = ref(0);
+  let currentTimeoutId: number | null = null;
 
   const playAudio = (
     audioUrl: string,
-    options?: { fallbackText?: string; onEnded?: () => void }
+    options?: { fallbackText?: string; onEnded?: () => void } | string
   ): Promise<number> => {
     return new Promise((resolve, reject) => {
-      let fallbackHasBeenCalled = false;
-      const callFallbackOnce = () => {
-        if (!fallbackHasBeenCalled) {
-          fallbackHasBeenCalled = true;
-          handleAudioFallback(audioUrl, options?.fallbackText);
-        }
-      };
+      console.log('🎵 Starting audio playback:', audioUrl);
+      
+      // Handle both string and object options for backward compatibility
+      let fallbackText: string | undefined;
+      let onEnded: (() => void) | undefined;
+      
+      if (typeof options === 'string') {
+        fallbackText = options;
+      } else if (options) {
+        fallbackText = options.fallbackText;
+        onEnded = options.onEnded;
+      }
+      
+      // Clear any existing timeout
+      if (currentTimeoutId) {
+        clearTimeout(currentTimeoutId);
+        currentTimeoutId = null;
+      }
 
       // Stop current audio if playing
       if (currentAudio.value) {
         currentAudio.value.pause();
         currentAudio.value.currentTime = 0;
+        currentAudio.value = null;
       }
 
       const audio = new Audio(audioUrl);
       currentAudio.value = audio;
       isPlaying.value = true;
 
-      audio.addEventListener('loadedmetadata', () => {
-        audioDuration.value = audio.duration || 2;
-      });
+      let hasEnded = false;
+      let hasErrored = false;
 
-      audio.play().catch((error) => {
-        if (error.name === 'NotAllowedError') {
-          console.warn('Autoplay was blocked by the browser.');
-          isPlaying.value = false;
-          currentAudio.value = null;
-          return reject(error); // Reject promise to be caught by the component
-        }
-        callFallbackOnce();
-        resolve(2);
-      });
-
-      audio.addEventListener('ended', () => {
+      const handleSuccess = (duration: number) => {
+        if (hasEnded || hasErrored) return;
+        hasEnded = true;
+        
+        console.log('✅ Audio playback completed successfully');
         isPlaying.value = false;
         currentAudio.value = null;
-        if (options?.onEnded) {
-          options.onEnded();
+        
+        if (onEnded) {
+          console.log('🔄 Calling onEnded callback');
+          onEnded();
         }
-        resolve(audioDuration.value || 2);
-      });
+        resolve(duration);
+      };
+
+      const handleError = (errorType: string) => {
+        if (hasEnded || hasErrored) return;
+        hasErrored = true;
+        
+        console.log('❌ Audio playback failed:', errorType);
+        isPlaying.value = false;
+        currentAudio.value = null;
+        
+        // Try TTS fallback
+        tryTTSFallback(audioUrl, fallbackText, onEnded)
+          .then(duration => resolve(duration))
+          .catch(() => {
+            // If TTS also fails, still call onEnded callback
+            console.log('🔄 TTS failed, calling onEnded callback anyway');
+            if (onEnded) {
+              onEnded();
+            }
+            resolve(2);
+          });
+      };
+
+      // Set up event listeners
+      audio.addEventListener('loadedmetadata', () => {
+        audioDuration.value = audio.duration || 2;
+        console.log('📊 Audio duration:', audioDuration.value);
+      }, { once: true });
+
+      audio.addEventListener('ended', () => {
+        console.log('🎵 Audio ended event fired');
+        handleSuccess(audioDuration.value || 2);
+      }, { once: true });
 
       audio.addEventListener('error', (e) => {
-        callFallbackOnce();
-        resolve(2); // Resolve to avoid unhandled promise rejection
-      });
+        console.log('🚨 Audio error event:', e);
+        handleError('error_event');
+      }, { once: true });
+
+      // Safety timeout - if audio doesn't end within expected time + buffer
+      const setupSafetyTimeout = () => {
+        const duration = audioDuration.value || 3; // fallback to 3 seconds
+        const timeoutDuration = (duration + 2) * 1000; // Add 2 second buffer
+        
+        console.log(`⏰ Setting safety timeout for ${timeoutDuration}ms`);
+        currentTimeoutId = setTimeout(() => {
+          console.log('⚠️ Safety timeout triggered - forcing audio end');
+          if (!hasEnded && !hasErrored) {
+            handleSuccess(duration);
+          }
+        }, timeoutDuration);
+      };
+
+      // Start playing
+      audio.play()
+        .then(() => {
+          console.log('▶️ Audio play() succeeded');
+          // Set up safety timeout after play succeeds
+          if (audioDuration.value > 0) {
+            setupSafetyTimeout();
+          } else {
+            // If duration not available yet, wait a bit
+            setTimeout(setupSafetyTimeout, 100);
+          }
+        })
+        .catch((error) => {
+          console.log('🚫 Audio play() failed:', error.name, error.message);
+          if (error.name === 'NotAllowedError') {
+            console.warn('Autoplay was blocked by the browser.');
+            reject(error);
+          } else {
+            handleError('play_failed');
+          }
+        });
     });
   };
 
-  const handleAudioFallback = (audioUrl: string, fallbackText?: string) => {
-    let textToSpeak = fallbackText || '';
-    // Extract word from audio URL for text-to-speech
-    if (!textToSpeak) {
-      const filename = audioUrl.split('/').pop()?.split('.')[0] || '';
-      // Map common audio filenames to Korean/English words
-      const audioMap: Record<string, { ko: string, en: string }> = {
-        'cat-ko': { ko: '고양이', en: 'cat' },
-        'cat-en': { ko: '고양이', en: 'cat' },
-        'dog-ko': { ko: '강아지', en: 'dog' },
-        'dog-en': { ko: '강아지', en: 'dog' },
-        'apple-ko': { ko: '사과', en: 'apple' },
-        'apple-en': { ko: '사과', en: 'apple' },
-        'banana-ko': { ko: '바나나', en: 'banana' },
-        'banana-en': { ko: '바나나', en: 'banana' },
-        'car-ko': { ko: '자동차', en: 'car' },
-        'car-en': { ko: '자동차', en: 'car' },
-        'bus-ko': { ko: '버스', en: 'bus' },
-        'bus-en': { ko: '버스', en: 'bus' },
-        'house-ko': { ko: '집', en: 'house' },
-        'house-en': { ko: '집', en: 'house' },
-        'flower-ko': { ko: '꽃', en: 'flower' },
-        'flower-en': { ko: '꽃', en: 'flower' },
-        'tree-ko': { ko: '나무', en: 'tree' },
-        'tree-en': { ko: '나무', en: 'tree' },
-        'water-ko': { ko: '물', en: 'water' },
-        'water-en': { ko: '물', en: 'water' },
-        'sun-ko': { ko: '해', en: 'sun' },
-        'sun-en': { ko: '해', en: 'sun' },
-        'moon-ko': { ko: '달', en: 'moon' },
-        'moon-en': { ko: '달', en: 'moon' },
-        'book-ko': { ko: '책', en: 'book' },
-        'book-en': { ko: '책', en: 'book' },
-        'ball-ko': { ko: '공', en: 'ball' },
-        'ball-en': { ko: '공', en: 'ball' },
-        'airplane-ko': { ko: '비행기', en: 'airplane' },
-        'airplane-en': { ko: '비행기', en: 'airplane' },
-        'train-ko': { ko: '기차', en: 'train' },
-        'train-en': { ko: '기차', en: 'train' },
-        'hat-ko': { ko: '모자', en: 'hat' },
-        'hat-en': { ko: '모자', en: 'hat' },
-        'shoes-ko': { ko: '신발', en: 'shoes' },
-        'shoes-en': { ko: '신발', en: 'shoes' },
-        'fish-ko': { ko: '물고기', en: 'fish' },
-        'fish-en': { ko: '물고기', en: 'fish' },
-        'bird-ko': { ko: '새', en: 'bird' },
-        'bird-en': { ko: '새', en: 'bird' }
+  const tryTTSFallback = (audioUrl: string, fallbackText?: string, onEnded?: () => void): Promise<number> => {
+    return new Promise((resolve, reject) => {
+      console.log('🗣️ Trying TTS fallback');
+      
+      let textToSpeak = fallbackText || extractTextFromAudioUrl(audioUrl);
+      
+      if (!textToSpeak || !('speechSynthesis' in window)) {
+        console.log('❌ TTS not available or no text');
+        reject(new Error('TTS not available'));
+        return;
+      }
+
+      const utterance = new SpeechSynthesisUtterance(textToSpeak);
+      let hasCompleted = false;
+
+      const handleTTSComplete = () => {
+        if (hasCompleted) return;
+        hasCompleted = true;
+        
+        console.log('✅ TTS completed');
+        isPlaying.value = false;
+        
+        if (onEnded) {
+          console.log('🔄 Calling onEnded callback from TTS');
+          onEnded();
+        }
+        resolve(2);
       };
 
-      // Determine language and text
-      if (filename.includes('-ko')) {
-        textToSpeak = audioMap[filename]?.ko || filename.replace('-ko', '');
-      } else if (filename.includes('-en')) {
-        textToSpeak = audioMap[filename]?.en || filename.replace('-en', '');
-      } else {
-        // For book audio or other content
-        textToSpeak = '내용을 읽어드립니다';
-      }
-    }
-
-    // Use Web Speech API for text-to-speech
-    if ('speechSynthesis' in window && textToSpeak) {
-      const utterance = new SpeechSynthesisUtterance(textToSpeak);
-      
-      // Enhanced language detection and settings
+      // Configure TTS
       const isKorean = /[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/.test(textToSpeak);
       
       if (isKorean) {
-        // Korean TTS settings for more natural speech
         utterance.lang = 'ko-KR';
-        utterance.rate = 0.6; // Much slower for Korean children
-        utterance.pitch = 1.1; // Slightly lower pitch for Korean
-        utterance.volume = 0.9;
-        
-        // Try to find Korean voice
-        const voices = speechSynthesis.getVoices();
-        const koreanVoice = voices.find(voice => 
-          voice.lang.startsWith('ko') || 
-          voice.name.includes('Korean') ||
-          voice.name.includes('한국어')
-        );
-        if (koreanVoice) {
-          utterance.voice = koreanVoice;
-        }
-      } else {
-        // English TTS settings
-        utterance.lang = 'en-US';
         utterance.rate = 0.7;
+        utterance.pitch = 1.1;
+      } else {
+        utterance.lang = 'en-US';
+        utterance.rate = 0.8;
         utterance.pitch = 1.2;
-        utterance.volume = 0.8;
-        
-        // Try to find child-friendly English voice
-        const voices = speechSynthesis.getVoices();
-        const englishVoice = voices.find(voice => 
-          voice.lang.startsWith('en') && 
-          (voice.name.includes('Female') || voice.name.includes('Woman'))
-        );
-        if (englishVoice) {
-          utterance.voice = englishVoice;
-        }
       }
       
+      utterance.volume = 0.8;
+
       utterance.onstart = () => {
+        console.log('🗣️ TTS started');
         isPlaying.value = true;
       };
-      
+
       utterance.onend = () => {
-        isPlaying.value = false;
-        currentAudio.value = null;
+        console.log('🗣️ TTS ended');
+        handleTTSComplete();
       };
-      
-      utterance.onerror = () => {
-        isPlaying.value = false;
-        currentAudio.value = null;
+
+      utterance.onerror = (error) => {
+        console.log('🚨 TTS error:', error);
+        handleTTSComplete(); // Still complete even on error
       };
-      
-      // Wait for voices to load before speaking
-      const speakUtterance = () => {
-        speechSynthesis.speak(utterance);
-      };
-      
-      if (speechSynthesis.getVoices().length === 0) {
-        speechSynthesis.addEventListener('voiceschanged', speakUtterance, { once: true });
-      } else {
-        speakUtterance();
-      }
-    } else {
-      // Fallback: just show visual feedback
-      isPlaying.value = true;
+
+      // Safety timeout for TTS (max 10 seconds)
       setTimeout(() => {
-        isPlaying.value = false;
-        currentAudio.value = null;
-      }, 1500);
-    }
+        if (!hasCompleted) {
+          console.log('⚠️ TTS safety timeout triggered');
+          speechSynthesis.cancel();
+          handleTTSComplete();
+        }
+      }, 10000);
+
+      speechSynthesis.speak(utterance);
+    });
+  };
+
+  const extractTextFromAudioUrl = (audioUrl: string): string => {
+    const filename = audioUrl.split('/').pop()?.split('.')[0] || '';
+    
+    // Simple mapping for common words
+    const audioMap: Record<string, string> = {
+      'cat-ko': '고양이', 'cat-en': 'cat',
+      'dog-ko': '강아지', 'dog-en': 'dog',
+      'apple-ko': '사과', 'apple-en': 'apple',
+      'book-ko': '책', 'book-en': 'book'
+    };
+
+    return audioMap[filename] || '내용을 읽어드립니다';
   };
 
   const stopAudio = () => {
+    console.log('🛑 Stopping audio');
+    
+    // Clear any pending timeout
+    if (currentTimeoutId) {
+      clearTimeout(currentTimeoutId);
+      currentTimeoutId = null;
+    }
+    
+    // Stop HTML audio
     if (currentAudio.value) {
       currentAudio.value.pause();
       currentAudio.value.currentTime = 0;
-      isPlaying.value = false;
       currentAudio.value = null;
     }
     
-    // Stop speech synthesis if active
+    // Stop speech synthesis
     if ('speechSynthesis' in window) {
       speechSynthesis.cancel();
     }
+    
+    isPlaying.value = false;
   };
 
   return {
