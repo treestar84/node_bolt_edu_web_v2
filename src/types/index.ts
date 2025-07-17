@@ -107,6 +107,31 @@ export interface ApiKey {
   keyPreview?: string;
 }
 
+export interface Like {
+  id: string;
+  userId: string;
+  contentType: 'word' | 'book' | 'quiz' | 'puzzle';
+  contentId: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface LikeRankingItem {
+  contentId: string;
+  likeCount: number;
+  latestLike: string;
+  rankPosition: number;
+}
+
+export interface LikeStatistics {
+  contentType: string;
+  totalLikes: number;
+  uniqueUsers: number;
+  avgLikesPerContent: number;
+}
+
 export type Language = 'ko' | 'en';
 export type GameMode = 'words' | 'quiz' | 'books' | 'puzzle';
 export type UserType = 'teacher' | 'director' | 'parent';
+export type ContentType = 'word' | 'book' | 'quiz' | 'puzzle';
+export type LikePeriod = 'all' | 'monthly' | 'weekly';

@@ -83,11 +83,12 @@ export const useContentStore = defineStore('content', () => {
 
       console.log('🔄 Loading personalized content for user:', authStore.user.id, 'age:', authStore.childAge);
 
-      // 개인화된 데이터 로드 (공용 + 개인)
+      // 단어는 개인화된 데이터 로드 (나이 제한 적용)
       await appStore.loadPersonalizedData(authStore.user.id, authStore.childAge);
-      
-      // App store에서 로드된 데이터 가져오기
       words.value = appStore.currentWords;
+      
+      // 책은 나이 제한 없이 모든 책을 로드
+      await appStore.loadBooks();
       books.value = appStore.currentBooks;
 
       // 뱃지 및 사용자 뱃지 로드 - FIXED: 강화된 로딩 로직

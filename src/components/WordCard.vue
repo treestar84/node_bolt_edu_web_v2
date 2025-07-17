@@ -1,14 +1,24 @@
 <template>
-  <div class="word-card" @click="playWordAudio">
-    <div class="card-image">
+  <div class="word-card">
+    <div class="card-image" @click="playWordAudio">
       <img :src="getImageUrl(word.imageUrl)" :alt="currentName" />
       <div class="play-overlay" :class="{ playing: isPlaying }">
         <span class="play-icon">{{ isPlaying ? '🔊' : '🔈' }}</span>
       </div>
     </div>
     <div class="card-content">
-      <h3 class="word-name">{{ currentName }}</h3>
-      <span class="word-category">{{$t('categories.'+word.category)}}</span>
+      <div class="word-info" @click="playWordAudio">
+        <h3 class="word-name">{{ currentName }}</h3>
+        <span class="word-category">{{$t('categories.'+word.category)}}</span>
+      </div>
+      <div class="card-actions" @click.stop>
+        <LikeButton 
+          content-type="word" 
+          :content-id="word.id"
+          :show-count="true"
+          @liked="onLiked"
+        />
+      </div>
     </div>
   </div>
 </template>
@@ -19,6 +29,7 @@ import type { WordItem } from '@/types';
 import { useAppStore } from '@/stores/app';
 import { useAudio } from '@/composables/useAudio';
 import { useFileUpload } from '@/composables/useFileUpload';
+import LikeButton from './LikeButton.vue';
 
 interface Props {
   word: WordItem;
@@ -68,6 +79,10 @@ const playWordAudio = async () => {
     console.warn('Audio playback failed:', error);
     emit('audio-played'); // Still emit for auto-advance
   }
+};
+
+const onLiked = (isLiked: boolean) => {
+  console.log(`Word "${currentName.value}" ${isLiked ? 'liked' : 'unliked'}`);
 };
 
 defineExpose({
@@ -153,8 +168,23 @@ defineExpose({
   flex: 1;
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
+  gap: var(--spacing-sm);
+}
+
+.word-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
   justify-content: center;
   gap: var(--spacing-sm);
+}
+
+.card-actions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: var(--spacing-sm);
 }
 
 .word-name {

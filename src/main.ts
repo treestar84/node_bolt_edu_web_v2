@@ -16,6 +16,7 @@ const messages = {
       achievements: '달성도',
       books: '책',
       badges: '뱃지',
+      favorites: '좋아요',
       login: '로그인',
       logout: '로그아웃',
       mypage: '마이페이지',
@@ -151,6 +152,31 @@ const messages = {
       personal: '개인',
       noData: '등록된 데이터가 없습니다',
       addFirst: '첫 번째 항목을 추가해보세요'
+    },
+    likes: {
+      title: '좋아요',
+      description: '인기 있는 콘텐츠를 확인해보세요',
+      loading: '좋아요 데이터를 불러오는 중...',
+      error: '데이터를 불러올 수 없습니다',
+      retry: '다시 시도',
+      noLikes: '아직 좋아요한 콘텐츠가 없습니다',
+      addLikes: '좋아요를 눌러주세요',
+      myLikes: '내 좋아요',
+      ranking: '좋아요 랭킹',
+      period: {
+        all: '전체',
+        monthly: '월간',
+        weekly: '주간'
+      },
+      contentType: {
+        words: '단어',
+        quiz: '퀴즈', 
+        puzzle: '퍼즐',
+        books: '책'
+      },
+      rank: '{rank}위',
+      likeCount: '{count}개',
+      emptyRanking: '랭킹 데이터가 없습니다'
     }
   },
   en: {
@@ -163,6 +189,7 @@ const messages = {
       achievements: 'Achievements',
       books: 'Books',
       badges: 'Badges',
+      favorites: 'Likes',
       login: 'Login',
       logout: 'Logout',
       mypage: 'My Page',
@@ -298,6 +325,31 @@ const messages = {
       personal: 'Personal',
       noData: 'No data registered',
       addFirst: 'Add the first item'
+    },
+    likes: {
+      title: 'Likes',
+      description: 'Check popular content',
+      loading: 'Loading likes data...',
+      error: 'Unable to load data',
+      retry: 'Retry',
+      noLikes: 'No liked content yet',
+      addLikes: 'Please like some content',
+      myLikes: 'My Likes',
+      ranking: 'Likes Ranking',
+      period: {
+        all: 'All Time',
+        monthly: 'Monthly',
+        weekly: 'Weekly'
+      },
+      contentType: {
+        words: 'Words',
+        quiz: 'Quiz',
+        puzzle: 'Puzzle',
+        books: 'Books'
+      },
+      rank: 'Rank {rank}',
+      likeCount: '{count} likes',
+      emptyRanking: 'No ranking data'
     }
   }
 };

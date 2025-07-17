@@ -50,6 +50,11 @@ const routes = [
     component: () => import('@/views/AchievementsView.vue')
   },
   {
+    path: '/likes',
+    name: 'Likes',
+    component: () => import('@/views/LikesView.vue')
+  },
+  {
     path: '/admin',
     name: 'AdminLogin',
     component: () => import('@/views/admin/AdminLoginView.vue')

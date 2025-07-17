@@ -11,14 +11,13 @@
           </p>
         </div>
 
-        <div v-if="contentStore.books.length > 0" class="books-grid">
+        <div v-if="store.currentBooks.length > 0" class="books-grid">
           <div 
-            v-for="book in contentStore.books" 
+            v-for="book in store.currentBooks" 
             :key="book.id"
             class="book-card fade-in"
-            @click="openBook(book.id)"
           >
-            <div class="book-cover">
+            <div class="book-cover" @click="openBook(book.id)">
               <img :src="getImageUrl(book.coverImage)" :alt="book.title" />
               <div class="play-overlay">
                 <span class="play-icon">📖</span>
@@ -26,9 +25,19 @@
               </div>
             </div>
             <div class="book-info">
-              <h3 class="book-title">{{ book.title }}</h3>
-              <div class="book-meta">
-                <span class="page-count">{{ book.pages.length }}장</span>
+              <div class="book-details" @click="openBook(book.id)">
+                <h3 class="book-title">{{ book.title }}</h3>
+                <div class="book-meta">
+                  <span class="page-count">{{ book.pages.length }}장</span>
+                </div>
+              </div>
+              <div class="book-actions" @click.stop>
+                <LikeButton 
+                  content-type="book" 
+                  :content-id="book.id"
+                  :show-count="true"
+                  @liked="onBookLiked"
+                />
               </div>
             </div>
           </div>
@@ -48,8 +57,10 @@
 </template>
 
 <script setup lang="ts">
+import { onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import Navigation from '@/components/Navigation.vue';
+import LikeButton from '@/components/LikeButton.vue';
 import { useAppStore } from '@/stores/app';
 import { useAuthStore } from '@/stores/auth';
 import { useContentStore } from '@/stores/content';
@@ -90,6 +101,17 @@ const openBook = async (bookId: string) => {
   
   router.push(`/book/${bookId}`);
 };
+
+const onBookLiked = (isLiked: boolean) => {
+  console.log(`Book ${isLiked ? 'liked' : 'unliked'}`);
+};
+
+onMounted(async () => {
+  // 로그인 상태와 관계없이 모든 책을 로드
+  console.log('📖 BooksView: Loading all books...');
+  await store.loadBooks();
+  console.log('✅ BooksView: Books loaded:', store.currentBooks.length);
+});
 </script>
 
 <style scoped>
@@ -199,6 +221,24 @@ const openBook = async (bookId: string) => {
 .book-info {
   padding: var(--spacing-xl);
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+}
+
+.book-details {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.book-actions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: var(--spacing-md);
 }
 
 .book-title {

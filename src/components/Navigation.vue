@@ -159,6 +159,7 @@ const menuItems = computed(() => [
   { key: 'quiz', path: '/quiz' },
   { key: 'puzzle', path: '/puzzle' },
   { key: 'storybook', path: '/books' },
+  { key: 'favorites', path: '/likes' },
   { key: 'achievements', path: '/achievements' }
 ]);
 

@@ -200,11 +200,13 @@ import WordCard from '@/components/WordCard.vue';
 import { useAppStore } from '@/stores/app';
 import { useAuthStore } from '@/stores/auth';
 import { useContentStore } from '@/stores/content';
+import { useLikes } from '@/composables/useLikes';
 import { useI18n } from 'vue-i18n';
 
 const store = useAppStore();
 const authStore = useAuthStore();
 const contentStore = useContentStore();
+const { loadLikes } = useLikes();
 const { t, messages } = useI18n();
 
 const selectedCategory = ref('all');
@@ -385,7 +387,12 @@ watch(viewMode, () => {
   clearAutoAdvanceTimers();
 });
 
-onMounted(() => {
+onMounted(async () => {
+  // Load likes for authenticated users
+  if (authStore.isAuthenticated) {
+    await loadLikes();
+  }
+  
   // Auto-start learning mode
   if (viewMode.value === 'single' && filteredWords.value.length > 0) {
     setTimeout(() => {
