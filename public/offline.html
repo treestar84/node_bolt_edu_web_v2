@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>오프라인 - 똑똑한 아이들</title>
+    <link rel="icon" href="/icons/icon-192x192.png" type="image/png">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: #333;
+        }
+
+        .offline-container {
+            text-align: center;
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            width: 100%;
+        }
+
+        .offline-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+            animation: bounce 2s infinite;
+        }
+
+        .offline-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .offline-message {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 25px;
+            line-height: 1.5;
+        }
+
+        .retry-button {
+            background: linear-gradient(45deg, #3b82f6, #1d4ed8);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        .retry-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(59, 130, 246, 0.3);
+        }
+
+        .offline-features {
+            text-align: left;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .feature-icon {
+            margin-right: 10px;
+            font-size: 16px;
+        }
+
+        .loading-spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-10px);
+            }
+            60% {
+                transform: translateY(-5px);
+            }
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .connection-status {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            z-index: 1000;
+        }
+
+        .connection-status.offline {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .connection-status.online {
+            background: #dcfce7;
+            color: #16a34a;
+        }
+
+        @media (max-width: 480px) {
+            .offline-container {
+                padding: 30px 20px;
+            }
+            
+            .offline-icon {
+                font-size: 60px;
+            }
+            
+            .offline-title {
+                font-size: 20px;
+            }
+            
+            .offline-message {
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="connection-status offline" id="connectionStatus">
+        📶 오프라인
+    </div>
+
+    <div class="offline-container">
+        <div class="offline-icon">🌐</div>
+        <h1 class="offline-title">인터넷 연결을 확인해주세요</h1>
+        <p class="offline-message">
+            현재 인터넷에 연결되어 있지 않아요.<br>
+            Wi-Fi나 모바일 데이터를 확인하고 다시 시도해주세요.
+        </p>
+        
+        <div class="loading-spinner" id="loadingSpinner"></div>
+        
+        <button class="retry-button" onclick="retryConnection()">
+            다시 연결하기
+        </button>
+
+        <div class="offline-features">
+            <div class="feature-item">
+                <span class="feature-icon">📚</span>
+                <span>일부 캐시된 콘텐츠는 오프라인에서도 이용 가능합니다</span>
+            </div>
+            <div class="feature-item">
+                <span class="feature-icon">🎯</span>
+                <span>학습 진도는 온라인 연결 시 자동으로 동기화됩니다</span>
+            </div>
+            <div class="feature-item">
+                <span class="feature-icon">🔄</span>
+                <span>네트워크 연결 시 자동으로 최신 콘텐츠를 받아옵니다</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 네트워크 상태 모니터링
+        function updateConnectionStatus() {
+            const statusElement = document.getElementById('connectionStatus');
+            
+            if (navigator.onLine) {
+                statusElement.textContent = '📶 온라인';
+                statusElement.className = 'connection-status online';
+                
+                // 온라인 상태일 때 자동으로 메인 페이지로 이동
+                setTimeout(() => {
+                    window.location.href = '/';
+                }, 1000);
+            } else {
+                statusElement.textContent = '📶 오프라인';
+                statusElement.className = 'connection-status offline';
+            }
+        }
+
+        // 연결 재시도 함수
+        function retryConnection() {
+            const button = document.querySelector('.retry-button');
+            const spinner = document.getElementById('loadingSpinner');
+            
+            button.style.display = 'none';
+            spinner.style.display = 'block';
+            
+            // 간단한 네트워크 테스트
+            fetch('/', { method: 'HEAD', cache: 'no-cache' })
+                .then(response => {
+                    if (response.ok) {
+                        window.location.href = '/';
+                    } else {
+                        throw new Error('Network response was not ok');
+                    }
+                })
+                .catch(error => {
+                    console.log('여전히 오프라인 상태입니다');
+                    button.style.display = 'block';
+                    spinner.style.display = 'none';
+                    
+                    // 사용자에게 피드백
+                    button.textContent = '다시 시도하기';
+                    setTimeout(() => {
+                        button.textContent = '다시 연결하기';
+                    }, 2000);
+                });
+        }
+
+        // 키보드 이벤트 (엔터키로 재시도)
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+                retryConnection();
+            }
+        });
+
+        // 네트워크 상태 변경 감지
+        window.addEventListener('online', updateConnectionStatus);
+        window.addEventListener('offline', updateConnectionStatus);
+
+        // 페이지 로드 시 상태 확인
+        updateConnectionStatus();
+
+        // 주기적으로 연결 상태 확인
+        setInterval(updateConnectionStatus, 5000);
+
+        // 페이지 가시성 변경 시 상태 확인
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) {
+                updateConnectionStatus();
+            }
+        });
+    </script>
+</body>
+</html>

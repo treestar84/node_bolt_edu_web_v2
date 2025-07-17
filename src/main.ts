@@ -420,12 +420,127 @@ const initializeApp = async () => {
   }
 };
 
+// Service Worker 등록
+const registerServiceWorker = async () => {
+  if ('serviceWorker' in navigator) {
+    try {
+      console.log('🔄 Service Worker 등록 중...');
+      
+      const registration = await navigator.serviceWorker.register('/sw.js', {
+        scope: '/'
+      });
+      
+      console.log('✅ Service Worker 등록 성공:', registration.scope);
+      
+      // 업데이트 확인
+      registration.addEventListener('updatefound', () => {
+        console.log('🔄 Service Worker 업데이트 발견');
+        
+        const newWorker = registration.installing;
+        if (newWorker) {
+          newWorker.addEventListener('statechange', () => {
+            if (newWorker.state === 'installed') {
+              if (navigator.serviceWorker.controller) {
+                console.log('🔄 새 버전의 Service Worker 설치됨');
+                // 사용자에게 새로고침 제안 (나중에 토스트 메시지로 개선)
+                if (confirm('새로운 버전이 설치되었습니다. 새로고침하시겠습니까?')) {
+                  window.location.reload();
+                }
+              } else {
+                console.log('✅ Service Worker 처음 설치됨');
+              }
+            }
+          });
+        }
+      });
+      
+      // 활성 Service Worker 변경 감지
+      if (registration.active) {
+        registration.active.addEventListener('statechange', (event) => {
+          if (event.target.state === 'activated') {
+            console.log('🚀 Service Worker 활성화됨');
+          }
+        });
+      }
+      
+    } catch (error) {
+      console.error('❌ Service Worker 등록 실패:', error);
+    }
+  } else {
+    console.log('⚠️ Service Worker가 지원되지 않는 브라우저입니다.');
+  }
+};
+
+// PWA 설치 프롬프트 관리
+let deferredPrompt: any = null;
+
+// PWA 설치 이벤트 리스너
+window.addEventListener('beforeinstallprompt', (e) => {
+  console.log('📱 PWA 설치 프롬프트 준비됨');
+  e.preventDefault();
+  deferredPrompt = e;
+  
+  // 사용자에게 설치 옵션 표시 (나중에 UI로 개선)
+  showInstallPrompt();
+});
+
+// PWA 설치 프롬프트 표시
+const showInstallPrompt = () => {
+  // 이미 설치된 경우 무시
+  if (window.matchMedia('(display-mode: standalone)').matches) {
+    console.log('📱 이미 PWA로 설치되어 있음');
+    return;
+  }
+  
+  // 모바일 기기에서만 설치 프롬프트 표시
+  if (/Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+    setTimeout(() => {
+      if (deferredPrompt && confirm('홈 화면에 앱을 설치하시겠습니까?')) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then((choiceResult: any) => {
+          if (choiceResult.outcome === 'accepted') {
+            console.log('✅ PWA 설치 수락됨');
+          } else {
+            console.log('❌ PWA 설치 거부됨');
+          }
+          deferredPrompt = null;
+        });
+      }
+    }, 3000); // 3초 후 프롬프트 표시
+  }
+};
+
+// PWA 설치 완료 이벤트
+window.addEventListener('appinstalled', (evt) => {
+  console.log('🎉 PWA 설치 완료!');
+  deferredPrompt = null;
+});
+
+// 온라인/오프라인 상태 모니터링
+window.addEventListener('online', () => {
+  console.log('🌐 온라인 상태로 전환');
+  // 온라인 상태 UI 업데이트 (나중에 구현)
+});
+
+window.addEventListener('offline', () => {
+  console.log('📴 오프라인 상태로 전환');
+  // 오프라인 상태 UI 업데이트 (나중에 구현)
+});
+
+// 앱 초기화 및 마운트
 initializeApp().then(() => {
   app.mount('#app');
+  
+  // Service Worker 등록 (앱 마운트 후)
+  registerServiceWorker();
+  
 }).catch((error) => {
   console.error('💥 Failed to initialize application:', error);
   // 초기화 실패해도 앱은 마운트
   app.mount('#app');
+  
+  // Service Worker는 여전히 등록
+  registerServiceWorker();
 });
 
 export { i18n };
