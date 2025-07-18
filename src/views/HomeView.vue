@@ -76,11 +76,11 @@
               <div class="stat-label">그림책</div>
             </div>
             <div class="stat-card">
-              <div class="stat-value">{{ authStore.userProgress.quiz_score }}</div>
+              <div class="stat-value">{{ authStore.userProgress.quizScore }}</div>
               <div class="stat-label">퀴즈 점수</div>
             </div>
             <div class="stat-card">
-              <div class="stat-value">{{ authStore.userProgress.puzzle_completions }}</div>
+              <div class="stat-value">{{ authStore.userProgress.puzzleCompletions }}</div>
               <div class="stat-label">퍼즐 완성</div>
             </div>
           </div>
@@ -99,17 +99,11 @@ import Navigation from '@/components/Navigation.vue';
 import BadgeDisplay from '@/components/BadgeDisplay.vue';
 import { useAuthStore } from '@/stores/auth';
 import { useContentStore } from '@/stores/content';
-import { useFileUpload } from '@/composables/useFileUpload';
-import { useAppStore } from '@/stores/app';
 
-const store = useAppStore();
 const authStore = useAuthStore();
 const contentStore = useContentStore();
-const { getUploadedFileUrl } = useFileUpload();
 
 const imageLoadError = ref(false);
-
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
 
 const getImageUrl = (imageUrl: string) => {
   if (imageUrl.startsWith('/uploads/')) {
@@ -138,7 +132,7 @@ const getDefaultImage = () => {
   return defaultImage;
 };
 
-const handleImageError = (e?: Event) => {
+const handleImageError = () => {
   // 무한 루프 방지: 이미 에러 상태면 아무것도 하지 않음
   if (imageLoadError.value) return;
   imageLoadError.value = true;

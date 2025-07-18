@@ -70,7 +70,7 @@
                 <label class="form-label">{{$t('settings.mainImage')}}</label>
                 <FileUploadInput
                   v-model="formData.mainImageUrl"
-
+                  label="메인 이미지"
                   :placeholder="$t('settings.mainImagePlaceholder')"
                   file-type="image"
                   :required="false"
@@ -121,7 +121,7 @@
               <div class="stat-item">
                 <div class="stat-icon">🧩</div>
                 <div class="stat-content">
-                  <div class="stat-value">{{ authStore.userProgress.quiz_score }}</div>
+                  <div class="stat-value">{{ authStore.userProgress.quizScore }}</div>
                   <div class="stat-label">퀴즈 점수</div>
                 </div>
               </div>
@@ -129,7 +129,7 @@
               <div class="stat-item">
                 <div class="stat-icon">🎯</div>
                 <div class="stat-content">
-                  <div class="stat-value">{{ authStore.userProgress.quiz_streak }}</div>
+                  <div class="stat-value">{{ authStore.userProgress.quizStreak }}</div>
                   <div class="stat-label">연속 정답</div>
                 </div>
               </div>
@@ -137,7 +137,7 @@
               <div class="stat-item">
                 <div class="stat-icon">🧩</div>
                 <div class="stat-content">
-                  <div class="stat-value">{{ authStore.userProgress.puzzle_completions }}</div>
+                  <div class="stat-value">{{ authStore.userProgress.puzzleCompletions }}</div>
                   <div class="stat-label">퍼즐 완성</div>
                 </div>
               </div>
@@ -145,7 +145,7 @@
               <div class="stat-item">
                 <div class="stat-icon">📚</div>
                 <div class="stat-content">
-                  <div class="stat-value">{{ authStore.userProgress.words_learned }}</div>
+                  <div class="stat-value">{{ authStore.userProgress.wordsLearned }}</div>
                   <div class="stat-label">학습한 단어</div>
                 </div>
               </div>
@@ -153,7 +153,7 @@
               <div class="stat-item">
                 <div class="stat-icon">📖</div>
                 <div class="stat-content">
-                  <div class="stat-value">{{ authStore.userProgress.books_read }}</div>
+                  <div class="stat-value">{{ authStore.userProgress.booksRead }}</div>
                   <div class="stat-label">읽은 책</div>
                 </div>
               </div>
@@ -192,16 +192,12 @@ import Navigation from '@/components/Navigation.vue';
 import FileUploadInput from '@/components/FileUploadInput.vue';
 import { useAuthStore } from '@/stores/auth';
 import { useContentStore } from '@/stores/content';
-import { useFileUpload } from '@/composables/useFileUpload';
 
 const router = useRouter();
 const authStore = useAuthStore();
 const contentStore = useContentStore();
-const { getUploadedFileUrl } = useFileUpload();
 
 const saveSuccess = ref(false);
-
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
 
 const formData = reactive({
   username: '',
@@ -229,7 +225,7 @@ const loadCurrentSettings = () => {
     formData.username = authStore.userProfile.username;
     formData.userType = authStore.userProfile.userType;
     formData.siteName = authStore.userProfile.siteName;
-    formData.childAge = authStore.userProfile.childAge;
+    formData.childAge = authStore.userProfile.childAge || 4;
     formData.mainImageUrl = authStore.userProfile.mainImageUrl || '';
   }
 };

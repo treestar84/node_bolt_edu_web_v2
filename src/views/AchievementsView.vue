@@ -127,16 +127,16 @@
               <div class="stat-card quiz">
                 <div class="stat-icon">🧩</div>
                 <div class="stat-content">
-                  <div class="stat-value">{{ authStore.userProgress.quiz_score }}</div>
+                  <div class="stat-value">{{ authStore.userProgress.quizScore }}</div>
                   <div class="stat-label">퀴즈 점수</div>
-                  <div class="stat-sub">연속 {{ authStore.userProgress.quiz_streak }}회</div>
+                  <div class="stat-sub">연속 {{ authStore.userProgress.quizStreak }}회</div>
                 </div>
               </div>
 
               <div class="stat-card puzzle">
                 <div class="stat-icon">🧩</div>
                 <div class="stat-content">
-                  <div class="stat-value">{{ authStore.userProgress.puzzle_completions }}</div>
+                  <div class="stat-value">{{ authStore.userProgress.puzzleCompletions }}</div>
                   <div class="stat-label">퍼즐 완성</div>
                 </div>
               </div>
@@ -144,7 +144,7 @@
               <div class="stat-card words">
                 <div class="stat-icon">📚</div>
                 <div class="stat-content">
-                  <div class="stat-value">{{ authStore.userProgress.words_learned }}</div>
+                  <div class="stat-value">{{ authStore.userProgress.wordsLearned }}</div>
                   <div class="stat-label">학습한 단어</div>
                   <div class="stat-sub">총 {{ contentStore.words.length }}개 중</div>
                 </div>
@@ -153,7 +153,7 @@
               <div class="stat-card books">
                 <div class="stat-icon">📖</div>
                 <div class="stat-content">
-                  <div class="stat-value">{{ authStore.userProgress.books_read }}</div>
+                  <div class="stat-value">{{ authStore.userProgress.booksRead }}</div>
                   <div class="stat-label">읽은 책</div>
                   <div class="stat-sub">총 {{ contentStore.books.length }}권 중</div>
                 </div>
@@ -304,7 +304,7 @@ const displayedBadges = computed(() => {
   if (badges.length === 0 && contentStore.userBadges.length > 0) {
     console.log('📊 Method 2 - extracting from userBadges...');
     badges = contentStore.userBadges
-      .map(ub => ub.badges || ub.badge)
+      .map(ub => ub.badge)
       .filter((badge): badge is Badge => badge !== null && badge !== undefined);
     console.log('📊 Method 2 result:', badges.length);
   }
@@ -318,7 +318,7 @@ const nextBadges = computed(() => {
   const unlockedBadgeIds = displayedBadges.value.map(b => b.id);
   return contentStore.badges
     .filter(badge => !unlockedBadgeIds.includes(badge.id))
-    .sort((a, b) => a.required_score - b.required_score)
+    .sort((a, b) => a.requiredScore - b.requiredScore)
     .slice(0, 3);
 });
 
@@ -341,25 +341,25 @@ const getCategoryName = (category: string) => {
 
 // 뱃지 진행률 텍스트
 const getProgressText = (badge: Badge) => {
-  if (!authStore.userProgress) return `0 / ${badge.required_score}`;
+  if (!authStore.userProgress) return `0 / ${badge.requiredScore}`;
   
   let current = 0;
   switch (badge.category) {
     case 'quiz':
-      current = authStore.userProgress.quiz_score;
+      current = authStore.userProgress.quizScore;
       break;
     case 'puzzle':
-      current = authStore.userProgress.puzzle_completions;
+      current = authStore.userProgress.puzzleCompletions;
       break;
     case 'words':
-      current = authStore.userProgress.words_learned;
+      current = authStore.userProgress.wordsLearned;
       break;
     case 'books':
-      current = authStore.userProgress.books_read;
+      current = authStore.userProgress.booksRead;
       break;
   }
   
-  return `${current} / ${badge.required_score}`;
+  return `${current} / ${badge.requiredScore}`;
 };
 
 // 뱃지 진행률 퍼센트
@@ -369,20 +369,20 @@ const getProgressPercentage = (badge: Badge) => {
   let current = 0;
   switch (badge.category) {
     case 'quiz':
-      current = authStore.userProgress.quiz_score;
+      current = authStore.userProgress.quizScore;
       break;
     case 'puzzle':
-      current = authStore.userProgress.puzzle_completions;
+      current = authStore.userProgress.puzzleCompletions;
       break;
     case 'words':
-      current = authStore.userProgress.words_learned;
+      current = authStore.userProgress.wordsLearned;
       break;
     case 'books':
-      current = authStore.userProgress.books_read;
+      current = authStore.userProgress.booksRead;
       break;
   }
   
-  return Math.min((current / badge.required_score) * 100, 100);
+  return Math.min((current / badge.requiredScore) * 100, 100);
 };
 
 // 카테고리별 뱃지 개수

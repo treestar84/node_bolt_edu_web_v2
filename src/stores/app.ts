@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import { ref, computed, toRaw } from 'vue';
 import { useSupabase } from '@/composables/useSupabase';
-import type { WordItem, Book, Quiz, Badge, ApiKey, Language } from '@/types';
+import type { WordItem, Book, Badge, ApiKey, Language } from '@/types';
 import { i18n } from '@/main';
 
 export const useAppStore = defineStore('app', () => {
@@ -25,7 +25,6 @@ export const useAppStore = defineStore('app', () => {
 
   // Badge state
   const currentBadges = ref<Badge[]>([]);
-  const unlockedBadges = ref<string[]>([]);
 
   // Admin state
   const isAdminLoggedIn = ref(false);
@@ -51,7 +50,7 @@ export const useAppStore = defineStore('app', () => {
   });
 
   const nextBadge = computed(() => {
-    const unlockedBadges = currentBadges.value.filter(b => b.unlocked);
+    
     const lockedBadges = currentBadges.value.filter(b => !b.unlocked);
     
     if (lockedBadges.length === 0) return null;
@@ -616,9 +615,6 @@ export const useAppStore = defineStore('app', () => {
       if (!badge.unlocked && badge.category === 'quiz' && quizScore.value >= badge.requiredScore) {
         console.log('🏆 Unlocking quiz badge:', badge.name, 'for score:', badge.requiredScore);
         badge.unlocked = true;
-        if (!unlockedBadges.value.includes(badge.id)) {
-          unlockedBadges.value.push(badge.id);
-        }
       }
     });
   };
@@ -631,9 +627,6 @@ export const useAppStore = defineStore('app', () => {
       if (!badge.unlocked && badge.category === 'puzzle' && puzzleCompletions.value >= badge.requiredScore) {
         console.log('🏆 Unlocking puzzle badge:', badge.name, 'for completions:', badge.requiredScore);
         badge.unlocked = true;
-        if (!unlockedBadges.value.includes(badge.id)) {
-          unlockedBadges.value.push(badge.id);
-        }
       }
     });
   };
@@ -856,7 +849,6 @@ export const useAppStore = defineStore('app', () => {
     quizStreak,
     puzzleCompletions,
     currentBadges,
-    unlockedBadges,
     isAdminLoggedIn,
     adminToken,
     apiKeys,

@@ -85,7 +85,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import { useLikes } from '@/composables/useLikes';
 import { useAuthStore } from '@/stores/auth';
 import { useAppStore } from '@/stores/app';
@@ -144,11 +144,7 @@ const getContentTypeLabel = (contentType: string) => {
 
 // 필터 변경 시 랭킹 다시 로드
 watch([selectedPeriod, selectedContentType], () => {
-  loadRanking({
-    contentType: selectedContentType.value,
-    period: selectedPeriod.value,
-    limit: 10
-  });
+  loadRanking(selectedContentType.value as any, selectedPeriod.value as any, 10);
 });
 
 onMounted(() => {

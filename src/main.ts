@@ -458,8 +458,9 @@ const registerServiceWorker = async () => {
       
       // 활성 Service Worker 변경 감지
       if (registration.active) {
-        registration.active.addEventListener('statechange', (event) => {
-          if (event.target.state === 'activated') {
+        registration.active.addEventListener('statechange', (event: Event) => {
+          const worker = event.target as ServiceWorker;
+          if (worker.state === 'activated') {
             console.log('🚀 Service Worker 활성화됨');
           }
         });
@@ -513,7 +514,7 @@ const showInstallPrompt = () => {
 };
 
 // PWA 설치 완료 이벤트
-window.addEventListener('appinstalled', (evt) => {
+window.addEventListener('appinstalled', () => {
   console.log('🎉 PWA 설치 완료!');
   deferredPrompt = null;
 });

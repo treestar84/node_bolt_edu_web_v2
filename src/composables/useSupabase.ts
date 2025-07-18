@@ -80,7 +80,7 @@ export function useSupabase() {
             // If no session was created (email confirmation required), try to sign in
             if (!data.session) {
               console.log('🔐 No session created, attempting to sign in...');
-              const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+              const { data: _signInResult, error: signInError } = await supabase.auth.signInWithPassword({
                 email,
                 password,
               });
@@ -281,7 +281,7 @@ export function useSupabase() {
         console.log('🔍 Checking if username exists:', username);
         
         // First check if we can access the table at all
-        const { data: testAccess, error: accessError } = await supabase
+        const { data: _testAccessResult, error: accessError } = await supabase
           .from('user_profiles')
           .select('count')
           .limit(1);

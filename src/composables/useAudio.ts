@@ -4,7 +4,7 @@ export function useAudio() {
   const isPlaying = ref(false);
   const currentAudio = ref<HTMLAudioElement | null>(null);
   const audioDuration = ref(0);
-  let currentTimeoutId: number | null = null;
+  let currentTimeoutId: NodeJS.Timeout | null = null;
 
   const playAudio = (
     audioUrl: string,

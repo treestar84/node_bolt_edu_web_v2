@@ -102,7 +102,7 @@ interface Emits {
 const props = defineProps<Props>();
 const emit = defineEmits<Emits>();
 
-const { isUploading, uploadProgress, uploadFile, getUploadedFileUrl, validateFile } = useFileUpload();
+const { isUploading, uploadProgress, uploadFile, validateFile } = useFileUpload();
 
 const inputMode = ref<'url' | 'upload'>('upload'); // Default to upload
 const fileInput = ref<HTMLInputElement>();

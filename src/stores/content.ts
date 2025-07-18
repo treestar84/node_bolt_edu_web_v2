@@ -38,7 +38,7 @@ export const useContentStore = defineStore('content', () => {
       .map(ub => {
         console.log('🎖️ Processing user badge:', ub);
         // FIXED: 올바른 데이터 구조 접근
-        const badge = ub.badges || ub.badge;
+        const badge = ub.badge;
         if (badge) {
           console.log('✅ Found badge:', badge.name);
           return badge;
@@ -243,15 +243,15 @@ export const useContentStore = defineStore('content', () => {
     }
 
     const progress = authStore.userProgress;
-    const unlockedBadgeIds = userBadges.value.map(ub => ub.badge_id);
+    const unlockedBadgeIds = userBadges.value.map(ub => ub.badgeId);
     const newlyUnlocked: Badge[] = [];
 
     console.log('🔍 Starting badge unlock check...');
     console.log('📊 Current progress:', {
-      quiz_score: progress.quiz_score,
-      puzzle_completions: progress.puzzle_completions,
-      words_learned: progress.words_learned,
-      books_read: progress.books_read
+      quizScore: progress.quizScore,
+      puzzleCompletions: progress.puzzleCompletions,
+      wordsLearned: progress.wordsLearned,
+      booksRead: progress.booksRead
     });
     console.log('🎖️ Already unlocked badge IDs:', unlockedBadgeIds);
     console.log('🏆 Total badges available:', badges.value.length);
@@ -267,24 +267,24 @@ export const useContentStore = defineStore('content', () => {
 
       switch (badge.category) {
         case 'quiz':
-          currentValue = progress.quiz_score;
-          shouldUnlock = currentValue >= badge.required_score;
+          currentValue = progress.quizScore;
+          shouldUnlock = currentValue >= badge.requiredScore;
           break;
         case 'puzzle':
-          currentValue = progress.puzzle_completions;
-          shouldUnlock = currentValue >= badge.required_score;
+          currentValue = progress.puzzleCompletions;
+          shouldUnlock = currentValue >= badge.requiredScore;
           break;
         case 'words':
-          currentValue = progress.words_learned;
-          shouldUnlock = currentValue >= badge.required_score;
+          currentValue = progress.wordsLearned;
+          shouldUnlock = currentValue >= badge.requiredScore;
           break;
         case 'books':
-          currentValue = progress.books_read;
-          shouldUnlock = currentValue >= badge.required_score;
+          currentValue = progress.booksRead;
+          shouldUnlock = currentValue >= badge.requiredScore;
           break;
       }
 
-      console.log(`🎯 Badge "${badge.name}" (${badge.category}): ${currentValue}/${badge.required_score} - ${shouldUnlock ? '🔓 UNLOCK!' : '🔒 Not yet'}`);
+      console.log(`🎯 Badge "${badge.name}" (${badge.category}): ${currentValue}/${badge.requiredScore} - ${shouldUnlock ? '🔓 UNLOCK!' : '🔒 Not yet'}`);
 
       if (shouldUnlock) {
         try {

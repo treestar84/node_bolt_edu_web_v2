@@ -47,8 +47,10 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useAppStore } from '@/stores/app';
+import { useContentStore } from '@/stores/content';
 
 const store = useAppStore();
+const contentStore = useContentStore();
 const recentlyUnlocked = ref<string[]>([]);
 
 const isNewlyUnlocked = (badgeId: string) => {
@@ -57,9 +59,9 @@ const isNewlyUnlocked = (badgeId: string) => {
 
 onMounted(() => {
   // Check for newly unlocked badges
-  const newBadges = store.unlockedBadges.filter(id => !recentlyUnlocked.value.includes(id));
+  const newBadges = contentStore.userBadges.filter(ub => !recentlyUnlocked.value.includes(ub.badgeId));
   if (newBadges.length > 0) {
-    recentlyUnlocked.value = [...newBadges];
+    recentlyUnlocked.value = newBadges.map(ub => ub.badgeId);
     
     // Clear the "newly unlocked" status after animation
     setTimeout(() => {

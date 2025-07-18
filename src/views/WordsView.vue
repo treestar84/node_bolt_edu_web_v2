@@ -207,7 +207,7 @@ const store = useAppStore();
 const authStore = useAuthStore();
 const contentStore = useContentStore();
 const { loadLikes } = useLikes();
-const { t, messages } = useI18n();
+const { messages } = useI18n();
 
 const selectedCategory = ref('all');
 const viewMode = ref<'grid' | 'single'>('single'); // Default to learning mode
@@ -261,19 +261,7 @@ const shuffleArray = <T>(array: T[]): T[] => {
   return shuffled;
 };
 
-const getCategoryName = (category: string) => {
-  const categoryNames: Record<string, string> = {
-    'all': '전체',
-    'animals': '동물',
-    'fruits': '과일',
-    'vehicles': '탈것',
-    'objects': '사물',
-    'nature': '자연',
-    'toys': '장난감',
-    'clothes': '옷'
-  };
-  return categoryNames[category] || category;
-};
+
 
 const previousWord = () => {
   if (currentWordIndex.value > 0) {
@@ -317,10 +305,10 @@ const handleWordLearned = async () => {
   
   // Supabase에 단어 학습 진행도 업데이트
   if (authStore.userProgress) {
-    const newWordsLearned = authStore.userProgress.words_learned + 1;
+    const newWordsLearned = authStore.userProgress.wordsLearned + 1;
     
     await authStore.updateProgress({
-      words_learned: newWordsLearned
+      wordsLearned: newWordsLearned
     });
     
     console.log('✅ Words learned progress updated in Supabase:', { wordsLearned: newWordsLearned });

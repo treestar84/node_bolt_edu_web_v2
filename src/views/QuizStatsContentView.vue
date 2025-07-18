@@ -127,8 +127,7 @@ import type { QuizResult } from '@/types';
 const authStore = useAuthStore();
 const { 
   getRecentQuizResults, 
-  calculateRecentAccuracy, 
-  calculateLearningProgress,
+  calculateRecentAccuracy,
   isLoading,
   error
 } = useQuizTracking();

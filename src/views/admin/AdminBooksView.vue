@@ -240,12 +240,10 @@ import AdminHeader from '@/components/AdminHeader.vue';
 import FileUploadInput from '@/components/FileUploadInput.vue';
 import { useAppStore } from '@/stores/app';
 import { useAuthStore } from '@/stores/auth';
-import { useFileUpload } from '@/composables/useFileUpload';
-import type { Book, BookPage } from '@/types';
+import type { Book } from '@/types';
 
 const store = useAppStore();
 const authStore = useAuthStore();
-const { getUploadedFileUrl } = useFileUpload();
 
 const showAddModal = ref(false);
 const showEditModal = ref(false);
@@ -254,8 +252,6 @@ const editingBook = ref<Book | null>(null);
 const bookToDelete = ref<Book | null>(null);
 const isLoading = ref(false);
 const error = ref('');
-
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
 
 // 시스템 관리자 여부 확인
 const isSystemAdmin = computed(() => {
@@ -354,11 +350,11 @@ const saveBook = async () => {
     // pagesData를 snake_case로 변환 (값이 없어도 등록)
     const pagesData = formData.pages.map((page, index) => ({
       id: `${Date.now()}-${index}`,
-      book_id: '', // Will be set by the store
-      page_number: index + 1,
-      image_url: page.imageUrl,
-      audio_url: page.audioUrl,
-      text_content: page.textContent || null
+      bookId: '', // Will be set by the store
+      pageNumber: index + 1,
+      imageUrl: page.imageUrl,
+      audioUrl: page.audioUrl,
+      textContent: page.textContent || null
     }));
 
     const bookData = {
@@ -372,10 +368,10 @@ const saveBook = async () => {
     };
 
     if (showAddModal.value) {
-      await store.addBook(bookData);
+      await store.addBook(bookData as Omit<Book, 'id'>);
       console.log('✅ Book added successfully');
     } else if (showEditModal.value && editingBook.value) {
-      await store.updateBook(editingBook.value.id, bookData);
+      await store.updateBook(editingBook.value.id, bookData as Partial<Book>);
       console.log('✅ Book updated successfully');
     }
     

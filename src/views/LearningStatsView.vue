@@ -225,7 +225,7 @@ const recentActivity = computed(() => {
 });
 
 // 레벨 표시 이름
-const levelDisplayName = {
+const levelDisplayName: { [key: string]: string } = {
   beginner: '초보자',
   developing: '발전중',
   intermediate: '중급자',

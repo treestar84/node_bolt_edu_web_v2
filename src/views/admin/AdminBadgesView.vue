@@ -222,7 +222,7 @@ const formData = reactive({
   icon: '',
   description: '',
   requiredScore: 5,
-  category: 'quiz' as 'quiz' | 'puzzle'
+  category: 'quiz' as 'quiz' | 'puzzle' | 'words' | 'books'
 });
 
 const resetForm = () => {
@@ -257,7 +257,6 @@ const saveBadge = () => {
       icon: formData.icon,
       description: formData.description,
       requiredScore: formData.requiredScore,
-      unlocked: false,
       category: formData.category
     });
   } else if (showEditModal.value && editingBadge.value) {

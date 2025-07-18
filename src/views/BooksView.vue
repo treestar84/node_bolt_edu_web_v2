@@ -64,15 +64,11 @@ import LikeButton from '@/components/LikeButton.vue';
 import { useAppStore } from '@/stores/app';
 import { useAuthStore } from '@/stores/auth';
 import { useContentStore } from '@/stores/content';
-import { useFileUpload } from '@/composables/useFileUpload';
 
 const store = useAppStore();
 const authStore = useAuthStore();
 const contentStore = useContentStore();
 const router = useRouter();
-const { getUploadedFileUrl } = useFileUpload();
-
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
 
 const getImageUrl = (url: string): string => {
   if (url.startsWith('/uploads/')) {
@@ -84,10 +80,10 @@ const getImageUrl = (url: string): string => {
 const openBook = async (bookId: string) => {
   // 책 읽기 진행도 업데이트
   if (authStore.userProgress) {
-    const newBooksRead = authStore.userProgress.books_read + 1;
+    const newBooksRead = authStore.userProgress.booksRead + 1;
     
     await authStore.updateProgress({
-      books_read: newBooksRead
+      booksRead: newBooksRead
     });
     
     console.log('✅ Books read progress updated in Supabase:', { booksRead: newBooksRead });

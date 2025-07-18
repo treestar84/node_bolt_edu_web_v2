@@ -81,11 +81,11 @@
           <div class="quiz-stats">
             <div class="stat">
               <span class="stat-label">{{$t('quiz.score')}}</span>
-              <span class="stat-value">{{ authStore.userProgress?.quiz_score || 0 }}</span>
+              <span class="stat-value">{{ authStore.userProgress?.quizScore || 0 }}</span>
             </div>
             <div class="stat">
               <span class="stat-label">{{$t('quiz.streak')}}</span>
-              <span class="stat-value">{{ authStore.userProgress?.quiz_streak || 0 }}</span>
+              <span class="stat-value">{{ authStore.userProgress?.quizStreak || 0 }}</span>
             </div>
           </div>
           <BadgeDisplay />
@@ -103,7 +103,6 @@ import { useAppStore } from '@/stores/app';
 import { useAuthStore } from '@/stores/auth';
 import { useContentStore } from '@/stores/content';
 import { useAudio } from '@/composables/useAudio';
-import { useFileUpload } from '@/composables/useFileUpload';
 import { useQuizTracking } from '@/composables/useQuizTracking';
 import type { Quiz, Badge } from '@/types';
 
@@ -111,7 +110,6 @@ const store = useAppStore();
 const authStore = useAuthStore();
 const contentStore = useContentStore();
 const { isPlaying, playAudio } = useAudio();
-const { getUploadedFileUrl } = useFileUpload();
 const { saveQuizResult } = useQuizTracking();
 
 const gameStarted = ref(false);
@@ -123,16 +121,7 @@ const newBadgeUnlocked = ref<Badge | null>(null);
 
 const canStartGame = computed(() => store.currentWords.length >= 3);
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
-
 const getImageUrl = (url: string): string => {
-  if (url.startsWith('/uploads/')) {
-    return '/server' + url;
-  }
-  return url;
-};
-
-const getAudioUrl = (url: string): string => {
   if (url.startsWith('/uploads/')) {
     return '/server' + url;
   }
@@ -206,7 +195,7 @@ const selectAnswer = async (answerId: string) => {
     
     const quizResultData = {
       userId: authStore.user.id,
-      quizType: 'word_quiz',
+      quizType: 'word_quiz' as 'word_quiz' | 'book_quiz' | 'general_quiz',
       questionId: currentQuiz.value.id,
       questionText: '이 소리에 맞는 그림을 찾아보세요',
       correctAnswer: correctOption?.name || '',
@@ -221,7 +210,7 @@ const selectAnswer = async (answerId: string) => {
     try {
       const savedResult = await saveQuizResult(quizResultData);
       console.log('✅ Quiz result saved to database:', savedResult);
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ Failed to save quiz result:', error);
       console.error('Error details:', error.message);
     }
@@ -238,8 +227,8 @@ const selectAnswer = async (answerId: string) => {
     
     // Supabase에 진행도 업데이트 (기존 시스템과 호환성 유지)
     if (authStore.userProgress) {
-      const currentScore = authStore.userProgress.quiz_score || 0;
-      const currentStreak = authStore.userProgress.quiz_streak || 0;
+      const currentScore = authStore.userProgress.quizScore || 0;
+      const currentStreak = authStore.userProgress.quizStreak || 0;
       const newScore = currentScore + 1;
       const newStreak = currentStreak + 1;
       
@@ -251,8 +240,8 @@ const selectAnswer = async (answerId: string) => {
       });
       
       await authStore.updateProgress({
-        quiz_score: newScore,
-        quiz_streak: newStreak
+        quizScore: newScore,
+        quizStreak: newStreak
       });
       
       console.log('✅ Quiz progress updated in Supabase:', { score: newScore, streak: newStreak });
@@ -281,7 +270,7 @@ const selectAnswer = async (answerId: string) => {
       console.log('📊 Resetting quiz streak...');
       
       await authStore.updateProgress({
-        quiz_streak: 0
+        quizStreak: 0
       });
       console.log('✅ Quiz streak reset in Supabase');
     }

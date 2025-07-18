@@ -250,13 +250,11 @@ import AdminHeader from '@/components/AdminHeader.vue';
 import FileUploadInput from '@/components/FileUploadInput.vue';
 import { useAppStore } from '@/stores/app';
 import { useAuthStore } from '@/stores/auth';
-import { useFileUpload } from '@/composables/useFileUpload';
 import type { WordItem } from '@/types';
 import { useI18n } from 'vue-i18n';
 
 const store = useAppStore();
 const authStore = useAuthStore();
-const { getUploadedFileUrl } = useFileUpload();
 const { t, messages } = useI18n();
 
 const showAddModal = ref(false);
@@ -266,8 +264,6 @@ const editingWord = ref<WordItem | null>(null);
 const wordToDelete = ref<WordItem | null>(null);
 const isLoading = ref(false);
 const error = ref('');
-
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
 
 // 시스템 관리자 여부 확인
 const isSystemAdmin = computed(() => {
@@ -293,13 +289,6 @@ const getCategoryName = (category: string) => {
 };
 
 const getImageUrl = (url: string): string => {
-  if (url.startsWith('/uploads/')) {
-    return '/server' + url;
-  }
-  return url;
-};
-
-const getAudioUrl = (url: string): string => {
   if (url.startsWith('/uploads/')) {
     return '/server' + url;
   }

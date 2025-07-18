@@ -320,9 +320,7 @@ export function useQuizTracking() {
   };
 
   // 학습 수준 분석
-  const analyzeLearningLevel = (userStats: UserLearningStats, ageGroupComparison: AgeGroupComparison) => {
-    const userAccuracy = userStats.currentAccuracyRate;
-    const groupMedian = ageGroupComparison.ageGroup.medianAccuracy;
+  const analyzeLearningLevel = (_userStats: UserLearningStats, ageGroupComparison: AgeGroupComparison) => {
     const percentile = ageGroupComparison.percentile;
     
     let level = 'beginner';

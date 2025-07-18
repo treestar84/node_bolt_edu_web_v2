@@ -9,7 +9,7 @@
         <div class="title-section">
           <h1 class="book-title">{{ book?.title }}</h1>
           <div class="page-indicator">
-            {{ currentPageIndex + 1 }} / {{ book?.pages.length }}
+            {{ currentPageIndex + 1 }} / {{ book?.pages?.length }}
           </div>
         </div>
       </div>
@@ -25,7 +25,7 @@
         </button>
         <button
           @click="nextPage"
-          :disabled="currentPageIndex === book?.pages.length - 1"
+          :disabled="currentPageIndex === (book?.pages?.length ?? 0) - 1"
           class="btn btn-lg btn-secondary navigation-btn"
         >
           다음 →
@@ -177,13 +177,11 @@ import { ref, computed, onMounted, watch, onUnmounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useAppStore } from '@/stores/app';
 import { useAudio } from '@/composables/useAudio';
-import { useFileUpload } from '@/composables/useFileUpload';
 
 const route = useRoute();
 const router = useRouter();
 const store = useAppStore();
 const { isPlaying, playAudio, stopAudio } = useAudio();
-const { getUploadedFileUrl } = useFileUpload();
 
 const currentPageIndex = ref(0);
 const autoPlayEnabled = ref(true);
@@ -194,8 +192,6 @@ const autoAdvanceDelay = ref(1500); // 기본 1.5초 딜레이
 const touchStart = ref({ x: 0, y: 0 });
 const touchEnd = ref({ x: 0, y: 0 });
 const swipeThreshold = 50;
-
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
 
 const book = computed(() => {
   const bookId = route.params.id as string;
@@ -231,15 +227,6 @@ const nextPage = () => {
       pageTransitioning.value = false;
     }, 300);
   }
-};
-
-const goToPage = (index: number) => {
-  pageTransitioning.value = true;
-  stopAudio();
-  currentPageIndex.value = index;
-  setTimeout(() => {
-    pageTransitioning.value = false;
-  }, 300);
 };
 
 // Touch event handlers

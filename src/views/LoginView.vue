@@ -181,8 +181,8 @@
                 <p><strong>전체 상태:</strong> {{ connectionTestResult.success ? '✅ 성공' : '❌ 실패' }}</p>
                 <p><strong>뱃지 테이블:</strong> {{ connectionTestResult.badgesAccess ? '✅ 접근 가능' : '❌ 접근 불가' }}</p>
                 <p><strong>프로필 테이블:</strong> {{ 
-                  connectionTestResult.profilesAccess === true ? '✅ 접근 가능' : 
-                  connectionTestResult.profilesAccess === false ? '❌ 접근 불가' : 
+                  connectionTestResult.user_profilesAccess === true ? '✅ 접근 가능' : 
+                  connectionTestResult.user_profilesAccess === false ? '❌ 접근 불가' : 
                   '⚠️ 미인증' 
                 }}</p>
               </div>
@@ -219,7 +219,7 @@ import { useSupabase } from '@/composables/useSupabase';
 
 const router = useRouter();
 const authStore = useAuthStore();
-const { supabase, testDatabaseConnection } = useSupabase();
+const { testDatabaseConnection } = useSupabase();
 
 const isRegister = ref(false);
 const showDebugInfo = ref(false);
@@ -323,7 +323,8 @@ const resetForm = () => {
   formData.username = '';
   formData.password = '';
   formData.userType = '';
-  formData.childAge = 4;
+  formData.childName = '';
+  formData.childBirthDate = '';
 };
 
 const fillDemoAccount = (type: 'parent' | 'teacher') => {
@@ -332,14 +333,16 @@ const fillDemoAccount = (type: 'parent' | 'teacher') => {
     formData.password = '123456';
     if (isRegister.value) {
       formData.userType = 'parent';
-      formData.childAge = 4;
+      formData.childName = '데모아이';
+      formData.childBirthDate = '2021-07-19';
     }
   } else {
     formData.username = 'demo_teacher';
     formData.password = '123456';
     if (isRegister.value) {
       formData.userType = 'teacher';
-      formData.childAge = 5;
+      formData.childName = '데모선생님아이';
+      formData.childBirthDate = '2020-07-19';
     }
   }
 };
@@ -354,13 +357,13 @@ const testConnection = async () => {
     
     if (result.success) {
       console.log('✅ Connection test successful:', result);
-      alert('✅ 데이터베이스 연결 성공!\n\n' + 
+      alert('✅ 데이터베이스 연결 성공!\n\n' +
             `인증 사용자: ${result.authUser || '없음'}\n` +
             `뱃지 테이블: ${result.badgesAccess ? '접근 가능' : '접근 불가'}\n` +
-            `프로필 테이블: ${result.profilesAccess === true ? '접근 가능' : result.profilesAccess === false ? '접근 불가' : '미인증'}`);
+            `프로필 테이블: ${result.user_profilesAccess === true ? '접근 가능' : result.user_profilesAccess === false ? '접근 불가' : '미인증'}`);
     } else {
       console.error('❌ Connection test failed:', result);
-      alert(`❌ 연결 실패!\n\n오류: ${result.error?.message || '알 수 없는 오류'}`);
+      alert(`❌ 연결 실패!\n\n오류: ${result.error || '알 수 없는 오류'}`);
     }
   } catch (err) {
     console.error('💥 Connection test error:', err);

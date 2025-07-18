@@ -36,10 +36,9 @@
               <WordCard
                 v-for="word in favoriteWordItems"
                 :key="word.id"
-                :word="word"
+                :word="word!"
                 @audio-played="onAudioPlayed"
               />
-            </div>
 
             <div v-else class="empty-section">
               <div class="empty-icon">📖</div>
@@ -60,12 +59,12 @@
             <div v-if="favoriteBookItems.length > 0" class="books-grid">
               <div
                 v-for="book in favoriteBookItems"
-                :key="book.id"
+                :key="book?.id"
                 class="book-card"
-                @click="openBook(book.id)"
+                @click="book?.id && openBook(book.id)"
               >
                 <div class="book-cover">
-                  <img :src="getImageUrl(book.coverImage)" :alt="book.title" />
+                  <img :src="getImageUrl(book?.coverImage || '')" :alt="book?.title || ''" />
                   <div class="play-overlay">
                     <span class="play-icon">📖</span>
                     <span class="play-text">읽기</span>
@@ -73,15 +72,16 @@
                 </div>
                 <div class="book-info">
                   <div class="book-details">
-                    <h3 class="book-title">{{ book.title }}</h3>
+                    <h3 class="book-title">{{ book?.title || '' }}</h3>
                     <div class="book-meta">
-                      <span class="page-count">{{ book.pages.length }}장</span>
+                      <span class="page-count">{{ book?.pages?.length || 0 }}장</span>
                     </div>
                   </div>
                   <div class="book-actions">
                     <FavoriteButton 
                       content-type="book" 
-                      :content-id="book.id"
+                      :content-id="book?.id || ''"
+                      :show-count="true"
                       @favorited="onBookFavorited"
                     />
                   </div>
@@ -112,16 +112,14 @@ import { useAppStore } from '@/stores/app';
 import { useAuthStore } from '@/stores/auth';
 import { useContentStore } from '@/stores/content';
 import { useFavorites } from '@/composables/useFavorites';
-import { useFileUpload } from '@/composables/useFileUpload';
+import type { WordItem } from '@/types';
 
 const router = useRouter();
 const store = useAppStore();
 const authStore = useAuthStore();
 const contentStore = useContentStore();
-const { getUploadedFileUrl } = useFileUpload();
 
 const {
-  favorites,
   favoriteWords,
   favoriteBooks,
   isLoading,
@@ -133,7 +131,7 @@ const {
 const favoriteWordItems = computed(() => {
   return favoriteWords.value
     .map(fav => store.currentWords.find(word => word.id === fav.contentId))
-    .filter(Boolean);
+    .filter(Boolean) as WordItem[];
 });
 
 const favoriteBookItems = computed(() => {

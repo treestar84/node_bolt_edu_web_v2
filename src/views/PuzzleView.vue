@@ -191,7 +191,6 @@ import Navigation from '@/components/Navigation.vue';
 import { useAppStore } from '@/stores/app';
 import { useAuthStore } from '@/stores/auth';
 import { useContentStore } from '@/stores/content';
-import { useFileUpload } from '@/composables/useFileUpload';
 import type { WordItem, Badge } from '@/types';
 
 interface PuzzlePiece {
@@ -209,7 +208,6 @@ interface PuzzleSlot {
 const store = useAppStore();
 const authStore = useAuthStore();
 const contentStore = useContentStore();
-const { getUploadedFileUrl } = useFileUpload();
 
 const gameState = ref<'selection' | 'playing' | 'completed'>('selection');
 const puzzleDifficulty = ref<'3x2' | '3x3'>('3x2');
@@ -226,8 +224,6 @@ const boardHeight = ref(0);
 // Touch handling
 const draggedPiece = ref<PuzzlePiece | null>(null);
 const touchOffset = ref({ x: 0, y: 0 });
-
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
 
 const puzzleOptions = computed(() => {
   const words = store.currentWords.filter(w => {
@@ -546,10 +542,10 @@ const completePuzzle = async () => {
   
   // Supabase에 진행도 업데이트
   if (authStore.userProgress) {
-    const newCompletions = authStore.userProgress.puzzle_completions + 1;
+    const newCompletions = authStore.userProgress.puzzleCompletions + 1;
     
     await authStore.updateProgress({
-      puzzle_completions: newCompletions
+      puzzleCompletions: newCompletions
     });
     
     console.log('✅ Puzzle progress updated in Supabase:', { completions: newCompletions });

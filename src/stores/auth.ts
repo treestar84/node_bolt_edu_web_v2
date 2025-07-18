@@ -69,14 +69,14 @@ export const useAuthStore = defineStore('auth', () => {
 
       // Load progress separately with error handling
       try {
-        const progressResult = await supabase
+        const { data: progressData } = await supabase
           .from('user_progress')
           .select('*')
           .eq('user_id', user.value.id)
           .single();
         
-        if (progressResult.data) {
-          userProgress.value = transformProgressFromDB(progressResult.data);
+        if (progressData) {
+          userProgress.value = transformProgressFromDB(progressData);
           console.log('✅ Progress loaded:', userProgress.value);
         } else {
           console.log('📊 No progress found, creating initial progress...');

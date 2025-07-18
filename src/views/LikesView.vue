@@ -241,13 +241,6 @@ import { useLikes } from '@/composables/useLikes';
 import type { ContentType, LikePeriod } from '@/types';
 import type { WordItem, Book } from '@/types';
 
-function isWordItem(obj: any): obj is WordItem {
-  return obj && typeof obj === 'object' && 'imageUrl' in obj && 'name' in obj;
-}
-function isBook(obj: any): obj is Book {
-  return obj && typeof obj === 'object' && 'coverImage' in obj && 'title' in obj;
-}
-
 const router = useRouter();
 const { t } = useI18n();
 const store = useAppStore();
@@ -255,7 +248,6 @@ const authStore = useAuthStore();
 const contentStore = useContentStore();
 
 const {
-  likes,
   ranking,
   isLoading,
   error,
@@ -319,23 +311,6 @@ const getImageUrl = (url: string): string => {
     return '/server' + url;
   }
   return url;
-};
-
-const getContentData = (contentId: string) => {
-  if (selectedContentType.value === 'word') {
-    return store.currentWords.find(word => word.id === contentId);
-  } else if (selectedContentType.value === 'book') {
-    return store.currentBooks.find(book => book.id === contentId);
-  }
-  return null;
-};
-
-const getContentImageUrl = (contentId: string): string => {
-  const content = getContentData(contentId);
-  if (!content) return '';
-  
-  const imageUrl = content.imageUrl || content.coverImage;
-  return getImageUrl(imageUrl);
 };
 
 const getContentTypeIcon = (type: ContentType): string => {

@@ -28,7 +28,6 @@ import { computed } from 'vue';
 import type { WordItem } from '@/types';
 import { useAppStore } from '@/stores/app';
 import { useAudio } from '@/composables/useAudio';
-import { useFileUpload } from '@/composables/useFileUpload';
 import LikeButton from './LikeButton.vue';
 
 interface Props {
@@ -44,9 +43,6 @@ const emit = defineEmits<Emits>();
 
 const store = useAppStore();
 const { isPlaying, playAudio } = useAudio();
-const { getUploadedFileUrl } = useFileUpload();
-
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
 
 const currentName = computed(() => {
   return store.currentLanguage === 'ko' ? props.word.name : props.word.nameEn;
