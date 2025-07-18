@@ -50,13 +50,29 @@
                 <span class="section-count">({{ likedWordItems.length }}개)</span>
               </h2>
 
-              <div v-if="likedWordItems.length > 0" class="words-grid">
-                <WordCard
-                  v-for="word in likedWordItems"
-                  :key="word.id"
-                  :word="word"
-                  @audio-played="onAudioPlayed"
-                />
+              <div v-if="likedWordPairs.length > 0" class="words-grid">
+                <template v-for="pair in likedWordPairs" :key="pair.like.contentId">
+                  <WordCard
+                    v-if="pair.word"
+                    :word="pair.word"
+                    @audio-played="onAudioPlayed"
+                  />
+                  <div v-else class="word-card deleted-word">
+                    <div class="card-content">
+                      <h3 class="word-name">삭제된 단어입니다</h3>
+                      <div class="word-id">ID: {{ pair.like.contentId }}</div>
+                      <div class="word-date">{{ new Date(pair.like.createdAt).toLocaleDateString() }}</div>
+                      <div class="card-actions">
+                        <LikeButton 
+                          content-type="word" 
+                          :content-id="pair.like.contentId"
+                          :show-count="true"
+                          @liked="onLiked"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </template>
               </div>
 
               <div v-else class="empty-section">
@@ -78,12 +94,12 @@
               <div v-if="likedBookItems.length > 0" class="books-grid">
                 <div
                   v-for="book in likedBookItems"
-                  :key="book.id"
+                  :key="book?.id"
                   class="book-card"
-                  @click="openBook(book.id)"
+                  @click="book?.id && openBook(book.id)"
                 >
                   <div class="book-cover">
-                    <img :src="getImageUrl(book.coverImage)" :alt="book.title" />
+                    <img :src="getImageUrl(book?.coverImage || '')" :alt="book?.title || ''" />
                     <div class="play-overlay">
                       <span class="play-icon">📖</span>
                       <span class="play-text">읽기</span>
@@ -91,15 +107,15 @@
                   </div>
                   <div class="book-info">
                     <div class="book-details">
-                      <h3 class="book-title">{{ book.title }}</h3>
+                      <h3 class="book-title">{{ book?.title || '' }}</h3>
                       <div class="book-meta">
-                        <span class="page-count">{{ book.pages.length }}장</span>
+                        <span class="page-count">{{ book?.pages?.length || 0 }}장</span>
                       </div>
                     </div>
                     <div class="book-actions">
                       <LikeButton 
                         content-type="book" 
-                        :content-id="book.id"
+                        :content-id="book?.id || ''"
                         :show-count="true"
                         @liked="onBookLiked"
                       />
@@ -149,39 +165,50 @@
                 {{ getRankingTitle() }}
               </h3>
 
-              <div v-if="ranking.length > 0" class="ranking-items">
+              <div v-if="rankingWordPairs.length > 0" class="ranking-items">
                 <div
-                  v-for="(item, index) in ranking"
-                  :key="item.contentId"
+                  v-for="(pair, index) in rankingWordPairs"
+                  :key="'rank-' + pair.item.contentId"
                   class="ranking-item"
                 >
                   <div class="rank-number">
                     <span class="rank">{{ index + 1 }}{{ $t('likes.rank').replace('{rank}', '') }}</span>
                   </div>
                   <div class="content-info">
-                    <div class="content-preview">
-                      <img 
-                        v-if="getContentData(item.contentId)?.imageUrl || getContentData(item.contentId)?.coverImage"
-                        :src="getContentImageUrl(item.contentId)"
-                        :alt="getContentData(item.contentId)?.name || getContentData(item.contentId)?.title"
-                        class="content-image"
-                      />
-                      <div class="content-fallback" v-else>
-                        {{ getContentTypeIcon(selectedContentType) }}
+                    <template v-if="selectedContentType === 'word' && !pair.word">
+                      <div class="content-fallback deleted-word">삭제된 단어입니다<br/>ID: {{ pair.item.contentId }}</div>
+                    </template>
+                    <template v-else>
+                      <div class="content-preview">
+                        <img 
+                          v-if="pair.word && (pair.word as any).imageUrl"
+                          :src="getImageUrl((pair.word as any).imageUrl)"
+                          :alt="(pair.word as any).name"
+                          class="content-image"
+                        />
+                        <img
+                          v-else-if="pair.book && (pair.book as any).coverImage"
+                          :src="getImageUrl((pair.book as any).coverImage)"
+                          :alt="(pair.book as any).title"
+                          class="content-image"
+                        />
+                        <div class="content-fallback" v-else>
+                          {{ getContentTypeIcon(selectedContentType) }}
+                        </div>
                       </div>
-                    </div>
-                    <div class="content-details">
-                      <h4 class="content-title">
-                        {{ getContentData(item.contentId)?.name || getContentData(item.contentId)?.title || '알 수 없음' }}
-                      </h4>
-                      <p class="content-meta">
-                        {{ $t('likes.contentType.' + selectedContentType) }}
-                      </p>
-                    </div>
+                      <div class="content-details">
+                        <h4 class="content-title">
+                          {{ pair.word ? pair.word.name : (pair.book ? pair.book.title : '알 수 없음') }}
+                        </h4>
+                        <p class="content-meta">
+                          {{ $t('likes.contentType.' + selectedContentType) }}
+                        </p>
+                      </div>
+                    </template>
                   </div>
                   <div class="like-stats">
                     <span class="like-count">
-                      ❤️ {{ $t('likes.likeCount').replace('{count}', item.likeCount.toString()) }}
+                      ❤️ {{ $t('likes.likeCount').replace('{count}', pair.item.likeCount.toString()) }}
                     </span>
                   </div>
                 </div>
@@ -212,6 +239,14 @@ import { useAuthStore } from '@/stores/auth';
 import { useContentStore } from '@/stores/content';
 import { useLikes } from '@/composables/useLikes';
 import type { ContentType, LikePeriod } from '@/types';
+import type { WordItem, Book } from '@/types';
+
+function isWordItem(obj: any): obj is WordItem {
+  return obj && typeof obj === 'object' && 'imageUrl' in obj && 'name' in obj;
+}
+function isBook(obj: any): obj is Book {
+  return obj && typeof obj === 'object' && 'coverImage' in obj && 'title' in obj;
+}
 
 const router = useRouter();
 const { t } = useI18n();
@@ -260,6 +295,25 @@ const likedBookItems = computed(() => {
     .filter(Boolean);
 });
 
+const likedWordPairs = computed(() =>
+  likedWords.value.map(like => ({
+    like,
+    word: store.currentWords.find(word => word.id === like.contentId)
+  }))
+);
+
+const rankingWordPairs = computed(() =>
+  ranking.value.map(item => {
+    const word = store.currentWords.find(word => word.id === item.contentId);
+    const book = store.currentBooks.find(book => book.id === item.contentId);
+    return {
+      item,
+      word: word ? (word as WordItem) : null,
+      book: book ? (book as Book) : null
+    };
+  })
+);
+
 const getImageUrl = (url: string): string => {
   if (url.startsWith('/uploads/')) {
     return '/server' + url;
@@ -304,6 +358,10 @@ const onAudioPlayed = () => {
   console.log('Audio played in likes');
 };
 
+const onLiked = (isLiked: boolean) => {
+  console.log('Like toggled:', isLiked);
+};
+
 const onBookLiked = (isLiked: boolean) => {
   console.log(`Book ${isLiked ? 'liked' : 'unliked'}`);
 };
@@ -311,21 +369,17 @@ const onBookLiked = (isLiked: boolean) => {
 const openBook = async (bookId: string) => {
   // 책 읽기 진행도 업데이트
   if (authStore.userProgress) {
-    const newBooksRead = authStore.userProgress.books_read + 1;
-    
+    const newBooksRead = authStore.userProgress.booksRead + 1;
     await authStore.updateProgress({
-      books_read: newBooksRead
+      booksRead: newBooksRead
     });
-    
     console.log('✅ Books read progress updated in Supabase:', { booksRead: newBooksRead });
-    
     // 뱃지 확인
     const unlockedBadges = await contentStore.checkBadgeUnlocks();
     if (unlockedBadges.length > 0) {
       console.log('🏆 New book reading badge unlocked:', unlockedBadges[0].name);
     }
   }
-  
   router.push(`/book/${bookId}`);
 };
 

@@ -11,6 +11,15 @@ export default defineConfig({
     }
   },
   server: {
+    // HMR 오버레이 설정
+    hmr: {
+      overlay: true,
+      clientPort: 5173
+    },
+    // 정적 파일 처리 개선
+    middlewareMode: false,
+    // 에러 처리 강화
+    strictPort: false,
     proxy: {
       '/api': {
         target: 'http://localhost:3001',
@@ -21,7 +30,16 @@ export default defineConfig({
         target: 'http://localhost:3001',
         changeOrigin: true,
         secure: false,
-        rewrite: (path) => path.replace(/^\/server/, '')
+        rewrite: (path) => {
+          // URL 디코딩 안전성 검증
+          try {
+            const decoded = decodeURI(path);
+            return decoded.replace(/^\/server/, '');
+          } catch (error) {
+            console.error('URL 디코딩 실패:', path, error);
+            return path.replace(/^\/server/, '');
+          }
+        }
       }
     }
   },
@@ -32,19 +50,13 @@ export default defineConfig({
         // 청크 분할로 로딩 성능 개선
         manualChunks: {
           vendor: ['vue', 'vue-router', 'pinia'],
-          ui: ['@headlessui/vue', '@heroicons/vue'],
-          utils: ['axios', 'date-fns']
+          supabase: ['@supabase/supabase-js'],
+          i18n: ['vue-i18n']
         }
       }
     },
     // 압축 및 최적화
-    minify: 'terser',
-    terserOptions: {
-      compress: {
-        drop_console: true, // 프로덕션에서 console 제거
-        drop_debugger: true
-      }
-    }
+    minify: 'esbuild' // 기본 esbuild minify 사용
   },
   // PWA 관련 설정
   define: {

@@ -52,7 +52,10 @@ export interface UserProfile {
   userType: 'teacher' | 'director' | 'parent';
   siteName: string;
   mainImageUrl?: string;
-  childAge: number;
+  childName?: string;
+  childBirthDate?: string;
+  childAgeMonths?: number;
+  childAge?: number; // 호환성을 위해 유지
   createdAt: string;
   updatedAt: string;
 }
@@ -128,6 +131,60 @@ export interface LikeStatistics {
   totalLikes: number;
   uniqueUsers: number;
   avgLikesPerContent: number;
+}
+
+// 퀴즈 결과 인터페이스
+export interface QuizResult {
+  id: string;
+  userId: string;
+  quizType: 'word_quiz' | 'book_quiz' | 'general_quiz';
+  questionId?: string;
+  questionText?: string;
+  correctAnswer?: string;
+  userAnswer?: string;
+  isCorrect: boolean;
+  responseTimeMs?: number;
+  difficultyLevel?: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// 사용자 학습 통계 인터페이스
+export interface UserLearningStats {
+  id: string;
+  userId: string;
+  childAgeMonths: number;
+  totalQuizAttempts: number;
+  correctAnswers: number;
+  currentAccuracyRate: number;
+  totalWordsLearned: number;
+  totalBooksRead: number;
+  totalPuzzlesCompleted: number;
+  learningStreakDays: number;
+  lastActivityDate: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// 연령대별 그룹 비교 인터페이스
+export interface AgeGroupComparison {
+  userInfo: {
+    childName: string;
+    childAgeMonths: number;
+    accuracyRate: number;
+    totalQuizAttempts: number;
+    wordsLearned: number;
+    booksRead: number;
+  };
+  percentile: number;
+  ageGroup: {
+    name: string;
+    userCount: number;
+    avgAccuracyRate: number;
+    medianAccuracy: number;
+    accuracy25th: number;
+    accuracy75th: number;
+  };
 }
 
 export type Language = 'ko' | 'en';

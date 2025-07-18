@@ -1,11 +1,12 @@
 import { ref, computed } from 'vue';
 import { useSupabase } from '@/composables/useSupabase';
 import { useAuthStore } from '@/stores/auth';
+import type { ContentType } from '@/types';
 
 export interface Favorite {
   id: string;
   userId: string;
-  contentType: 'word' | 'book';
+  contentType: ContentType;
   contentId: string;
   createdAt: string;
 }
@@ -61,7 +62,7 @@ export function useFavorites() {
   };
 
   // 즐겨찾기 추가
-  const addToFavorites = async (contentType: 'word' | 'book', contentId: string) => {
+  const addToFavorites = async (contentType: ContentType, contentId: string) => {
     if (!authStore.user) {
       console.log('⚠️ No authenticated user for adding favorite');
       return false;
@@ -111,7 +112,7 @@ export function useFavorites() {
   };
 
   // 즐겨찾기 제거
-  const removeFromFavorites = async (contentType: 'word' | 'book', contentId: string) => {
+  const removeFromFavorites = async (contentType: ContentType, contentId: string) => {
     if (!authStore.user) {
       console.log('⚠️ No authenticated user for removing favorite');
       return false;
@@ -148,7 +149,7 @@ export function useFavorites() {
   };
 
   // 즐겨찾기 토글
-  const toggleFavorite = async (contentType: 'word' | 'book', contentId: string) => {
+  const toggleFavorite = async (contentType: ContentType, contentId: string) => {
     const isFavorited = isFavorite(contentType, contentId);
     
     if (isFavorited) {
@@ -159,7 +160,7 @@ export function useFavorites() {
   };
 
   // 즐겨찾기 여부 확인
-  const isFavorite = (contentType: 'word' | 'book', contentId: string): boolean => {
+  const isFavorite = (contentType: ContentType, contentId: string): boolean => {
     return favorites.value.some(
       fav => fav.contentType === contentType && fav.contentId === contentId
     );

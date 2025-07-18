@@ -125,14 +125,16 @@ export const useAuthStore = defineStore('auth', () => {
     username: string, 
     password: string, 
     userType: 'teacher' | 'director' | 'parent',
-    childAge: number
+    childName: string,
+    childBirthDate: string,
+    childAgeMonths: number
   ) => {
     try {
       isLoading.value = true;
       error.value = '';
       
       console.log('🚀 Starting registration process...');
-      console.log('📝 Registration data:', { username, userType, childAge });
+      console.log('📝 Registration data:', { username, userType, childName, childBirthDate, childAgeMonths });
 
       // Validate username format
       if (!/^[a-zA-Z0-9_]{3,20}$/.test(username)) {
@@ -161,7 +163,7 @@ export const useAuthStore = defineStore('auth', () => {
       }
 
       console.log('✅ Username is available, proceeding with signup...');
-      const { user: newUser } = await signUp(username, password, userType, childAge);
+      const { user: newUser } = await signUp(username, password, userType, childName, childBirthDate, childAgeMonths);
       
       if (newUser) {
         console.log('🎉 User created successfully, loading profile...');

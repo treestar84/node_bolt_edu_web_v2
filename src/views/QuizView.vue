@@ -104,6 +104,7 @@ import { useAuthStore } from '@/stores/auth';
 import { useContentStore } from '@/stores/content';
 import { useAudio } from '@/composables/useAudio';
 import { useFileUpload } from '@/composables/useFileUpload';
+import { useQuizTracking } from '@/composables/useQuizTracking';
 import type { Quiz, Badge } from '@/types';
 
 const store = useAppStore();
@@ -111,6 +112,7 @@ const authStore = useAuthStore();
 const contentStore = useContentStore();
 const { isPlaying, playAudio } = useAudio();
 const { getUploadedFileUrl } = useFileUpload();
+const { saveQuizResult } = useQuizTracking();
 
 const gameStarted = ref(false);
 const currentQuiz = ref<Quiz | null>(null);
@@ -192,17 +194,61 @@ const playQuizAudio = () => {
 const selectAnswer = async (answerId: string) => {
   if (showResult.value) return;
   
+  const responseStartTime = Date.now();
   selectedAnswer.value = answerId;
   isCorrect.value = answerId === currentQuiz.value?.correctAnswerId;
   showResult.value = true;
   
+  // 퀴즈 결과를 새로운 quiz_results 테이블에 저장
+  if (currentQuiz.value && authStore.user) {
+    const correctOption = currentQuiz.value.options.find(opt => opt.id === currentQuiz.value?.correctAnswerId);
+    const selectedOption = currentQuiz.value.options.find(opt => opt.id === answerId);
+    
+    const quizResultData = {
+      userId: authStore.user.id,
+      quizType: 'word_quiz',
+      questionId: currentQuiz.value.id,
+      questionText: '이 소리에 맞는 그림을 찾아보세요',
+      correctAnswer: correctOption?.name || '',
+      userAnswer: selectedOption?.name || '',
+      isCorrect: isCorrect.value,
+      responseTimeMs: Date.now() - responseStartTime,
+      difficultyLevel: 1
+    };
+    
+    console.log('💾 Saving quiz result:', quizResultData);
+    
+    try {
+      const savedResult = await saveQuizResult(quizResultData);
+      console.log('✅ Quiz result saved to database:', savedResult);
+    } catch (error) {
+      console.error('❌ Failed to save quiz result:', error);
+      console.error('Error details:', error.message);
+    }
+  } else {
+    console.error('❌ Cannot save quiz result - missing data:', {
+      currentQuiz: !!currentQuiz.value,
+      user: !!authStore.user,
+      userId: authStore.user?.id
+    });
+  }
+  
   if (isCorrect.value) {
     console.log('🎯 Correct answer! Updating quiz score...');
     
-    // Supabase에 진행도 업데이트
+    // Supabase에 진행도 업데이트 (기존 시스템과 호환성 유지)
     if (authStore.userProgress) {
-      const newScore = authStore.userProgress.quiz_score + 1;
-      const newStreak = authStore.userProgress.quiz_streak + 1;
+      const currentScore = authStore.userProgress.quiz_score || 0;
+      const currentStreak = authStore.userProgress.quiz_streak || 0;
+      const newScore = currentScore + 1;
+      const newStreak = currentStreak + 1;
+      
+      console.log('📊 Current progress:', { 
+        currentScore, 
+        currentStreak, 
+        newScore, 
+        newStreak 
+      });
       
       await authStore.updateProgress({
         quiz_score: newScore,
@@ -232,6 +278,8 @@ const selectAnswer = async (answerId: string) => {
     
     // Supabase에 연속 정답 리셋
     if (authStore.userProgress) {
+      console.log('📊 Resetting quiz streak...');
+      
       await authStore.updateProgress({
         quiz_streak: 0
       });

@@ -55,19 +55,38 @@
             </div>
 
             <div class="form-group">
-              <label for="childAge" class="form-label">자녀 나이</label>
-              <select
-                id="childAge"
-                v-model.number="formData.childAge"
+              <label for="childName" class="form-label">자녀 이름</label>
+              <input
+                id="childName"
+                type="text"
+                v-model="formData.childName"
                 class="form-input"
+                placeholder="자녀 이름을 입력하세요"
                 required
-              >
-                <option value="">선택하세요</option>
-                <option value="3">3세</option>
-                <option value="4">4세</option>
-                <option value="5">5세</option>
-                <option value="6">6세</option>
-              </select>
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="childBirthDate" class="form-label">자녀 생년월일</label>
+              <input
+                id="childBirthDate"
+                type="date"
+                v-model="formData.childBirthDate"
+                class="form-input"
+                :max="maxDate"
+                required
+              />
+              <div class="form-hint">
+                정확한 생년월일을 입력하면 맞춤형 학습 콘텐츠를 제공받을 수 있습니다
+              </div>
+            </div>
+
+            <div v-if="formData.childBirthDate" class="child-age-display">
+              <div class="age-info">
+                <span class="age-label">현재 나이:</span>
+                <span class="age-value">{{ calculatedAge.years }}세 {{ calculatedAge.months }}개월</span>
+                <span class="age-months">({{ calculatedAge.totalMonths }}개월)</span>
+              </div>
             </div>
           </div>
 
@@ -211,7 +230,36 @@ const formData = reactive({
   username: '',
   password: '',
   userType: '',
-  childAge: 4
+  childName: '',
+  childBirthDate: ''
+});
+
+// 오늘 날짜 (최대 날짜)
+const maxDate = computed(() => {
+  const today = new Date();
+  return today.toISOString().split('T')[0];
+});
+
+// 나이 계산
+const calculatedAge = computed(() => {
+  if (!formData.childBirthDate) {
+    return { years: 0, months: 0, totalMonths: 0 };
+  }
+  
+  const birthDate = new Date(formData.childBirthDate);
+  const today = new Date();
+  
+  let years = today.getFullYear() - birthDate.getFullYear();
+  let months = today.getMonth() - birthDate.getMonth();
+  
+  if (months < 0) {
+    years--;
+    months += 12;
+  }
+  
+  const totalMonths = years * 12 + months;
+  
+  return { years, months, totalMonths };
 });
 
 const debugInfo = computed(() => ({
@@ -225,7 +273,9 @@ const handleSubmit = async () => {
     isRegister: isRegister.value, 
     username: formData.username,
     userType: formData.userType,
-    childAge: formData.childAge 
+    childName: formData.childName,
+    childBirthDate: formData.childBirthDate,
+    calculatedAge: calculatedAge.value
   });
   
   let success = false;
@@ -235,7 +285,9 @@ const handleSubmit = async () => {
       formData.username,
       formData.password,
       formData.userType as any,
-      formData.childAge
+      formData.childName,
+      formData.childBirthDate,
+      calculatedAge.value.totalMonths
     );
   } else {
     success = await authStore.login(formData.username, formData.password);
@@ -386,6 +438,39 @@ onMounted(() => {
   font-size: 0.75rem;
   color: var(--color-text-muted);
   margin-top: var(--spacing-xs);
+}
+
+.child-age-display {
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-md);
+  margin-top: var(--spacing-md);
+}
+
+.age-info {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  font-size: 0.875rem;
+}
+
+.age-label {
+  font-weight: 500;
+  color: var(--color-text-secondary);
+}
+
+.age-value {
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+.age-months {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  background: rgba(59, 130, 246, 0.1);
+  padding: 0.125rem 0.5rem;
+  border-radius: var(--radius-sm);
 }
 
 .error-message {

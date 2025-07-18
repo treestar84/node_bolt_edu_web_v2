@@ -11,22 +11,40 @@
           </p>
         </div>
 
-        <!-- 로딩 상태 -->
-        <div v-if="contentStore.isLoading" class="loading-state">
-          <div class="spinner"></div>
-          <p>{{$t('achievements.loading')}}</p>
+        <!-- 탭 네비게이션 -->
+        <div class="tab-navigation">
+          <button 
+            v-for="tab in tabs" 
+            :key="tab.key"
+            @click="activeTab = tab.key"
+            class="tab-button"
+            :class="{ active: activeTab === tab.key }"
+          >
+            <span class="tab-icon">{{ tab.icon }}</span>
+            <span class="tab-label">{{ tab.label }}</span>
+          </button>
         </div>
 
-        <!-- 에러 상태 -->
-        <div v-else-if="contentStore.error" class="error-state">
-          <div class="error-icon">⚠️</div>
-          <h3>{{$t('achievements.errorTitle')}}</h3>
-          <p>{{ contentStore.error }}</p>
-          <button @click="reloadContent" class="btn btn-primary">{{$t('achievements.retry')}}</button>
-        </div>
+        <!-- 탭 컨텐츠 -->
+        <div class="tab-content">
+          <!-- 달성도 탭 -->
+          <div v-if="activeTab === 'achievements'" class="tab-pane">
+            <!-- 로딩 상태 -->
+            <div v-if="contentStore.isLoading" class="loading-state">
+              <div class="spinner"></div>
+              <p>{{$t('achievements.loading')}}</p>
+            </div>
 
-        <!-- 정상 상태 -->
-        <div v-else>
+            <!-- 에러 상태 -->
+            <div v-else-if="contentStore.error" class="error-state">
+              <div class="error-icon">⚠️</div>
+              <h3>{{$t('achievements.errorTitle')}}</h3>
+              <p>{{ contentStore.error }}</p>
+              <button @click="reloadContent" class="btn btn-primary">{{$t('achievements.retry')}}</button>
+            </div>
+
+            <!-- 정상 상태 -->
+            <div v-else>
           <!-- 획득한 뱃지 섹션 - 최상단에 모든 뱃지 표시 -->
           <section class="earned-badges-section">
             <div class="section-header">
@@ -226,6 +244,18 @@
               <button @click="checkBadges" class="btn btn-primary">뱃지 확인 실행</button>
             </div>
           </section>
+          </div>
+          </div>
+
+          <!-- 통계 탭 -->
+          <div v-if="activeTab === 'stats'" class="tab-pane">
+            <QuizStatsContentView />
+          </div>
+
+          <!-- 좋아요 탭 -->
+          <div v-if="activeTab === 'likes'" class="tab-pane">
+            <LikesContentView />
+          </div>
         </div>
 
         <!-- 디버그 토글 버튼 -->
@@ -244,6 +274,8 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue';
 import Navigation from '@/components/Navigation.vue';
+import QuizStatsContentView from '@/views/QuizStatsContentView.vue';
+import LikesContentView from '@/views/LikesContentView.vue';
 import { useAuthStore } from '@/stores/auth';
 import { useContentStore } from '@/stores/content';
 import type { Badge } from '@/types';
@@ -251,6 +283,14 @@ import type { Badge } from '@/types';
 const authStore = useAuthStore();
 const contentStore = useContentStore();
 const showDebugInfo = ref(false);
+
+// 탭 관리
+const activeTab = ref('achievements');
+const tabs = [
+  { key: 'achievements', label: '달성도', icon: '🏆' },
+  { key: 'stats', label: '통계', icon: '📊' },
+  { key: 'likes', label: '좋아요', icon: '❤️' }
+];
 
 // FIXED: 실제 표시될 뱃지 계산 (여러 방법으로 시도)
 const displayedBadges = computed(() => {
@@ -1039,5 +1079,88 @@ onMounted(async () => {
 .debug-toggle {
   font-size: 0.7rem;
   padding: var(--spacing-xs);
+}
+
+/* 탭 네비게이션 스타일 */
+.tab-navigation {
+  display: flex;
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-xs);
+  margin-bottom: var(--spacing-xl);
+  gap: var(--spacing-xs);
+}
+
+.tab-button {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md) var(--spacing-lg);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.tab-button:hover {
+  background: var(--color-bg-secondary);
+  color: var(--color-text-primary);
+}
+
+.tab-button.active {
+  background: var(--color-primary);
+  color: white;
+  box-shadow: var(--shadow-sm);
+}
+
+.tab-icon {
+  font-size: 1.2rem;
+}
+
+.tab-label {
+  font-weight: 600;
+}
+
+.tab-content {
+  min-height: 400px;
+}
+
+.tab-pane {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 모바일 반응형 */
+@media (max-width: 768px) {
+  .tab-navigation {
+    flex-direction: column;
+    gap: var(--spacing-xs);
+  }
+  
+  .tab-button {
+    padding: var(--spacing-sm) var(--spacing-md);
+    font-size: 0.8rem;
+  }
+  
+  .tab-icon {
+    font-size: 1rem;
+  }
 }
 </style>

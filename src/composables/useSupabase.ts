@@ -23,10 +23,10 @@ export function useSupabase() {
     supabase,
     
     // Auth helpers - Enhanced with better session management
-    async signUp(username: string, password: string, userType: string, childAge: number) {
+    async signUp(username: string, password: string, userType: string, childName: string, childBirthDate: string, childAgeMonths: number) {
       try {
         console.log('🚀 Starting signup process for:', username);
-        console.log('📋 Signup parameters:', { username, userType, childAge });
+        console.log('📋 Signup parameters:', { username, userType, childName, childBirthDate, childAgeMonths });
         
         // Create a fake email from username for Supabase
         const email = `${username}@local.app`;
@@ -42,7 +42,9 @@ export function useSupabase() {
             data: {
               username: username,
               user_type: userType,
-              child_age: childAge,
+              child_name: childName,
+              child_birth_date: childBirthDate,
+              child_age_months: childAgeMonths,
               email_confirm: false // Custom flag to indicate no email confirmation needed
             }
           }
@@ -111,7 +113,9 @@ export function useSupabase() {
               user_id: data.user.id,
               username,
               user_type: userType,
-              child_age: childAge, // FIXED: Use snake_case for database
+              child_name: childName,
+              child_birth_date: childBirthDate,
+              child_age_months: childAgeMonths,
               site_name: '유아학습'
             };
             
@@ -332,19 +336,19 @@ export function useSupabase() {
         
         // Test 3: User-specific table access (if authenticated)
         if (authUser.user) {
-          const { data: profiles, error: profilesError } = await supabase
+          const { data: user_profiles, error: user_profilesError } = await supabase
             .from('user_profiles')
             .select('count')
             .limit(1);
           
-          console.log('👤 Profiles table test:', { profiles, profilesError });
+          console.log('👤 Profiles table test:', { user_profiles, user_profilesError });
         }
         
         return {
           success: true,
           authUser: authUser.user?.id,
           badgesAccess: !badgesError,
-          profilesAccess: authUser.user ? !badgesError : 'not_authenticated'
+          user_profilesAccess: authUser.user ? !badgesError : 'not_authenticated'
         };
       } catch (error) {
         console.error('💥 Database connection test failed:', error);

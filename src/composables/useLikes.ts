@@ -75,9 +75,10 @@ export function useLikes() {
   const error = ref<string>('');
 
   // 좋아요 목록 로드
-  const loadLikes = async () => {
-    if (!authStore.user) {
-      console.log('⚠️ No authenticated user for likes');
+  const loadLikes = async (userId?: string) => {
+    const targetUserId = userId || authStore.user?.id;
+    if (!targetUserId) {
+      console.log('⚠️ No user ID provided for likes');
       return;
     }
 
@@ -85,14 +86,14 @@ export function useLikes() {
       isLoading.value = true;
       error.value = '';
 
-      console.log('🔄 Loading likes for user:', authStore.user.id);
+      console.log('🔄 Loading likes for user:', targetUserId);
 
       // likes 테이블부터 시도 (새로운 테이블)
       let tableName = 'likes';
       let { data, error: fetchError } = await supabase
         .from(tableName)
         .select('*')
-        .eq('user_id', authStore.user.id)
+        .eq('user_id', targetUserId)
         .order('created_at', { ascending: false });
 
       // likes 테이블이 없으면 favorites 테이블 사용 (fallback)
@@ -102,7 +103,7 @@ export function useLikes() {
         const result = await supabase
           .from(tableName)
           .select('*')
-          .eq('user_id', authStore.user.id)
+          .eq('user_id', targetUserId)
           .order('created_at', { ascending: false });
         data = result.data;
         fetchError = result.error;
@@ -322,12 +323,39 @@ export function useLikes() {
       const grouped = groupAndCount(result.data || []);
       const limitedData = grouped.slice(0, limit);
 
-      ranking.value = limitedData.map((item, index) => ({
-        contentId: item.content_id,
-        likeCount: item.count,
-        latestLike: item.created_at,
-        rankPosition: index + 1
-      }));
+      ranking.value = limitedData.map((item, index) => {
+        // 기본 제목 설정
+        let contentTitle = '';
+        switch (contentType) {
+          case 'word':
+            contentTitle = `단어 ${item.content_id}`;
+            break;
+          case 'book':
+            contentTitle = `책 ${item.content_id}`;
+            break;
+          case 'quiz':
+            contentTitle = '퀴즈';
+            break;
+          case 'puzzle':
+            contentTitle = '퍼즐';
+            break;
+          default:
+            contentTitle = '알 수 없는 콘텐츠';
+        }
+        
+        return {
+          id: item.content_id,
+          contentId: item.content_id,
+          content_id: item.content_id,
+          content_title: contentTitle,
+          content_name: contentTitle,
+          content_type: contentType,
+          likeCount: item.count,
+          like_count: item.count,
+          latestLike: item.created_at,
+          rankPosition: index + 1
+        };
+      });
 
       console.log('✅ Ranking loaded:', ranking.value.length);
     } catch (err: any) {
@@ -452,9 +480,43 @@ export function useLikes() {
     likes.value.filter(like => like.contentType === 'puzzle')
   );
 
+  // myLikes 별칭 추가 (LikesContentView 호환성을 위해)
+  const myLikes = computed(() => {
+    return likes.value.map(like => {
+      // 기본 제목 설정 (contentStore 없이)
+      let contentTitle = '';
+      
+      switch (like.contentType) {
+        case 'word':
+          contentTitle = `단어 ${like.contentId}`;
+          break;
+        case 'book':
+          contentTitle = `책 ${like.contentId}`;
+          break;
+        case 'quiz':
+          contentTitle = '퀴즈';
+          break;
+        case 'puzzle':
+          contentTitle = '퍼즐';
+          break;
+        default:
+          contentTitle = '알 수 없는 콘텐츠';
+      }
+      
+      return {
+        ...like,
+        content_title: contentTitle,
+        content_name: contentTitle,
+        content_type: like.contentType,
+        created_at: like.createdAt
+      };
+    });
+  });
+
   return {
     // State
     likes,
+    myLikes, // 추가
     ranking,
     statistics,
     isLoading,

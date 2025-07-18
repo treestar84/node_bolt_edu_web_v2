@@ -1,0 +1,78 @@
+runtime: nodejs20
+
+# 환경 변수 (실제 값으로 교체 필요)
+env_variables:
+  NODE_ENV: production
+  VITE_SUPABASE_URL: "YOUR_SUPABASE_URL"
+  VITE_SUPABASE_ANON_KEY: "YOUR_SUPABASE_ANON_KEY"
+
+# 정적 파일 처리
+handlers:
+  # 정적 파일 캐싱
+  - url: /assets
+    static_dir: dist/assets
+    secure: always
+    http_headers:
+      Cache-Control: "public, max-age=31536000, immutable"
+  
+  # 이미지 파일
+  - url: /images
+    static_dir: dist/images
+    secure: always
+    http_headers:
+      Cache-Control: "public, max-age=86400"
+  
+  # 오디오 파일
+  - url: /audio
+    static_dir: dist/audio
+    secure: always
+    http_headers:
+      Cache-Control: "public, max-age=86400"
+  
+  # PWA 파일들
+  - url: /manifest.json
+    static_files: dist/manifest.json
+    upload: dist/manifest.json
+    secure: always
+    http_headers:
+      Content-Type: "application/manifest+json"
+  
+  - url: /sw.js
+    static_files: dist/sw.js
+    upload: dist/sw.js
+    secure: always
+    http_headers:
+      Content-Type: "application/javascript"
+      Cache-Control: "no-cache, no-store, must-revalidate"
+  
+  - url: /offline.html
+    static_files: dist/offline.html
+    upload: dist/offline.html
+    secure: always
+  
+  # 아이콘 파일
+  - url: /icons
+    static_dir: dist/icons
+    secure: always
+    http_headers:
+      Cache-Control: "public, max-age=86400"
+  
+  # SPA 라우팅 - 모든 요청을 index.html로
+  - url: /.*
+    static_files: dist/index.html
+    upload: dist/index.html
+    secure: always
+    http_headers:
+      Content-Security-Policy: "default-src 'self' https:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https:; font-src 'self' https:; connect-src 'self' https:; media-src 'self' https:;"
+
+# 자동 스케일링 설정
+automatic_scaling:
+  min_instances: 0
+  max_instances: 10
+  target_cpu_utilization: 0.6
+
+# 리소스 설정
+resources:
+  cpu: 1
+  memory_gb: 0.5
+  disk_size_gb: 10

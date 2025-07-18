@@ -3,17 +3,17 @@
  * PWA 오프라인 지원 및 캐싱 전략 구현
  */
 
-const CACHE_NAME = 'toddler-app-v1.0.0';
+const CACHE_NAME = 'toddler-app-v1.0.1';
 const OFFLINE_URL = '/offline.html';
 
-// 캐시할 핵심 리소스들
+// 캐시할 핵심 리소스들 (모든 외부 리소스 HTTPS 사용)
 const CORE_CACHE_URLS = [
   '/',
   '/offline.html',
   '/manifest.json',
   '/icons/icon-192x192.png',
   '/icons/icon-512x512.png',
-  // CSS 및 폰트
+  // CSS 및 폰트 (HTTPS 강제)
   'https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css'
 ];
 
@@ -96,6 +96,26 @@ self.addEventListener('fetch', (event) => {
 
   // Chrome extension 요청 무시
   if (event.request.url.startsWith('chrome-extension://')) {
+    return;
+  }
+
+  // 잘못된 URL 형식 검증
+  try {
+    const url = new URL(event.request.url);
+    
+    // 특수 문자나 잘못된 인코딩이 있는 URL 무시
+    if (url.pathname.includes('%') && !isValidEncodedURI(url.pathname)) {
+      console.warn('⚠️ 잘못된 URL 인코딩 감지:', event.request.url);
+      return;
+    }
+    
+    // 한글이나 특수 문자가 포함된 URL 처리
+    if (containsKoreanOrSpecialChars(url.pathname)) {
+      console.log('🔄 한글/특수문자 URL 처리:', event.request.url);
+    }
+    
+  } catch (error) {
+    console.error('❌ URL 파싱 실패:', event.request.url, error);
     return;
   }
 
@@ -198,20 +218,51 @@ async function handleImageRequest(request) {
 }
 
 /**
- * 오디오 요청 처리 (네트워크 우선)
+ * 오디오 요청 처리 (Range 요청 지원)
  */
 async function handleAudioRequest(request) {
+  const url = new URL(request.url);
+  const rangeHeader = request.headers.get('range');
+  
   try {
+    // Range 요청인 경우 캐시하지 않고 네트워크로 직접 전달
+    if (rangeHeader) {
+      console.log('🎵 Range 요청 감지, 네트워크로 직접 전달:', url.pathname);
+      return fetch(request);
+    }
+    
+    // 캐시 먼저 확인
+    const cachedResponse = await caches.match(request);
+    if (cachedResponse) {
+      console.log('🎵 캐시된 오디오 파일 반환:', url.pathname);
+      return cachedResponse;
+    }
+    
+    // 네트워크에서 가져오기
     const networkResponse = await fetch(request);
     
-    if (networkResponse.ok) {
+    // 성공적인 응답이고 Range 요청이 아닌 경우에만 캐시
+    if (networkResponse.ok && networkResponse.status === 200) {
       const cache = await caches.open(CACHE_NAME);
+      console.log('🎵 오디오 파일 캐시 저장:', url.pathname);
       cache.put(request, networkResponse.clone());
     }
     
     return networkResponse;
   } catch (error) {
-    return caches.match(request);
+    console.error('❌ 오디오 요청 처리 실패:', error);
+    
+    // 오프라인 시 캐시에서 찾기
+    const cachedResponse = await caches.match(request);
+    if (cachedResponse) {
+      return cachedResponse;
+    }
+    
+    // 캐시에도 없으면 오류 반환
+    return new Response('오디오 파일을 찾을 수 없습니다.', {
+      status: 404,
+      statusText: 'Not Found'
+    });
   }
 }
 
@@ -305,6 +356,53 @@ async function handleOfflineResponse(request) {
  */
 function isDynamicCachePattern(url) {
   return DYNAMIC_CACHE_PATTERNS.some(pattern => pattern.test(url));
+}
+
+/**
+ * URL 인코딩 검증
+ */
+function isValidEncodedURI(uri) {
+  try {
+    // decodeURI 테스트 - 실패하면 잘못된 인코딩
+    decodeURI(uri);
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+
+/**
+ * 한글이나 특수 문자 포함 확인
+ */
+function containsKoreanOrSpecialChars(str) {
+  // 한글 유니코드 범위: \uAC00-\uD7AF
+  // 한글 자음/모음: \u3131-\u318E
+  const koreanRegex = /[\uAC00-\uD7AF\u3131-\u318E]/;
+  const specialCharsRegex = /[^\w\-._~:/?#[\]@!$&'()*+,;=%]/;
+  
+  return koreanRegex.test(str) || specialCharsRegex.test(str);
+}
+
+/**
+ * 안전한 URL 정규화
+ */
+function sanitizeURL(url) {
+  try {
+    const urlObj = new URL(url);
+    
+    // 경로 정규화
+    const normalizedPath = urlObj.pathname
+      .replace(/\/{2,}/g, '/') // 연속된 슬래시 제거
+      .replace(/\/+$/, '') // 마지막 슬래시 제거
+      .replace(/[^\w\-._~:/?#[\]@!$&'()*+,;=%]/g, ''); // 위험한 문자 제거
+    
+    urlObj.pathname = normalizedPath || '/';
+    
+    return urlObj.toString();
+  } catch (error) {
+    console.error('URL 정규화 실패:', url, error);
+    return null;
+  }
 }
 
 /**

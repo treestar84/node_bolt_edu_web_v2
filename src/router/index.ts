@@ -93,6 +93,18 @@ const routes = [
     path: '/api-guide',
     name: 'ApiGuide',
     component: () => import('@/views/ApiGuideView.vue')
+  },
+  {
+    path: '/learning-stats',
+    name: 'LearningStats',
+    component: () => import('@/views/LearningStatsView.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/quiz-stats',
+    name: 'QuizStats',
+    component: () => import('@/views/QuizStatsView.vue'),
+    meta: { requiresAuth: true }
   }
 ];
 

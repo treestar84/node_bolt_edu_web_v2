@@ -86,7 +86,7 @@ export const useAppStore = defineStore('app', () => {
         return;
       }
       currentWords.value = (data || []).map(transformWordFromDB);
-      console.log('✅ Words loaded:', currentWords.value.length);
+      console.log('✅ Words loaded:', currentWords.value.length, currentWords.value.map(w => w.id));
     } catch (error) {
       console.error('💥 Error in loadWords:', error);
       currentWords.value = [];

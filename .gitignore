@@ -18,6 +18,12 @@ server/uploads/
 !.vscode/extensions.json
 .idea
 .DS_Store
+src/.DS_Store
+public/.DS_Store
+supabase/.DS_Store
+server/.DS_Store
+server/uploads/
+server/data/
 *.suo
 *.ntvs*
 *.njsproj
@@ -32,15 +38,14 @@ server/uploads/
 .env.production.local
 
 # Security sensitive files
-server/data/apiKeys.json
-server/data/store.js
+server/data/
+server/uploads/
 
 # Build files
 *.tsbuildinfo
 
 # SQL files (migration files should be in supabase/migrations only)
 *.sql
-!supabase/migrations/*.sql
 
 # Temporary files
 *.tmp
