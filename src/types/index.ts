@@ -115,6 +115,8 @@ export interface Like {
   userId: string;
   contentType: 'word' | 'book' | 'quiz' | 'puzzle';
   contentId: string;
+  content_title?: string; // Add this line
+  content_name?: string; // Add this line
   createdAt: string;
   updatedAt: string;
 }
