@@ -55,6 +55,7 @@ npm run api
 ### Components
 - **WordCard.vue**: 단어 카드 UI, 이미지/음성 재생
 - **FileUploadInput.vue**: 파일 업로드 (이미지/음성)
+- **LikeButton.vue**: 좋아요 버튼 (단어/책 좋아요 기능)
 - **Navigation.vue**: 메인 네비게이션
 
 ### Views
@@ -64,6 +65,9 @@ npm run api
 - **BookReaderView.vue**: 그림책 읽기
 - **QuizView.vue**: 퀴즈 게임
 - **PuzzleView.vue**: 퍼즐 게임
+- **LikesView.vue**: 좋아요한 콘텐츠 목록 및 랭킹
+- **LearningStatsView.vue**: 사용자 학습 통계 (연령대 비교 포함)
+- **QuizStatsView.vue**: 퀴즈 결과 통계
 - **admin/**: 관리자 페이지들
 
 ### Stores (Pinia)
@@ -74,7 +78,34 @@ npm run api
 ### Composables
 - **useAudio.ts**: 오디오 재생 관리
 - **useFileUpload.ts**: 파일 업로드 로직
+- **useLikes.ts**: 좋아요 기능 (추가/삭제, 목록, 랭킹, 통계)
+- **useQuizTracking.ts**: 퀴즈 결과 추적 및 학습 통계
 - **useSupabase.ts**: Supabase 클라이언트
+
+## 좋아요 및 통계 기능
+
+### 좋아요 기능 (`useLikes.ts`, `LikesView.vue`)
+- **목적**: 사용자가 단어, 그림책, 퀴즈, 퍼즐 등 다양한 콘텐츠에 '좋아요'를 표시하고 관리할 수 있도록 합니다.
+- **주요 기능**:
+  - 콘텐츠 좋아요 추가/제거
+  - 사용자가 좋아요한 콘텐츠 목록 조회
+  - 콘텐츠별 좋아요 랭킹 (주간, 월간, 전체 기간) 및 통계 제공
+- **데이터 흐름**:
+  - `LikeButton.vue`에서 `useLikes.ts`의 `toggleLike` 호출
+  - `useLikes.ts`는 Supabase의 `likes` 테이블(또는 `favorites` 테이블로 폴백)과 연동하여 좋아요 상태를 관리
+  - `LikesView.vue`에서 `useLikes.ts`를 통해 사용자의 좋아요 목록 및 랭킹 데이터를 불러와 표시
+
+### 학습 통계 기능 (`useQuizTracking.ts`, `LearningStatsView.vue`, `QuizStatsView.vue`)
+- **목적**: 사용자의 퀴즈 학습 결과를 추적하고, 다양한 통계 및 분석 정보를 제공하여 학습 현황을 파악할 수 있도록 돕습니다.
+- **주요 기능**:
+  - 퀴즈 결과 저장 (정답 여부, 응답 시간, 난이도 등)
+  - 사용자별 학습 통계 (총 문제 수, 정답률, 연속 정답 등)
+  - 연령대별 비교 및 학습 수준 분석
+  - 주간 학습 진도 및 난이도별 정답률 시각화
+- **데이터 흐름**:
+  - `QuizView.vue` 등 퀴즈 관련 뷰에서 `useQuizTracking.ts`의 `saveQuizResult` 호출
+  - `useQuizTracking.ts`는 Supabase의 `quiz_results` 테이블에 퀴즈 결과를 저장
+  - `LearningStatsView.vue` 및 `QuizStatsView.vue`에서 `useQuizTracking.ts`를 통해 저장된 퀴즈 결과를 불러와 통계 및 분석 정보를 계산하고 시각화
 
 ## API 및 데이터 흐름
 
