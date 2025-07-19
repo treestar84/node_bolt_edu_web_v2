@@ -752,7 +752,7 @@ onUnmounted(() => {
   }
   
   .mobile-menu {
-    width: 280px;
+    width: 100%;
   }
   
   .mobile-menu-content {
