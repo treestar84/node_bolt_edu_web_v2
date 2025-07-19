@@ -45,7 +45,10 @@ export default defineConfig({
   },
   preview: {
     host: '0.0.0.0',
-    port: 4173
+    port: 4173,
+    strictPort: true,
+    open: true,
+    allowedHosts: ['duck-edu-word.duckdns.org']
   },
   build: {
     // PWA 최적화를 위한 빌드 설정
