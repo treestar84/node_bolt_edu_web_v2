@@ -40,13 +40,17 @@ const props = withDefaults(defineProps<Props>(), {
 
 const emit = defineEmits<Emits>();
 
-const { isLikedByUser, toggleLike, getContentLikeCount, loadLikes } = useLikes();
+const { likes, isLikedByUser, toggleLike, getContentLikeCount, loadLikes } = useLikes();
 const isLoading = ref(false);
 const likeCount = ref(0);
 
-const isLiked = computed(() => 
-  isLikedByUser(props.contentType, props.contentId)
-);
+const isLiked = computed(() => {
+  // likes 변화를 명시적으로 감지하도록 함
+  const userLikes = likes.value;
+  const result = isLikedByUser(props.contentType, props.contentId);
+  console.log('🔄 LikeButton computed isLiked:', result, 'likes count:', userLikes.length);
+  return result;
+});
 
 const handleToggle = async () => {
   if (isLoading.value) return;
