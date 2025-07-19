@@ -5,7 +5,7 @@ import { generateToken, verifyToken, authenticateAdmin } from '../middleware/aut
 const router = express.Router();
 
 // Admin credentials (in production, store in database)
-const ADMIN_PASSWORD_HASH = bcrypt.hashSync('admin123', 10);
+const ADMIN_PASSWORD_HASH = bcrypt.hashSync('aa11##', 10);
 
 // Admin login
 router.post('/login', async (req, res) => {
