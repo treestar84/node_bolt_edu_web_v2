@@ -17,6 +17,7 @@
 :root.dark {
   /* Dark theme backgrounds */
   --color-bg-primary: #0a0a0a;
+  --color-bg-primary-rgb: 10, 10, 10;
   --color-bg-secondary: #111111;
   --color-bg-tertiary: #1a1a1a;
   --color-bg-card: #111111;
@@ -40,6 +41,7 @@
 :root.light {
   /* Light theme backgrounds */
   --color-bg-primary: #ffffff;
+  --color-bg-primary-rgb: 255, 255, 255;
   --color-bg-secondary: #f8fafc;
   --color-bg-tertiary: #f1f5f9;
   --color-bg-card: #ffffff;

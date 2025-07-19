@@ -5,26 +5,54 @@
     <main class="main-content">
       <div class="container">
         <section class="hero-section">
+          <!-- 배경 이미지 레이어 -->
+          <div class="hero-background">
+            <div 
+              v-for="(image, index) in backgroundImages" 
+              :key="index"
+              class="bg-image"
+              :style="{ 
+                backgroundImage: `url(${image})`,
+                animationDelay: `${index * 2}s`
+              }"
+            ></div>
+          </div>
+          
+          
+          <!-- 콘텐츠 레이어 -->
           <div class="hero-content">
             <div class="hero-badge">
               {{ authStore.childAge }}세 맞춤 학습
             </div>
-            <h1 class="hero-title">
-              즐겁게 배우는<br />
-              우리 아이 첫 학습
+            <h1 class="hero-title fade-in">
+              You are my heart outside my body.
             </h1>
-            <p class="hero-description">
-              이미지와 소리로 배우는 재미있는 한글 학습.<br />
-              아이들의 호기심을 자극하는 인터랙티브 학습 경험을 제공합니다.
+            <p class="hero-description fade-in">
+              {{$t('landing.description')}}
             </p>
-            
-            <div class="hero-actions">
-              <router-link to="/words" class="btn btn-primary">
-                학습 시작하기
+
+            <div class="hero-actions fade-in">
+              <router-link to="/words" class="btn btn-primary btn-lg">
+                단어 학습하기
               </router-link>
-              <router-link to="/quiz" class="btn btn-secondary">
+              <router-link to="/quiz" class="btn btn-secondary btn-lg">
                 퀴즈 놀이
               </router-link>
+            </div>
+          </div>
+
+          <!-- 플로팅 카드들 -->
+          <div class="floating-cards">
+            <div 
+              v-for="(card, index) in floatingCards" 
+              :key="index"
+              class="floating-card"
+              :class="`delay-${index + 1}`"
+              :style="{ 
+                animationDelay: `${index * 0.5}s`
+              }"
+            >
+              <img :src="card.image" :alt="card.alt" />
             </div>
           </div>
         </section>
@@ -85,7 +113,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import Navigation from '@/components/Navigation.vue';
 import BadgeDisplay from '@/components/BadgeDisplay.vue';
 import { useAuthStore } from '@/stores/auth';
@@ -94,6 +122,71 @@ import { useContentStore } from '@/stores/content';
 const authStore = useAuthStore();
 const contentStore = useContentStore();
 
+
+// 플로팅 카드들 (사용자 저장 이미지)
+const floatingCards = ref<Array<{
+  image: string;
+  alt: string;
+}>>([]);
+
+// 배경 이미지들
+const backgroundImages = ref<string[]>([]);
+
+
+// 플로팅 카드 생성 (사용자 저장 이미지 기반)
+const generateFloatingCards = () => {
+  const availableImages = contentStore.words
+    .filter(word => word.imageUrl)
+    .slice(0, 6)
+    .map(word => ({
+      image: getImageUrl(word.imageUrl),
+      alt: word.name
+    }));
+  
+  // 기본 이미지들과 함께
+  const defaultCards = [
+    {
+      image: "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg?auto=compress&cs=tinysrgb&w=300",
+      alt: "Learning"
+    },
+    {
+      image: "https://images.pexels.com/photos/104827/cat-pet-animal-domestic-104827.jpeg?auto=compress&cs=tinysrgb&w=300", 
+      alt: "Cat"
+    }
+  ];
+  
+  floatingCards.value = [...availableImages.slice(0, 3), ...defaultCards].slice(0, 4);
+};
+
+// 배경 이미지 생성
+const generateBackgroundImages = () => {
+  const userImages = contentStore.words
+    .filter(word => word.imageUrl)
+    .slice(0, 3)
+    .map(word => getImageUrl(word.imageUrl));
+  
+  if (userImages.length > 0) {
+    // 사용자가 등록한 이미지가 있으면 그것을 사용
+    backgroundImages.value = userImages;
+  } else {
+    // 없으면 고정된 교육용 이미지 사용
+    backgroundImages.value = [
+      "https://images.pexels.com/photos/1092730/pexels-photo-1092730.jpeg?auto=compress&cs=tinysrgb&w=1200" // 아이들이 공부하는 모습
+    ];
+  }
+};
+
+const getImageUrl = (url: string): string => {
+  if (url.startsWith('/uploads/')) {
+    return '/server' + url;
+  }
+  return url;
+};
+
+onMounted(() => {
+  generateFloatingCards();
+  generateBackgroundImages();
+});
 
 const features = computed(() => [
   {
@@ -140,11 +233,92 @@ const features = computed(() => [
 .hero-section {
   padding: 120px 0 80px;
   text-align: center;
+  position: relative;
+  overflow: hidden;
+  min-height: 80vh;
 }
 
+.hero-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+}
+
+.bg-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity: 0;
+  animation: fadeInOut 6s ease-in-out infinite;
+}
+
+
 .hero-content {
+  position: relative;
+  z-index: 3;
   max-width: 640px;
   margin: 0 auto;
+  text-align: center;
+  padding: 0 20px;
+}
+
+.floating-cards {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.floating-card {
+  position: absolute;
+  width: 120px;
+  height: 120px;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
+  animation: floatCard 6s ease-in-out infinite;
+  opacity: 0.7;
+}
+
+.floating-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.floating-card:nth-child(1) {
+  top: 20%;
+  left: 10%;
+  animation-delay: 0s;
+}
+
+.floating-card:nth-child(2) {
+  top: 60%;
+  right: 15%;
+  animation-delay: 1s;
+}
+
+.floating-card:nth-child(3) {
+  top: 30%;
+  right: 5%;
+  animation-delay: 2s;
+}
+
+.floating-card:nth-child(4) {
+  bottom: 25%;
+  left: 5%;
+  animation-delay: 1.5s;
 }
 
 .hero-badge {
@@ -166,6 +340,7 @@ const features = computed(() => [
   margin-bottom: 24px;
   color: var(--color-text-primary);
   letter-spacing: -0.02em;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .hero-description {
@@ -173,6 +348,7 @@ const features = computed(() => [
   color: var(--color-text-secondary);
   margin-bottom: 40px;
   line-height: 1.6;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .hero-actions {
@@ -402,6 +578,93 @@ const features = computed(() => [
   .stats-grid {
     grid-template-columns: 1fr;
     gap: 16px;
+  }
+}
+
+/* 애니메이션 키프레임 */
+@keyframes fadeInOut {
+  0%, 100% { opacity: 0; }
+  16.66%, 83.33% { opacity: 0.15; }
+  50% { opacity: 0.25; }
+}
+
+
+@keyframes floatCard {
+  0%, 100% { 
+    transform: translateY(0px) rotate(0deg); 
+    opacity: 0.5; 
+  }
+  50% { 
+    transform: translateY(-15px) rotate(2deg); 
+    opacity: 0.8; 
+  }
+}
+
+.fade-in {
+  opacity: 0;
+  animation: fadeInUp 0.8s ease forwards;
+}
+
+.fade-in:nth-child(1) { animation-delay: 0.2s; }
+.fade-in:nth-child(2) { animation-delay: 0.4s; }
+.fade-in:nth-child(3) { animation-delay: 0.6s; }
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 모바일에서 애니메이션 단순화 */
+@media (max-width: 768px) {
+  .hero-content {
+    padding: 40px 20px;
+  }
+  
+  .floating-card {
+    width: 80px;
+    height: 80px;
+  }
+  
+  
+  .hero-section {
+    min-height: 70vh;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-content {
+    padding: 30px 16px;
+  }
+  
+  .floating-cards {
+    display: none; /* 작은 화면에서는 플로팅 카드 숨김 */
+  }
+  
+  .hero-section {
+    min-height: 60vh;
+  }
+}
+
+/* 애니메이션 감소 설정을 선호하는 사용자를 위한 처리 */
+@media (prefers-reduced-motion: reduce) {
+  .bg-image,
+  .floating-card,
+  .fade-in {
+    animation: none;
+  }
+  
+  .floating-card {
+    opacity: 0.7;
+  }
+  
+  .fade-in {
+    opacity: 1;
   }
 }
 </style>
