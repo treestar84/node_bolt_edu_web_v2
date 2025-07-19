@@ -628,7 +628,7 @@ onMounted(() => {
 
 .debug-btn {
   background: var(--color-primary);
-  color: white;
+  color: var(--color-text-primary);
   border: none;
   padding: var(--spacing-sm) var(--spacing-md);
   border-radius: var(--radius-sm);

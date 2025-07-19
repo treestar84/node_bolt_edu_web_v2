@@ -530,7 +530,7 @@ onMounted(() => {
   gap: var(--spacing-sm);
   padding: var(--spacing-lg) var(--spacing-xl);
   background: var(--color-primary);
-  color: white;
+  color: var(--color-text-primary);
   border: none;
   border-radius: var(--radius-md);
   font-size: 1.125rem;
@@ -549,7 +549,7 @@ onMounted(() => {
 }
 
 .audio-text {
-  color: white;
+  color: var(--color-text-primary);
   font-weight: 700;
 }
 

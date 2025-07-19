@@ -874,7 +874,7 @@ watch(puzzleDifficulty, () => {
 
 .aspect-ratio-info {
   background: var(--color-primary);
-  color: white;
+  color: var(--color-text-primary);
   padding: 2px var(--spacing-xs);
   border-radius: var(--radius-sm);
   font-size: 0.75rem;

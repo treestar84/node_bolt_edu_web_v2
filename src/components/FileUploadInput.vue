@@ -212,7 +212,7 @@ const getPreviewUrl = (url: string) => {
 
 .tab-button.active {
   background: var(--color-primary);
-  color: white;
+  color: var(--color-text-primary);
 }
 
 .tab-button:hover:not(.active) {

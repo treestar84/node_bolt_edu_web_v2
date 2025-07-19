@@ -243,14 +243,21 @@ span, div, label {
   outline-offset: 2px;
 }
 
-.btn-primary {
+.btn-primary,
+.btn.btn-primary,
+.btn-primary.active,
+.btn.btn-primary.active {
   background: var(--color-primary);
-  color: var(--color-text-white);
+  color: #111;
   box-shadow: var(--shadow-button);
 }
 
-.btn-primary:hover:not(:disabled) {
+.btn-primary:hover:not(:disabled),
+.btn.btn-primary:hover:not(:disabled),
+.btn-primary.active:hover:not(:disabled),
+.btn.btn-primary.active:hover:not(:disabled) {
   background: var(--color-primary-light);
+  color: #111;
   transform: translateY(-1px);
   box-shadow: var(--shadow-md);
 }
@@ -268,7 +275,7 @@ span, div, label {
 
 .btn-success {
   background: var(--color-success);
-  color: var(--color-text-white);
+  color: var(--color-text-primary);
 }
 
 .btn-success:hover:not(:disabled) {
@@ -278,7 +285,7 @@ span, div, label {
 
 .btn-danger {
   background: var(--color-danger);
-  color: var(--color-text-white);
+  color: var(--color-text-primary);
 }
 
 .btn-danger:hover:not(:disabled) {
@@ -376,14 +383,33 @@ span, div, label {
 .grid-3 { grid-template-columns: repeat(3, 1fr); }
 .grid-4 { grid-template-columns: repeat(4, 1fr); }
 
-@media (max-width: 768px) {
+/* Improved responsive grid system */
+@media (max-width: 480px) {
+  .grid {
+    gap: var(--spacing-md);
+  }
   .grid-2, .grid-3, .grid-4 {
     grid-template-columns: 1fr;
   }
 }
 
+@media (min-width: 481px) and (max-width: 768px) {
+  .grid {
+    gap: var(--spacing-md);
+  }
+  .grid-3, .grid-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .grid-2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 @media (min-width: 769px) and (max-width: 1024px) {
   .grid-3, .grid-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .grid-2 {
     grid-template-columns: repeat(2, 1fr);
   }
 }
@@ -398,6 +424,14 @@ span, div, label {
 
 .container-sm {
   max-width: 800px;
+}
+
+/* Responsive container improvements */
+@media (max-width: 480px) {
+  .container {
+    padding: 0 var(--spacing-md);
+    max-width: 100%;
+  }
 }
 
 /* Utilities */
@@ -515,12 +549,50 @@ span, div, label {
   border-left: 4px solid var(--color-danger);
 }
 
-/* Mobile optimizations */
-@media (max-width: 768px) {
+/* Enhanced mobile optimizations */
+@media (max-width: 480px) {
+  :root {
+    --spacing-xs: 2px;
+    --spacing-sm: 4px;
+    --spacing-md: 8px;
+    --spacing-lg: 12px;
+    --spacing-xl: 16px;
+    --spacing-2xl: 24px;
+  }
+  
+  body {
+    font-size: 0.9rem;
+    -webkit-text-size-adjust: 100%;
+  }
+  
+  .container {
+    padding: 0 var(--spacing-md);
+  }
+  
+  .btn {
+    min-height: 48px;
+    font-size: 1rem;
+    font-weight: 600;
+    padding: 12px 16px;
+  }
+  
+  .card {
+    padding: var(--spacing-md);
+    border-radius: var(--radius-md);
+  }
+  
+  h1 { font-size: 1.75rem; }
+  h2 { font-size: 1.5rem; }
+  h3 { font-size: 1.25rem; }
+  h4 { font-size: 1.125rem; }
+}
+
+@media (min-width: 481px) and (max-width: 768px) {
   :root {
     --spacing-md: 12px;
     --spacing-lg: 16px;
-    --spacing-xl: 24px;
+    --spacing-xl: 20px;
+    --spacing-2xl: 32px;
   }
   
   body {
@@ -532,13 +604,13 @@ span, div, label {
   }
   
   .btn {
-    min-height: 52px;
+    min-height: 50px;
     font-size: 1.05rem;
     font-weight: 600;
   }
   
   .card {
-    padding: var(--spacing-md);
+    padding: var(--spacing-lg);
   }
   
   h1 { font-size: 2rem; }
@@ -580,4 +652,91 @@ a:hover {
 ::-moz-selection {
   background: var(--color-secondary);
   color: var(--color-text-white);
+}
+
+/* Enhanced viewport and touch optimizations */
+@media (max-width: 768px) {
+  html {
+    -webkit-text-size-adjust: 100%;
+    -ms-text-size-adjust: 100%;
+  }
+  
+  /* Better touch targets */
+  button, .btn, a {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Prevent zoom on focus for iOS */
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+}
+
+/* Tablet-specific optimizations */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .container {
+    padding: 0 var(--spacing-lg);
+  }
+  
+  .grid {
+    gap: var(--spacing-lg);
+  }
+}
+
+/* High DPI displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+/* Landscape mobile fixes */
+@media (max-height: 500px) and (orientation: landscape) {
+  .btn {
+    min-height: 40px;
+    padding: 8px 16px;
+  }
+  
+  /* Adjust container padding for landscape */
+  .container {
+    padding: 0 var(--spacing-sm);
+  }
+}
+
+/* Enhanced viewport handling for different device sizes */
+@media (min-width: 768px) and (max-width: 1024px) {
+  /* Tablet portrait and landscape */
+  :root {
+    --spacing-md: 16px;
+    --spacing-lg: 20px;
+    --spacing-xl: 28px;
+  }
+  
+  .container {
+    padding: 0 var(--spacing-lg);
+    max-width: 100%;
+  }
+  
+  .btn {
+    min-height: 46px;
+    padding: 12px 20px;
+  }
+}
+
+/* Very small screen fixes */
+@media (max-width: 360px) {
+  .container {
+    padding: 0 8px;
+  }
+  
+  .btn {
+    font-size: 0.9rem;
+    padding: 10px 14px;
+  }
+  
+  h1 { font-size: 1.5rem; }
+  h2 { font-size: 1.25rem; }
+  h3 { font-size: 1.125rem; }
 }

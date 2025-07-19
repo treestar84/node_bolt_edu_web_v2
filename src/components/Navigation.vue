@@ -729,11 +729,19 @@ onUnmounted(() => {
 /* Responsive breakpoints */
 @media (max-width: 1024px) {
   .desktop-menu {
-    gap: 32px;
+    gap: 24px;
+  }
+  
+  .nav-content {
+    padding: 18px 22px;
+  }
+  
+  .desktop-controls {
+    gap: 12px;
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 900px) {
   .mobile-menu-btn {
     display: flex;
   }
@@ -742,7 +750,9 @@ onUnmounted(() => {
   .desktop-controls {
     display: none;
   }
-  
+}
+
+@media (max-width: 768px) {
   .nav-content {
     padding: 16px 20px;
   }

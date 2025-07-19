@@ -542,7 +542,7 @@ onUnmounted(() => {
   gap: var(--spacing-sm);
   padding: var(--spacing-md) var(--spacing-lg);
   background: var(--color-primary);
-  color: white;
+  color: var(--color-text-primary);
   border: none;
   border-radius: var(--radius-md);
   font-size: 1rem;

@@ -306,7 +306,7 @@ onMounted(async () => {
 .like-type {
   font-size: 0.8rem;
   background: var(--color-primary);
-  color: white;
+  color: var(--color-text-primary);
   padding: 2px 8px;
   border-radius: var(--radius-sm);
 }
