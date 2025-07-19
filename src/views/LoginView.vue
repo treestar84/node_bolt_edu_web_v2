@@ -392,11 +392,11 @@ onMounted(() => {
 <style scoped>
 .login-view {
   min-height: 100vh;
-  background: linear-gradient(135deg, var(--color-bg-primary) 0%, var(--color-bg-secondary) 100%);
+  background: var(--color-bg-primary);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: var(--spacing-lg);
+  padding: 24px;
 }
 
 .login-container {

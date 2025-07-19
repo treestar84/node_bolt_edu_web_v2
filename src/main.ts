@@ -374,13 +374,19 @@ app.use(i18n);
 import { useAuthStore } from '@/stores/auth';
 import { useContentStore } from '@/stores/content';
 import { useAppStore } from '@/stores/app';
+import { useTheme } from '@/composables/useTheme';
 
 const initializeApp = async () => {
   const authStore = useAuthStore();
   const contentStore = useContentStore();
   const appStore = useAppStore();
+  const { watchSystemTheme } = useTheme();
   
   console.log('🚀 Initializing application...');
+  
+  // 테마 시스템 초기화
+  console.log('🎨 Initializing theme system...');
+  watchSystemTheme();
   
   try {
     // 1. 먼저 공용 콘텐츠를 로드 (인증 없이도 접근 가능)

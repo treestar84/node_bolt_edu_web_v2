@@ -168,50 +168,60 @@ onMounted(async () => {
 <style scoped>
 .user-dashboard {
   min-height: 100vh;
-  background: var(--color-bg);
+  background: var(--color-bg-primary);
 }
 
 .main-content {
-  padding-top: calc(var(--header-height) + var(--spacing-lg));
-  padding-bottom: var(--spacing-xl);
+  padding: 40px 0;
 }
 
 .container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 var(--spacing-md);
+  padding: 0 24px;
 }
 
 .dashboard-header {
   text-align: center;
-  margin-bottom: var(--spacing-xl);
+  margin-bottom: 40px;
 }
 
 .dashboard-title {
-  font-size: 2rem;
-  font-weight: 700;
-  color: var(--color-text);
-  margin-bottom: var(--spacing-sm);
+  font-size: 2.25rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: 16px;
+  letter-spacing: -0.025em;
 }
 
 .dashboard-subtitle {
   color: var(--color-text-secondary);
-  font-size: 1.1rem;
+  font-size: 1rem;
+  line-height: 1.6;
+  max-width: 600px;
+  margin: 0 auto;
 }
 
 .dashboard-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: var(--spacing-lg);
-  margin-bottom: var(--spacing-xl);
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
+  margin-bottom: 40px;
 }
 
 .dashboard-card {
-  background: var(--color-bg-secondary);
-  border-radius: var(--radius-lg);
-  padding: var(--spacing-lg);
-  box-shadow: var(--shadow-sm);
+  background: var(--color-bg-card);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: var(--shadow-card);
   border: 1px solid var(--color-border);
+  transition: all 0.2s ease;
+}
+
+.dashboard-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--color-border-dark);
 }
 
 .dashboard-card.full-width {

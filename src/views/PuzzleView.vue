@@ -732,74 +732,77 @@ watch(puzzleDifficulty, () => {
 <style scoped>
 .puzzle-view {
   min-height: 100vh;
-  background: linear-gradient(135deg, var(--color-bg-primary) 0%, var(--color-bg-secondary) 100%);
+  background: var(--color-bg-primary);
 }
 
 .main-content {
-  padding: var(--spacing-2xl) 0;
+  padding: 40px 0;
 }
 
 .page-header {
   text-align: center;
-  margin-bottom: var(--spacing-2xl);
+  margin-bottom: 40px;
 }
 
 .page-title {
-  font-size: 2.5rem;
-  font-weight: 700;
-  margin-bottom: var(--spacing-md);
-  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  font-size: 2.25rem;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: var(--color-text-primary);
+  letter-spacing: -0.025em;
 }
 
 .page-description {
-  font-size: 1.125rem;
+  font-size: 1rem;
   color: var(--color-text-secondary);
   max-width: 600px;
   margin: 0 auto;
+  line-height: 1.6;
 }
 
 .puzzle-options {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: var(--spacing-xl);
-  margin-bottom: var(--spacing-2xl);
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
+  margin-bottom: 40px;
 }
 
 .puzzle-option-card {
   background: var(--color-bg-card);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-xl);
+  border-radius: 16px;
   overflow: hidden;
   cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: var(--shadow-md);
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow-card);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 .puzzle-option-card:hover {
-  transform: translateY(-8px);
-  box-shadow: var(--shadow-xl);
-  border-color: var(--color-primary);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--color-border-dark);
 }
 
 .option-image {
   position: relative;
   width: 100%;
-  height: 200px;
+  aspect-ratio: 1;
   overflow: hidden;
+  flex-shrink: 0;
 }
 
 .option-image img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.3s ease;
+  transition: transform 0.2s ease;
 }
 
 .puzzle-option-card:hover .option-image img {
-  transform: scale(1.1);
+  transform: scale(1.05);
 }
 
 .play-overlay {
@@ -807,20 +810,21 @@ watch(puzzleDifficulty, () => {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background: rgba(0, 0, 0, 0.8);
-  border-radius: var(--radius-lg);
-  padding: var(--spacing-lg);
+  background: var(--color-primary);
+  border-radius: 12px;
+  padding: 16px 20px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--spacing-sm);
+  gap: 8px;
   opacity: 0;
-  transition: all 0.3s ease;
-  backdrop-filter: blur(10px);
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow-md);
 }
 
 .puzzle-option-card:hover .play-overlay {
   opacity: 1;
+  transform: translate(-50%, -50%) scale(1.05);
 }
 
 .play-icon {
@@ -828,21 +832,28 @@ watch(puzzleDifficulty, () => {
 }
 
 .play-text {
-  color: white;
+  color: var(--color-text-white);
   font-weight: 600;
-  font-size: 1rem;
+  font-size: 0.875rem;
 }
 
 .option-info {
-  padding: var(--spacing-lg);
+  padding: 20px 16px 16px;
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  flex: 1;
+  gap: 12px;
 }
 
 .option-name {
   font-size: 1.25rem;
   font-weight: 600;
   color: var(--color-text-primary);
-  margin-bottom: var(--spacing-sm);
+  margin-bottom: 8px;
+  line-height: 1.3;
+  word-break: break-word;
 }
 
 .difficulty-info {
@@ -1253,7 +1264,23 @@ watch(puzzleDifficulty, () => {
   }
 }
 
+/* Responsive grid adjustments */
+@media (max-width: 1200px) {
+  .puzzle-options {
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 20px;
+  }
+}
+
 @media (max-width: 1024px) {
+  .main-content {
+    padding: 32px 0;
+  }
+  
+  .page-title {
+    font-size: 2rem;
+  }
+  
   .game-container {
     grid-template-columns: 1fr;
     gap: var(--spacing-lg);
@@ -1261,11 +1288,6 @@ watch(puzzleDifficulty, () => {
   
   .puzzle-board {
     width: 500px;
-    /* height: 333px; */ /* Removed fixed height */
-  }
-  
-  .puzzle-board.grid-3x3 {
-    /* height: 500px; */ /* Removed fixed height */
   }
   
   .puzzle-pieces-container {
@@ -1279,7 +1301,75 @@ watch(puzzleDifficulty, () => {
   }
 }
 
-@media (max-width: 540px) {
+@media (max-width: 768px) {
+  .main-content {
+    padding: 24px 0;
+  }
+  
+  .page-title {
+    font-size: 1.75rem;
+  }
+  
+  .page-description {
+    font-size: 0.875rem;
+  }
+  
+  .puzzle-options {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 16px;
+  }
+  
+  .option-info {
+    padding: 16px 12px 12px;
+  }
+  
+  .option-name {
+    font-size: 1.125rem;
+  }
+  
+  .play-overlay {
+    opacity: 1;
+    padding: 12px 16px;
+  }
+  
+  .play-icon {
+    font-size: 1.5rem;
+  }
+  
+  .play-text {
+    font-size: 0.75rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .puzzle-options {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .main-content {
+    padding: 20px 0;
+  }
+  
+  .page-title {
+    font-size: 1.5rem;
+  }
+  
+  .puzzle-options {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  
+  .option-name {
+    font-size: 1rem;
+  }
+  
+  .option-info {
+    padding: 12px 8px 8px;
+  }
+  
   .puzzle-board {
     width: 100%;
     height: auto;
@@ -1299,6 +1389,51 @@ watch(puzzleDifficulty, () => {
     width: 100%;
     height: auto;
     aspect-ratio: 1 / 1;
+  }
+}
+
+/* Touch-friendly improvements */
+@media (hover: none) and (pointer: coarse) {
+  .puzzle-option-card:hover {
+    transform: none;
+  }
+  
+  .puzzle-option-card:hover .option-image img {
+    transform: none;
+  }
+  
+  .play-overlay {
+    opacity: 1;
+  }
+  
+  .puzzle-option-card:active {
+    transform: scale(0.95);
+    transition: transform 0.1s ease;
+  }
+}
+
+/* Accessibility improvements */
+@media (prefers-reduced-motion: reduce) {
+  .puzzle-option-card,
+  .option-image img,
+  .play-overlay {
+    transition: none;
+  }
+  
+  .puzzle-option-card:hover {
+    transform: none;
+  }
+  
+  .puzzle-option-card:hover .option-image img {
+    transform: none;
+  }
+  
+  .celebration-icon {
+    animation: none;
+  }
+  
+  .confetti {
+    animation: none;
   }
 }
 </style>

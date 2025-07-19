@@ -1,15 +1,32 @@
 <template>
-  <div class="word-card">
-    <div class="card-image" @click="playWordAudio">
-      <img :src="getImageUrl(word.imageUrl)" :alt="currentName" />
-      <div class="play-overlay" :class="{ playing: isPlaying }">
+  <article 
+    class="word-card"
+    :aria-label="`단어 카드: ${currentName}`"
+    role="button"
+    tabindex="0"
+    @click="playWordAudio"
+    @keydown.enter="playWordAudio"
+    @keydown.space.prevent="playWordAudio"
+  >
+    <div class="card-image">
+      <img 
+        :src="getImageUrl(word.imageUrl)" 
+        :alt="`${currentName} 이미지`"
+        loading="lazy"
+      />
+      <div class="play-overlay" :class="{ playing: isPlaying }" aria-hidden="true">
         <span class="play-icon">{{ isPlaying ? '🔊' : '🔈' }}</span>
       </div>
     </div>
     <div class="card-content">
-      <div class="word-info" @click="playWordAudio">
-        <h3 class="word-name">{{ currentName }}</h3>
-        <span class="word-category">{{$t('categories.'+word.category)}}</span>
+      <div class="word-info">
+        <h3 class="word-name" :id="`word-name-${word.id}`">{{ currentName }}</h3>
+        <span 
+          class="word-category"
+          :aria-label="`카테고리: ${$t('categories.'+word.category)}`"
+        >
+          {{$t('categories.'+word.category)}}
+        </span>
       </div>
       <div class="card-actions" @click.stop>
         <LikeButton 
@@ -20,11 +37,15 @@
         />
       </div>
     </div>
-  </div>
+    <!-- Screen reader feedback for audio playback -->
+    <div class="sr-only" aria-live="polite" :id="`word-feedback-${word.id}`">
+      {{ audioFeedback }}
+    </div>
+  </article>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import type { WordItem } from '@/types';
 import { useAppStore } from '@/stores/app';
 import { useAudio } from '@/composables/useAudio';
@@ -43,6 +64,7 @@ const emit = defineEmits<Emits>();
 
 const store = useAppStore();
 const { isPlaying, playAudio } = useAudio();
+const audioFeedback = ref('');
 
 const currentName = computed(() => {
   return store.currentLanguage === 'ko' ? props.word.name : props.word.nameEn;
@@ -69,10 +91,24 @@ const getAudioUrl = (url: string): string => {
 
 const playWordAudio = async () => {
   try {
+    // Provide screen reader feedback
+    audioFeedback.value = `${currentName.value} 음성을 재생합니다`;
+    
     await playAudio(currentAudioUrl.value, currentName.value);
     emit('audio-played');
+    
+    // Clear feedback after a delay
+    setTimeout(() => {
+      audioFeedback.value = '';
+    }, 2000);
   } catch (error) {
     console.warn('Audio playback failed:', error);
+    audioFeedback.value = `${currentName.value} 음성 재생에 실패했습니다`;
+    
+    setTimeout(() => {
+      audioFeedback.value = '';
+    }, 3000);
+    
     emit('audio-played'); // Still emit for auto-advance
   }
 };
@@ -87,34 +123,54 @@ defineExpose({
 </script>
 
 <style scoped>
+/* Screen reader only content */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 .word-card {
   background: var(--color-bg-card);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
+  border-radius: 16px;
   overflow: hidden;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
   user-select: none;
   position: relative;
   height: 100%;
   display: flex;
   flex-direction: column;
+  box-shadow: var(--shadow-card);
 }
 
 .word-card:hover {
-  transform: translateY(-8px);
-  box-shadow: var(--shadow-xl);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--color-border-dark);
+}
+
+.word-card:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
   border-color: var(--color-primary);
 }
 
 .word-card:active {
-  transform: translateY(-4px) scale(0.98);
+  transform: translateY(-2px) scale(0.98);
 }
 
 .card-image {
   position: relative;
   width: 100%;
-  height: 200px;
+  aspect-ratio: 1;
   overflow: hidden;
   flex-shrink: 0;
 }
@@ -123,11 +179,11 @@ defineExpose({
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.3s ease;
+  transition: transform 0.2s ease;
 }
 
 .word-card:hover .card-image img {
-  transform: scale(1.1);
+  transform: scale(1.05);
 }
 
 .play-overlay {
@@ -135,37 +191,43 @@ defineExpose({
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 60px;
-  height: 60px;
-  background: rgba(0, 0, 0, 0.7);
+  width: 48px;
+  height: 48px;
+  background: var(--color-primary);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   opacity: 0;
-  transition: all 0.3s ease;
-  backdrop-filter: blur(10px);
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow-md);
+}
+
+.play-overlay .play-icon {
+  color: var(--color-text-white);
 }
 
 .word-card:hover .play-overlay {
   opacity: 1;
+  transform: translate(-50%, -50%) scale(1.1);
 }
 
 .play-overlay.playing {
   opacity: 1;
-  background: rgba(59, 130, 246, 0.8);
+  background: var(--color-secondary);
+  transform: translate(-50%, -50%) scale(1.2);
   animation: pulse 1s infinite;
 }
 
 .card-content {
-  padding: var(--spacing-lg);
+  padding: 20px 16px 16px;
   text-align: center;
   flex: 1;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  gap: var(--spacing-sm);
+  gap: 12px;
 }
 
 .word-info {
@@ -173,131 +235,100 @@ defineExpose({
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: var(--spacing-sm);
+  gap: 8px;
 }
 
 .card-actions {
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-top: var(--spacing-sm);
 }
 
 .word-name {
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   font-weight: 600;
   color: var(--color-text-primary);
-  margin-bottom: var(--spacing-sm);
+  margin-bottom: 8px;
   word-break: break-word;
-  hyphens: auto;
+  line-height: 1.3;
 }
 
 .word-category {
-  font-size: 0.875rem;
+  font-size: 0.75rem;
   color: var(--color-text-muted);
   text-transform: capitalize;
-  background: var(--color-bg-secondary);
-  padding: var(--spacing-xs) var(--spacing-sm);
-  border-radius: var(--radius-sm);
+  background: var(--color-bg-tertiary);
+  padding: 4px 8px;
+  border-radius: 12px;
   display: inline-block;
+  font-weight: 500;
 }
 
 @keyframes pulse {
-  0% { transform: translate(-50%, -50%) scale(1); }
-  50% { transform: translate(-50%, -50%) scale(1.1); }
-  100% { transform: translate(-50%, -50%) scale(1); }
+  0% { transform: translate(-50%, -50%) scale(1.2); }
+  50% { transform: translate(-50%, -50%) scale(1.4); }
+  100% { transform: translate(-50%, -50%) scale(1.2); }
+}
+
+/* Large card variant for single view */
+.word-card.large-card {
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.word-card.large-card .word-name {
+  font-size: 1.5rem;
+}
+
+.word-card.large-card .play-overlay {
+  width: 64px;
+  height: 64px;
+  font-size: 1.5rem;
 }
 
 /* Tablet optimizations */
 @media (max-width: 1024px) {
-  .card-image {
-    height: 180px;
-  }
-  
   .word-name {
-    font-size: 1.375rem;
+    font-size: 1.125rem;
   }
   
   .card-content {
-    padding: var(--spacing-md);
+    padding: 16px 12px 12px;
   }
 }
 
 /* Mobile optimizations */
 @media (max-width: 768px) {
-  .word-card {
-    border-radius: var(--radius-md);
-  }
-  
-  .card-image {
-    height: 160px;
-  }
-  
-  .word-name {
-    font-size: 1.25rem;
-    margin-bottom: var(--spacing-xs);
-  }
-  
   .card-content {
-    padding: var(--spacing-md);
-  }
-  
-  .play-overlay {
-    width: 50px;
-    height: 50px;
-    font-size: 1.25rem;
-    opacity: 1;
-  }
-  
-  .word-category {
-    font-size: 0.8rem;
-    padding: var(--spacing-xs);
-  }
-}
-
-/* Small mobile optimizations */
-@media (max-width: 480px) {
-  .card-image {
-    height: 140px;
-  }
-  
-  .word-name {
-    font-size: 1.125rem;
-  }
-  
-  .card-content {
-    padding: var(--spacing-sm);
-  }
-  
-  .play-overlay {
-    width: 45px;
-    height: 45px;
-    font-size: 1.125rem;
-  }
-  
-  .word-category {
-    font-size: 0.75rem;
-  }
-}
-
-/* Very small screens */
-@media (max-width: 360px) {
-  .card-image {
-    height: 120px;
+    padding: 12px 8px 8px;
+    gap: 8px;
   }
   
   .word-name {
     font-size: 1rem;
+    margin-bottom: 6px;
   }
   
-  .card-content {
-    padding: var(--spacing-xs);
+  .word-category {
+    font-size: 0.7rem;
+    padding: 3px 6px;
   }
   
   .play-overlay {
     width: 40px;
     height: 40px;
     font-size: 1rem;
+  }
+}
+
+/* Small mobile optimizations */
+@media (max-width: 480px) {
+  .word-name {
+    font-size: 0.9rem;
+  }
+  
+  .word-category {
+    font-size: 0.65rem;
   }
 }
 
@@ -313,38 +344,27 @@ defineExpose({
   
   .play-overlay {
     opacity: 1;
-    background: rgba(0, 0, 0, 0.5);
   }
   
   .word-card:active {
     transform: scale(0.95);
     transition: transform 0.1s ease;
   }
-  
-  .card-content {
-    padding: var(--spacing-lg);
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .word-card:focus {
+    outline: 3px solid currentColor;
+    outline-offset: 2px;
   }
   
-  .word-name {
-    font-size: 1.375rem;
-  }
-  
-  .play-overlay {
-    width: 55px;
-    height: 55px;
-    font-size: 1.375rem;
+  .word-card {
+    border-width: 2px;
   }
 }
 
-/* High DPI screens */
-@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
-  .card-image img {
-    image-rendering: -webkit-optimize-contrast;
-    image-rendering: crisp-edges;
-  }
-}
-
-/* Reduce animations for users who prefer reduced motion */
+/* Accessibility improvements */
 @media (prefers-reduced-motion: reduce) {
   .word-card,
   .card-image img,
@@ -360,23 +380,12 @@ defineExpose({
     transform: none;
   }
   
+  .word-card:focus {
+    transform: none;
+  }
+  
   .play-overlay.playing {
     animation: none;
-  }
-}
-
-/* Dark mode adjustments */
-@media (prefers-color-scheme: dark) {
-  .play-overlay {
-    background: rgba(0, 0, 0, 0.8);
-  }
-  
-  .word-card {
-    border-color: var(--color-border);
-  }
-  
-  .word-card:hover {
-    border-color: var(--color-primary);
   }
 }
 </style>

@@ -1,38 +1,83 @@
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700;800;900&display=swap');
 
 :root {
-  --color-primary: #3b82f6;
-  --color-primary-dark: #2563eb;
-  --color-secondary: #10b981;
-  --color-accent: #f59e0b;
-  --color-danger: #ef4444;
-  --color-warning: #f97316;
+  /* Brand colors */
+  --color-primary: #ffffff;
+  --color-primary-light: #f8fafc;
+  --color-secondary: #6366f1;
+  --color-accent: #06b6d4;
   --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-danger: #ef4444;
+}
+
+/* Dark theme (default) */
+:root,
+:root.dark {
+  /* Dark theme backgrounds */
+  --color-bg-primary: #0a0a0a;
+  --color-bg-secondary: #111111;
+  --color-bg-tertiary: #1a1a1a;
+  --color-bg-card: #111111;
+  --color-bg-hover: #1a1a1a;
+  --color-bg-overlay: rgba(255, 255, 255, 0.05);
   
-  --color-bg-primary: #0f172a;
-  --color-bg-secondary: #1e293b;
-  --color-bg-tertiary: #334155;
-  --color-bg-card: #1e293b;
-  --color-bg-hover: #334155;
-  
-  /* 모든 텍스트를 화이트 컬러로 통일 */
+  /* Dark theme text colors */
   --color-text-primary: #ffffff;
-  --color-text-secondary: #f8fafc;
-  --color-text-muted: #e2e8f0;
+  --color-text-secondary: #a1a1aa;
+  --color-text-muted: #71717a;
+  --color-text-light: #52525b;
+  --color-text-white: #ffffff;
   
-  --color-border: #334155;
-  --color-border-light: #475569;
+  /* Dark theme borders */
+  --color-border: #27272a;
+  --color-border-light: #1a1a1a;
+  --color-border-dark: #3f3f46;
+}
+
+/* Light theme */
+:root.light {
+  /* Light theme backgrounds */
+  --color-bg-primary: #ffffff;
+  --color-bg-secondary: #f8fafc;
+  --color-bg-tertiary: #f1f5f9;
+  --color-bg-card: #ffffff;
+  --color-bg-hover: #f8fafc;
+  --color-bg-overlay: rgba(0, 0, 0, 0.05);
   
+  /* Light theme text colors */
+  --color-text-primary: #0f172a;
+  --color-text-secondary: #334155;
+  --color-text-muted: #64748b;
+  --color-text-light: #94a3b8;
+  --color-text-white: #ffffff;
+  
+  /* Light theme borders */
+  --color-border: #e2e8f0;
+  --color-border-light: #f1f5f9;
+  --color-border-dark: #cbd5e1;
+  
+  /* Light theme brand colors override */
+  --color-primary: #000000;
+  --color-primary-light: #1a1a1a;
+}
+
+/* Common design tokens */
+:root {
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 16px;
   --radius-xl: 20px;
   
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  /* Modern shadow system */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.03);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.03);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.03);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.04);
+  --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.15);
+  --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.05), 0 1px 2px -1px rgb(0 0 0 / 0.05);
+  --shadow-button: 0 2px 4px -1px rgb(0 0 0 / 0.06), 0 1px 2px -1px rgb(0 0 0 / 0.04);
   
   --spacing-xs: 4px;
   --spacing-sm: 8px;
@@ -61,6 +106,37 @@
   --mobile-spacing-xl: 16px;
 }
 
+/* Screen reader only content */
+.sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+/* Skip link for screen readers */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 6px;
+  background: var(--color-primary);
+  color: white;
+  padding: 8px;
+  text-decoration: none;
+  border-radius: 4px;
+  z-index: 1000;
+  transition: top 0.3s;
+}
+
+.skip-link:focus {
+  top: 6px;
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
@@ -68,15 +144,16 @@
 }
 
 body {
-  /* 한글에 최적화된 폰트 스택 적용 */
-  font-family: 'Pretendard', 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', '맑은 고딕', sans-serif;
-  line-height: 1.6;
+  /* Modern font stack with Inter for UI and Pretendard for Korean */
+  font-family: 'Inter', 'Pretendard', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', '맑은 고딕', sans-serif;
+  line-height: 1.5;
   color: var(--color-text-primary);
-  background: linear-gradient(135deg, var(--color-bg-primary) 0%, var(--color-bg-secondary) 100%);
+  background: var(--color-bg-primary);
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  font-weight: 500; /* 한글 가독성을 위해 기본 굵기 증가 */
+  font-weight: 400;
+  font-size: 16px;
 }
 
 #app {
@@ -85,111 +162,128 @@ body {
   flex-direction: column;
 }
 
-/* Typography - 모든 텍스트 화이트 컬러 적용 */
+/* Modern Typography System */
 h1, h2, h3, h4, h5, h6 {
-  font-weight: 700; /* 제목은 더 굵게 */
-  line-height: 1.3; /* 한글에 적합한 줄간격 */
+  font-weight: 600;
+  line-height: 1.2;
   color: var(--color-text-primary);
-  letter-spacing: -0.02em; /* 한글 자간 최적화 */
+  letter-spacing: -0.025em;
+  margin: 0;
 }
 
 h1 { 
-  font-size: 2.5rem; 
-  font-weight: 800;
+  font-size: 3rem; 
+  font-weight: 700;
+  letter-spacing: -0.04em;
 }
 h2 { 
-  font-size: 2rem; 
-  font-weight: 700;
+  font-size: 2.25rem; 
+  font-weight: 600;
+  letter-spacing: -0.03em;
 }
 h3 { 
-  font-size: 1.5rem; 
+  font-size: 1.875rem; 
   font-weight: 600;
 }
 h4 { 
-  font-size: 1.25rem; 
+  font-size: 1.5rem; 
   font-weight: 600;
 }
 h5 { 
-  font-size: 1.125rem; 
-  font-weight: 600;
+  font-size: 1.25rem; 
+  font-weight: 500;
 }
 h6 { 
-  font-size: 1rem; 
-  font-weight: 600;
+  font-size: 1.125rem; 
+  font-weight: 500;
 }
 
 p {
-  color: var(--color-text-primary);
+  color: var(--color-text-secondary);
   margin-bottom: var(--spacing-md);
   font-weight: 400;
-  line-height: 1.7; /* 한글 본문에 적합한 줄간격 */
+  line-height: 1.6;
 }
 
-/* 모든 텍스트 요소에 화이트 컬러 강제 적용 */
-span, div, label, input, textarea, select, button {
-  color: var(--color-text-primary);
+/* Text elements use semantic colors */
+span, div, label {
+  color: inherit;
 }
 
-/* Buttons */
+/* Modern Button System */
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: var(--spacing-sm);
-  padding: var(--spacing-md) var(--spacing-lg);
-  border: none;
-  border-radius: var(--radius-md);
-  font-size: 1rem;
-  font-weight: 600; /* 버튼 텍스트 굵게 */
+  padding: 12px 24px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-lg);
+  font-size: 0.875rem;
+  font-weight: 500;
   text-decoration: none;
   cursor: pointer;
-  transition: all 0.2s ease;
-  min-height: 48px;
+  transition: all 0.15s ease;
+  min-height: 44px;
   user-select: none;
   font-family: inherit;
   letter-spacing: -0.01em;
+  position: relative;
+  overflow: hidden;
 }
 
 .btn:disabled {
-  opacity: 0.5;
+  opacity: 0.4;
   cursor: not-allowed;
+  transform: none !important;
+}
+
+.btn:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
-  color: white;
-  box-shadow: var(--shadow-md);
-  font-weight: 700;
+  background: var(--color-primary);
+  color: var(--color-text-white);
+  box-shadow: var(--shadow-button);
 }
 
 .btn-primary:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-lg);
+  background: var(--color-primary-light);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
 }
 
 .btn-secondary {
   background: var(--color-bg-card);
   color: var(--color-text-primary);
   border: 1px solid var(--color-border);
-  font-weight: 600;
 }
 
 .btn-secondary:hover:not(:disabled) {
   background: var(--color-bg-hover);
-  border-color: var(--color-border-light);
-  color: var(--color-text-primary);
+  border-color: var(--color-border-dark);
 }
 
 .btn-success {
-  background: linear-gradient(135deg, var(--color-success) 0%, #059669 100%);
-  color: white;
-  font-weight: 700;
+  background: var(--color-success);
+  color: var(--color-text-white);
+}
+
+.btn-success:hover:not(:disabled) {
+  background: #059669;
+  transform: translateY(-1px);
 }
 
 .btn-danger {
-  background: linear-gradient(135deg, var(--color-danger) 0%, #dc2626 100%);
-  color: white;
-  font-weight: 700;
+  background: var(--color-danger);
+  color: var(--color-text-white);
+}
+
+.btn-danger:hover:not(:disabled) {
+  background: #dc2626;
+  transform: translateY(-1px);
 }
 
 .btn-lg {
@@ -206,20 +300,20 @@ span, div, label, input, textarea, select, button {
   font-weight: 600;
 }
 
-/* Cards */
+/* Modern Card System */
 .card {
   background: var(--color-bg-card);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   padding: var(--spacing-lg);
-  box-shadow: var(--shadow-md);
-  transition: all 0.3s ease;
+  box-shadow: var(--shadow-card);
+  transition: all 0.2s ease;
 }
 
 .card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-xl);
-  border-color: var(--color-border-light);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--color-border-dark);
 }
 
 .card-header {
@@ -249,22 +343,22 @@ span, div, label, input, textarea, select, button {
 
 .form-input {
   width: 100%;
-  padding: var(--spacing-md);
+  padding: 12px 16px;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  background: var(--color-bg-secondary);
+  background: var(--color-bg-card);
   color: var(--color-text-primary);
-  font-size: 1rem;
+  font-size: 0.875rem;
   font-family: inherit;
-  font-weight: 500;
-  transition: all 0.2s ease;
+  font-weight: 400;
+  transition: all 0.15s ease;
 }
 
 .form-input:focus {
   outline: none;
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgb(59 130 246 / 0.15);
-  color: var(--color-text-primary);
+  border-color: var(--color-secondary);
+  box-shadow: 0 0 0 3px rgb(79 70 229 / 0.1);
+  background: var(--color-bg-primary);
 }
 
 .form-input::placeholder {
@@ -338,22 +432,21 @@ span, div, label, input, textarea, select, button {
 .p-lg { padding: var(--spacing-lg); }
 .p-xl { padding: var(--spacing-xl); }
 
-/* 특별한 텍스트 스타일 */
-.text-white {
-  color: #ffffff !important;
-}
+/* Text Utilities */
+.text-primary { color: var(--color-text-primary) !important; }
+.text-secondary { color: var(--color-text-secondary) !important; }
+.text-muted { color: var(--color-text-muted) !important; }
+.text-white { color: var(--color-text-white) !important; }
 
-.text-bold {
-  font-weight: 700;
-}
+.text-sm { font-size: 0.875rem; }
+.text-base { font-size: 1rem; }
+.text-lg { font-size: 1.125rem; }
+.text-xl { font-size: 1.25rem; }
 
-.text-extra-bold {
-  font-weight: 800;
-}
-
-.text-black {
-  font-weight: 900;
-}
+.font-normal { font-weight: 400; }
+.font-medium { font-weight: 500; }
+.font-semibold { font-weight: 600; }
+.font-bold { font-weight: 700; }
 
 /* Animations */
 @keyframes fadeIn {
@@ -467,23 +560,24 @@ span, div, label, input, textarea, select, button {
   font-feature-settings: "kern" 1;
 }
 
-/* 모든 링크 텍스트도 화이트 컬러로 */
+/* Links */
 a {
   color: var(--color-text-primary);
   text-decoration: none;
+  transition: color 0.15s ease;
 }
 
 a:hover {
-  color: var(--color-primary);
+  color: var(--color-secondary);
 }
 
-/* 선택된 텍스트 스타일 */
+/* Selection */
 ::selection {
-  background: var(--color-primary);
-  color: white;
+  background: var(--color-secondary);
+  color: var(--color-text-white);
 }
 
 ::-moz-selection {
-  background: var(--color-primary);
-  color: white;
+  background: var(--color-secondary);
+  color: var(--color-text-white);
 }

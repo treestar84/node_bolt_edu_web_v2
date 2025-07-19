@@ -350,7 +350,7 @@ onUnmounted(() => {
 <style scoped>
 .book-reader {
   min-height: 100vh;
-  background: linear-gradient(135deg, var(--color-bg-primary) 0%, var(--color-bg-secondary) 100%);
+  background: var(--color-bg-primary);
   display: flex;
   flex-direction: column;
 }

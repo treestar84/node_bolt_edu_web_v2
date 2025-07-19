@@ -402,11 +402,11 @@ onMounted(() => {
 <style scoped>
 .quiz-view {
   min-height: 100vh;
-  background: linear-gradient(135deg, var(--color-bg-primary) 0%, var(--color-bg-secondary) 100%);
+  background: var(--color-bg-primary);
 }
 
 .main-content {
-  padding: var(--spacing-lg) 0;
+  padding: 40px 0;
   display: flex;
   flex-direction: column;
   flex-grow: 1;
@@ -414,17 +414,15 @@ onMounted(() => {
 
 .quiz-header {
   text-align: center;
-  margin-bottom: var(--spacing-lg); /* 헤더 하단 마진 줄임 */
+  margin-bottom: 32px;
 }
 
 .page-title {
-  font-size: 2.5rem;
-  font-weight: 800;
-  margin-bottom: var(--spacing-lg);
-  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  font-size: 2.25rem;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: var(--color-text-primary);
+  letter-spacing: -0.025em;
 }
 
 .quiz-stats {
@@ -609,7 +607,7 @@ onMounted(() => {
 
 .quiz-option img {
   width: 100%;
-  height: 150px;
+  aspect-ratio: 1;
   object-fit: cover;
 }
 

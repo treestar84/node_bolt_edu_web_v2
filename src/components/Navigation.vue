@@ -1,72 +1,117 @@
 <template>
-  <nav class="navigation">
+  <nav class="navigation" role="navigation" aria-label="메인 네비게이션">
     <div class="container">
       <div class="nav-content">
-        <router-link to="/" class="nav-brand">
+        <router-link 
+          to="/" 
+          class="nav-brand"
+          aria-label="홈페이지로 이동"
+        >
           <span class="brand-text">{{ authStore.siteName }}</span>
         </router-link>
         
         <!-- Mobile menu button -->
         <button 
           @click="toggleMobileMenu"
+          @keydown.escape="closeMobileMenu"
           class="mobile-menu-btn"
           :class="{ active: mobileMenuOpen }"
-          aria-label="메뉴 열기/닫기"
+          :aria-label="mobileMenuOpen ? '메뉴 닫기' : '메뉴 열기'"
+          :aria-expanded="mobileMenuOpen"
+          aria-controls="mobile-menu"
+          type="button"
         >
-          <span class="hamburger-line"></span>
-          <span class="hamburger-line"></span>
-          <span class="hamburger-line"></span>
+          <span class="hamburger-line" aria-hidden="true"></span>
+          <span class="hamburger-line" aria-hidden="true"></span>
+          <span class="hamburger-line" aria-hidden="true"></span>
         </button>
         
         <!-- Desktop menu -->
-        <div class="nav-menu desktop-menu">
-          <router-link 
-            v-for="item in menuItems" 
-            :key="item.path"
-            :to="item.path" 
-            class="nav-item"
-            :class="{ active: $route.path === item.path }"
-          >
-            <span class="nav-text">{{$t('menu.'+item.key)}}</span>
-          </router-link>
-        </div>
+        <ul class="nav-menu desktop-menu" role="menubar" aria-label="데스크톱 메뉴">
+          <li role="none" v-for="item in menuItems" :key="item.path">
+            <router-link 
+              :to="item.path" 
+              class="nav-item"
+              :class="{ active: $route.path === item.path }"
+              role="menuitem"
+              :aria-current="$route.path === item.path ? 'page' : undefined"
+            >
+              <span class="nav-text">{{$t('menu.'+item.key)}}</span>
+            </router-link>
+          </li>
+        </ul>
 
         <div class="nav-controls desktop-controls">
-          <div class="age-indicator" v-if="authStore.userProfile">
+          <div class="age-indicator" v-if="authStore.userProfile" role="status" aria-label="자녀 나이">
             <span class="age-badge">{{ authStore.childAge }}세</span>
           </div>
           
-          <div class="language-toggle">
+          <div class="theme-toggle">
             <button 
-              @click="toggleLanguage"
+              @click="toggleTheme"
+              class="theme-btn"
+              :aria-label="isDark ? '라이트 모드로 변경' : '다크 모드로 변경'"
+              :title="isDark ? '라이트 모드로 변경' : '다크 모드로 변경'"
+              type="button"
+            >
+              <span class="theme-icon" aria-hidden="true">{{ isDark ? '☀️' : '🌙' }}</span>
+            </button>
+          </div>
+          
+          <fieldset class="language-toggle" aria-label="언어 선택">
+            <legend class="sr-only">언어 선택</legend>
+            <button 
+              @click="() => setLanguage('ko')"
               class="btn btn-secondary btn-sm"
               :class="{ active: store.currentLanguage === 'ko' }"
+              :aria-pressed="store.currentLanguage === 'ko'"
+              aria-label="한국어로 변경"
+              type="button"
             >
               한글
             </button>
             <button 
-              @click="toggleLanguage"
+              @click="() => setLanguage('en')"
               class="btn btn-secondary btn-sm"
               :class="{ active: store.currentLanguage === 'en' }"
+              :aria-pressed="store.currentLanguage === 'en'"
+              aria-label="영어로 변경"
+              type="button"
             >
               ENG
             </button>
-          </div>
+          </fieldset>
           
-          <div class="user-menu" v-if="authStore.isAuthenticated">
-            <router-link to="/settings" class="btn btn-sm btn-secondary">
+          <nav class="user-menu" v-if="authStore.isAuthenticated" aria-label="사용자 메뉴">
+            <router-link 
+              to="/settings" 
+              class="btn btn-sm btn-secondary"
+              aria-label="설정 페이지로 이동"
+            >
               {{$t('menu.settings')}}
             </router-link>
-            <router-link to="/admin" class="btn btn-sm btn-secondary">
+            <router-link 
+              to="/admin" 
+              class="btn btn-sm btn-secondary"
+              aria-label="관리자 페이지로 이동"
+            >
               {{$t('menu.admin')}}
             </router-link>
-          </div>
+          </nav>
           
           <div class="auth-buttons" v-else>
-            <router-link to="/login" class="btn btn-sm btn-primary">
+            <router-link 
+              to="/login" 
+              class="btn btn-sm btn-primary"
+              aria-label="로그인 페이지로 이동"
+            >
               {{$t('menu.login')}}
             </router-link>
-            <router-link to="/admin" class="btn btn-sm btn-secondary">
+            <router-link 
+              to="/admin" 
+              class="btn btn-sm btn-secondary"
+              aria-label="관리자 페이지로 이동"
+            >
               {{$t('menu.admin')}}
             </router-link>
           </div>
@@ -78,81 +123,136 @@
         v-if="mobileMenuOpen" 
         class="mobile-menu-overlay"
         @click="closeMobileMenu"
+        @keydown.escape="closeMobileMenu"
+        aria-hidden="true"
       ></div>
       
       <!-- Mobile menu -->
-      <div class="mobile-menu" :class="{ open: mobileMenuOpen }">
+      <aside 
+        id="mobile-menu"
+        class="mobile-menu" 
+        :class="{ open: mobileMenuOpen }"
+        :aria-hidden="!mobileMenuOpen"
+        aria-label="모바일 메뉴"
+      >
         <div class="mobile-menu-content">
           <div class="mobile-menu-header">
-            <div class="age-indicator" v-if="authStore.userProfile">
+            <div class="age-indicator" v-if="authStore.userProfile" role="status" aria-label="자녀 나이">
               <span class="age-badge">{{ authStore.childAge }}세</span>
             </div>
             
-            <div class="language-toggle">
-              <button 
-                @click="toggleLanguage"
-                class="btn btn-secondary btn-sm"
-                :class="{ active: store.currentLanguage === 'ko' }"
-              >
-                한글
-              </button>
-              <button 
-                @click="toggleLanguage"
-                class="btn btn-secondary btn-sm"
-                :class="{ active: store.currentLanguage === 'en' }"
-              >
-                ENG
-              </button>
+            <div class="mobile-controls">
+              <div class="theme-toggle">
+                <button 
+                  @click="toggleTheme"
+                  class="theme-btn"
+                  :aria-label="isDark ? '라이트 모드로 변경' : '다크 모드로 변경'"
+                  :title="isDark ? '라이트 모드로 변경' : '다크 모드로 변경'"
+                  type="button"
+                >
+                  <span class="theme-icon" aria-hidden="true">{{ isDark ? '☀️' : '🌙' }}</span>
+                  <span class="theme-text">{{ isDark ? '라이트' : '다크' }}</span>
+                </button>
+              </div>
+              
+              <fieldset class="language-toggle" aria-label="언어 선택">
+                <legend class="sr-only">언어 선택</legend>
+                <button 
+                  @click="() => setLanguage('ko')"
+                  class="btn btn-secondary btn-sm"
+                  :class="{ active: store.currentLanguage === 'ko' }"
+                  :aria-pressed="store.currentLanguage === 'ko'"
+                  aria-label="한국어로 변경"
+                  type="button"
+                >
+                  한글
+                </button>
+                <button 
+                  @click="() => setLanguage('en')"
+                  class="btn btn-secondary btn-sm"
+                  :class="{ active: store.currentLanguage === 'en' }"
+                  :aria-pressed="store.currentLanguage === 'en'"
+                  aria-label="영어로 변경"
+                  type="button"
+                >
+                  ENG
+                </button>
+              </fieldset>
             </div>
           </div>
           
-          <div class="mobile-menu-items">
+          <nav class="mobile-menu-items" aria-label="모바일 메뉴 항목">
             <router-link 
               v-for="item in menuItems" 
               :key="item.path"
               :to="item.path" 
               class="mobile-nav-item"
               :class="{ active: $route.path === item.path }"
+              :aria-current="$route.path === item.path ? 'page' : undefined"
               @click="closeMobileMenu"
+              @keydown.escape="closeMobileMenu"
             >
               <span class="nav-text">{{$t('menu.'+item.key)}}</span>
             </router-link>
-          </div>
+          </nav>
           
           <div class="mobile-menu-footer">
-            <div class="mobile-auth-buttons" v-if="authStore.isAuthenticated">
-              <router-link to="/settings" class="btn btn-sm btn-secondary" @click="closeMobileMenu">
+            <nav class="mobile-auth-buttons" v-if="authStore.isAuthenticated" aria-label="사용자 메뉴">
+              <router-link 
+                to="/settings" 
+                class="btn btn-sm btn-secondary" 
+                @click="closeMobileMenu"
+                aria-label="설정 페이지로 이동"
+              >
                 {{$t('menu.settings')}}
               </router-link>
-              <router-link to="/admin" class="btn btn-sm btn-secondary" @click="closeMobileMenu">
+              <router-link 
+                to="/admin" 
+                class="btn btn-sm btn-secondary" 
+                @click="closeMobileMenu"
+                aria-label="관리자 페이지로 이동"
+              >
                 {{$t('menu.admin')}}
               </router-link>
-            </div>
+            </nav>
             
             <div class="mobile-auth-buttons" v-else>
-              <router-link to="/login" class="btn btn-sm btn-primary" @click="closeMobileMenu">
+              <router-link 
+                to="/login" 
+                class="btn btn-sm btn-primary" 
+                @click="closeMobileMenu"
+                aria-label="로그인 페이지로 이동"
+              >
                 {{$t('menu.login')}}
               </router-link>
-              <router-link to="/admin" class="btn btn-sm btn-secondary" @click="closeMobileMenu">
+              <router-link 
+                to="/admin" 
+                class="btn btn-sm btn-secondary" 
+                @click="closeMobileMenu"
+                aria-label="관리자 페이지로 이동"
+              >
                 {{$t('menu.admin')}}
               </router-link>
             </div>
           </div>
         </div>
-      </div>
+      </aside>
     </div>
   </nav>
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, ref, nextTick, onMounted, onUnmounted } from 'vue';
 import { useAppStore } from '@/stores/app';
 import { useAuthStore } from '@/stores/auth';
+import { useTheme } from '@/composables/useTheme';
 
 const store = useAppStore();
 const authStore = useAuthStore();
+const { isDark, toggleTheme } = useTheme();
 
 const mobileMenuOpen = ref(false);
+const lastFocusedElement = ref<HTMLElement | null>(null);
 
 const menuItems = computed(() => [
   { key: 'words', path: '/words' },
@@ -162,58 +262,155 @@ const menuItems = computed(() => [
   { key: 'achievements', path: '/achievements' }
 ]);
 
-const toggleLanguage = () => {
-  store.setLanguage(store.currentLanguage === 'ko' ? 'en' : 'ko');
+const setLanguage = (lang: 'ko' | 'en') => {
+  store.setLanguage(lang);
 };
 
 const toggleMobileMenu = () => {
+  if (!mobileMenuOpen.value) {
+    // Store the currently focused element
+    lastFocusedElement.value = document.activeElement as HTMLElement;
+  }
+  
   mobileMenuOpen.value = !mobileMenuOpen.value;
   
   // Prevent body scroll when menu is open
   if (mobileMenuOpen.value) {
     document.body.style.overflow = 'hidden';
+    
+    // Focus the first menu item after the menu opens
+    nextTick(() => {
+      const firstMenuItem = document.querySelector('.mobile-nav-item') as HTMLElement;
+      if (firstMenuItem) {
+        firstMenuItem.focus();
+      }
+    });
   } else {
     document.body.style.overflow = '';
+    
+    // Return focus to the menu button
+    nextTick(() => {
+      if (lastFocusedElement.value) {
+        lastFocusedElement.value.focus();
+      }
+    });
   }
 };
 
 const closeMobileMenu = () => {
-  mobileMenuOpen.value = false;
-  document.body.style.overflow = '';
+  if (mobileMenuOpen.value) {
+    mobileMenuOpen.value = false;
+    document.body.style.overflow = '';
+    
+    // Return focus to the last focused element (usually the menu button)
+    nextTick(() => {
+      if (lastFocusedElement.value) {
+        lastFocusedElement.value.focus();
+      }
+    });
+  }
 };
+
+// Handle keyboard navigation
+const handleKeydown = (event: KeyboardEvent) => {
+  if (!mobileMenuOpen.value) return;
+  
+  if (event.key === 'Escape') {
+    closeMobileMenu();
+    event.preventDefault();
+  } else if (event.key === 'Tab') {
+    // Trap focus within the mobile menu
+    const focusableElements = document.querySelectorAll(
+      '#mobile-menu button, #mobile-menu a, #mobile-menu [tabindex]:not([tabindex="-1"])'
+    );
+    const firstElement = focusableElements[0] as HTMLElement;
+    const lastElement = focusableElements[focusableElements.length - 1] as HTMLElement;
+    
+    if (event.shiftKey) {
+      // Shift + Tab
+      if (document.activeElement === firstElement) {
+        lastElement.focus();
+        event.preventDefault();
+      }
+    } else {
+      // Tab
+      if (document.activeElement === lastElement) {
+        firstElement.focus();
+        event.preventDefault();
+      }
+    }
+  }
+};
+
+onMounted(() => {
+  document.addEventListener('keydown', handleKeydown);
+});
+
+onUnmounted(() => {
+  document.removeEventListener('keydown', handleKeydown);
+  // Cleanup: restore body scroll if component is unmounted while menu is open
+  if (mobileMenuOpen.value) {
+    document.body.style.overflow = '';
+  }
+});
 </script>
 
 <style scoped>
+/* Screen reader only content */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 .navigation {
-  background: var(--color-bg-card);
+  background: var(--color-bg-primary);
   border-bottom: 1px solid var(--color-border);
-  padding: var(--spacing-md) 0;
+  padding: 0;
   position: sticky;
   top: 0;
   z-index: 100;
-  backdrop-filter: blur(10px);
-  font-family: 'Pretendard', 'Noto Sans KR', Arial, sans-serif !important;
-  letter-spacing: -0.01em;
+  backdrop-filter: blur(16px);
+  font-family: 'Inter', 'Pretendard', Arial, sans-serif !important;
+  font-weight: 500;
 }
 
 .nav-content {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--spacing-lg);
+  padding: 20px 24px;
+  max-width: 1200px;
+  margin: 0 auto;
   position: relative;
 }
 
 .nav-brand {
   display: flex;
   align-items: center;
-  gap: var(--spacing-sm);
   text-decoration: none;
   color: var(--color-text-primary);
-  font-weight: 800;
-  font-size: 1.5rem;
-  letter-spacing: -0.02em;
+  font-weight: 700;
+  font-size: 1.25rem;
+  letter-spacing: -0.025em;
   z-index: 101;
+  transition: opacity 0.15s ease;
+}
+
+.nav-brand:hover {
+  opacity: 0.8;
+}
+
+.nav-brand:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: 4px;
 }
 
 .brand-text {
@@ -232,6 +429,12 @@ const closeMobileMenu = () => {
   cursor: pointer;
   padding: 0;
   z-index: 101;
+}
+
+.mobile-menu-btn:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: 4px;
 }
 
 .hamburger-line {
@@ -258,47 +461,58 @@ const closeMobileMenu = () => {
 /* Desktop menu */
 .desktop-menu {
   display: flex;
-  gap: var(--spacing-md);
-  flex: 1;
-  justify-content: center;
-  font-family: 'Pretendard', 'Noto Sans KR', Arial, sans-serif !important;
-  letter-spacing: -0.01em;
+  gap: 48px;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
 }
 
 .nav-item {
   display: flex;
   align-items: center;
-  gap: var(--spacing-sm);
-  padding: var(--spacing-md) var(--spacing-lg);
-  border-radius: var(--radius-md);
   text-decoration: none;
-  color: var(--color-text-secondary);
-  font-weight: 600;
-  transition: all 0.2s ease;
-  min-width: 100px;
-  justify-content: center;
-  font-family: 'Pretendard', 'Noto Sans KR', Arial, sans-serif !important;
-  letter-spacing: -0.01em;
+  color: var(--color-text-muted);
+  font-weight: 500;
+  font-size: 0.875rem;
+  transition: color 0.15s ease;
+  position: relative;
 }
 
-.nav-item:hover,
-.nav-item.active {
-  background: var(--color-bg-hover);
+.nav-item:hover {
   color: var(--color-text-primary);
-  transform: translateY(-2px);
+}
+
+.nav-item:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: 4px;
+  color: var(--color-text-primary);
+}
+
+.nav-item.active {
+  color: var(--color-text-primary);
+}
+
+.nav-item.active::after {
+  content: '';
+  position: absolute;
+  bottom: -20px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--color-primary);
+  border-radius: 1px;
 }
 
 .nav-text {
   color: inherit;
   font-weight: inherit;
-  font-family: 'Pretendard', 'Noto Sans KR', Arial, sans-serif !important;
-  letter-spacing: -0.01em;
 }
 
 .desktop-controls {
   display: flex;
   align-items: center;
-  gap: var(--spacing-md);
+  gap: 16px;
 }
 
 .age-indicator {
@@ -307,39 +521,91 @@ const closeMobileMenu = () => {
 }
 
 .age-badge {
-  background: var(--color-primary);
-  color: white;
-  padding: var(--spacing-xs) var(--spacing-sm);
-  border-radius: var(--radius-md);
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-primary);
+  padding: 6px 12px;
+  border-radius: 20px;
   font-size: 0.75rem;
-  font-weight: 700;
+  font-weight: 600;
+  border: 1px solid var(--color-border);
 }
 
 .language-toggle {
   display: flex;
   background: var(--color-bg-secondary);
-  border-radius: var(--radius-md);
+  border-radius: 8px;
   padding: 2px;
-  gap: 2px;
+  border: 1px solid var(--color-border);
 }
 
 .language-toggle .btn {
   border: none;
   background: transparent;
-  min-height: 36px;
-  padding: var(--spacing-sm) var(--spacing-md);
-  color: var(--color-text-primary);
-  font-weight: 600;
+  min-height: 32px;
+  padding: 6px 12px;
+  color: var(--color-text-muted);
+  font-weight: 500;
+  font-size: 0.75rem;
+  border-radius: 6px;
+  transition: all 0.15s ease;
 }
 
 .language-toggle .btn.active {
-  background: var(--color-primary);
-  color: white;
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  box-shadow: var(--shadow-sm);
+}
+
+.language-toggle .btn:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 1px;
+}
+
+.theme-toggle {
+  display: flex;
+  align-items: center;
+}
+
+.theme-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 8px 12px;
+  color: var(--color-text-secondary);
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  min-height: 36px;
+}
+
+.theme-btn:hover {
+  background: var(--color-bg-hover);
+  border-color: var(--color-border-dark);
+  color: var(--color-text-primary);
+}
+
+.theme-btn:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.theme-icon {
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+}
+
+.theme-text {
+  font-weight: 500;
+  display: none;
 }
 
 .auth-buttons {
   display: flex;
-  gap: var(--spacing-sm);
+  gap: 8px;
 }
 
 /* Mobile menu overlay */
@@ -349,10 +615,10 @@ const closeMobileMenu = () => {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.3);
   z-index: 99;
   opacity: 0;
-  animation: fadeIn 0.3s ease forwards;
+  animation: fadeIn 0.2s ease forwards;
 }
 
 @keyframes fadeIn {
@@ -366,14 +632,14 @@ const closeMobileMenu = () => {
   position: fixed;
   top: 0;
   right: -100%;
-  width: 80%;
-  max-width: 320px;
+  width: 280px;
   height: 100vh;
-  background: var(--color-bg-card);
+  background: var(--color-bg-primary);
   border-left: 1px solid var(--color-border);
   z-index: 100;
-  transition: right 0.3s ease;
+  transition: right 0.25s ease;
   overflow-y: auto;
+  box-shadow: var(--shadow-xl);
 }
 
 .mobile-menu.open {
@@ -381,20 +647,34 @@ const closeMobileMenu = () => {
 }
 
 .mobile-menu-content {
-  padding: var(--spacing-xl);
+  padding: 32px 24px;
   display: flex;
   flex-direction: column;
   height: 100%;
-  gap: var(--spacing-xl);
+  gap: 32px;
 }
 
 .mobile-menu-header {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-lg);
-  padding-top: var(--spacing-2xl);
+  gap: 16px;
+  padding-top: 32px;
   border-bottom: 1px solid var(--color-border);
-  padding-bottom: var(--spacing-lg);
+  padding-bottom: 16px;
+}
+
+.mobile-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.mobile-controls .theme-btn {
+  justify-content: flex-start;
+}
+
+.mobile-controls .theme-text {
+  display: block;
 }
 
 .mobile-menu-items {
@@ -407,23 +687,25 @@ const closeMobileMenu = () => {
 .mobile-nav-item {
   display: flex;
   align-items: center;
-  padding: var(--spacing-lg) var(--spacing-md);
-  border-radius: var(--radius-md);
+  padding: 16px 0;
   text-decoration: none;
   color: var(--color-text-secondary);
-  font-weight: 600;
-  transition: all 0.2s ease;
-  border: 1px solid transparent;
-  font-size: 1.1rem;
-  font-family: 'Pretendard', 'Noto Sans KR', Arial, sans-serif !important;
-  letter-spacing: -0.01em;
+  font-weight: 500;
+  transition: color 0.15s ease;
+  font-size: 1rem;
+  border-bottom: 1px solid var(--color-border-light);
 }
 
 .mobile-nav-item:hover,
 .mobile-nav-item.active {
-  background: var(--color-bg-hover);
   color: var(--color-text-primary);
-  border-color: var(--color-primary);
+}
+
+.mobile-nav-item:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: 4px;
+  background: var(--color-bg-secondary);
 }
 
 .mobile-menu-footer {
@@ -447,16 +729,7 @@ const closeMobileMenu = () => {
 /* Responsive breakpoints */
 @media (max-width: 1024px) {
   .desktop-menu {
-    gap: var(--spacing-sm);
-  }
-  
-  .nav-item {
-    padding: var(--spacing-sm) var(--spacing-md);
-    min-width: 80px;
-  }
-  
-  .nav-text {
-    font-size: 0.9rem;
+    gap: 32px;
   }
 }
 
@@ -471,85 +744,87 @@ const closeMobileMenu = () => {
   }
   
   .nav-content {
-    justify-content: space-between;
+    padding: 16px 20px;
   }
   
   .nav-brand {
-    font-size: 1.25rem;
+    font-size: 1.125rem;
   }
   
   .mobile-menu {
-    width: 85%;
-    max-width: 280px;
+    width: 280px;
   }
   
   .mobile-menu-content {
-    padding: var(--spacing-lg);
-  }
-  
-  .mobile-menu-header {
-    padding-top: var(--spacing-lg);
-  }
-  
-  .mobile-nav-item {
-    font-size: 1rem;
-    padding: var(--spacing-md);
+    padding: 24px 20px;
   }
 }
 
 @media (max-width: 480px) {
-  .navigation {
-    padding: var(--spacing-sm) 0;
+  .nav-content {
+    padding: 12px 16px;
   }
   
   .nav-brand {
-    font-size: 1.1rem;
+    font-size: 1rem;
   }
   
   .mobile-menu {
-    width: 90%;
-    max-width: 260px;
+    width: 100%;
   }
   
   .mobile-menu-content {
-    padding: var(--spacing-md);
-  }
-  
-  .mobile-nav-item {
-    font-size: 0.95rem;
-    padding: var(--spacing-sm) var(--spacing-md);
-  }
-  
-  .age-badge {
-    font-size: 0.7rem;
-    padding: var(--spacing-xs);
-  }
-  
-  .language-toggle .btn {
-    font-size: 0.8rem;
-    padding: var(--spacing-xs) var(--spacing-sm);
-    min-height: 32px;
+    padding: 20px 16px;
   }
 }
 
 /* Touch-friendly improvements */
 @media (hover: none) and (pointer: coarse) {
-  .nav-item:hover {
-    transform: none;
-  }
-  
   .mobile-nav-item {
-    padding: var(--spacing-lg);
-    font-size: 1.1rem;
+    padding: 20px 0;
   }
   
   .mobile-menu-btn {
-    width: 40px;
-    height: 40px;
+    width: 44px;
+    height: 44px;
   }
   
   .hamburger-line {
-    height: 4px;
+    height: 3px;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .nav-item:focus,
+  .nav-brand:focus,
+  .mobile-menu-btn:focus,
+  .theme-btn:focus,
+  .language-toggle .btn:focus,
+  .mobile-nav-item:focus {
+    outline: 3px solid currentColor;
+    outline-offset: 2px;
+  }
+  
+  .mobile-menu {
+    border-left: 2px solid var(--color-border-dark);
+  }
+}
+
+/* Reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .nav-brand,
+  .nav-item,
+  .theme-btn,
+  .language-toggle .btn,
+  .mobile-menu,
+  .mobile-menu-overlay,
+  .hamburger-line {
+    transition: none;
+  }
+  
+  .mobile-menu-overlay {
+    animation: none;
   }
 }
 </style>

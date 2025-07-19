@@ -3,15 +3,27 @@
     @click.stop="handleToggle"
     :class="['like-btn', { active: isLiked, loading: isLoading }]"
     :disabled="isLoading"
-    :title="isLiked ? '좋아요 취소' : '좋아요'"
+    :aria-label="getAriaLabel()"
+    :aria-pressed="isLiked"
+    :aria-describedby="showCount ? `like-count-${contentId}` : undefined"
+    type="button"
   >
-    <span v-if="isLoading" class="loading-spinner">⏳</span>
-    <span v-else class="heart-icon">{{ isLiked ? '❤️' : '🤍' }}</span>
+    <span v-if="isLoading" class="loading-spinner" aria-hidden="true">⏳</span>
+    <span v-else class="heart-icon" aria-hidden="true">{{ isLiked ? '❤️' : '🤍' }}</span>
     <span v-if="showText" class="like-text">
       {{ isLiked ? '좋아요됨' : '좋아요' }}
     </span>
-    <span v-if="showCount && likeCount > 0" class="like-count">
+    <span 
+      v-if="showCount && likeCount > 0" 
+      class="like-count"
+      :id="`like-count-${contentId}`"
+      :aria-label="`좋아요 ${likeCount}개`"
+    >
       {{ likeCount }}
+    </span>
+    <!-- Screen reader feedback for state changes -->
+    <span class="sr-only" aria-live="polite" :id="`like-feedback-${contentId}`">
+      {{ feedbackMessage }}
     </span>
   </button>
 </template>
@@ -43,6 +55,7 @@ const emit = defineEmits<Emits>();
 const { likes, isLikedByUser, toggleLike, getContentLikeCount, loadLikes } = useLikes();
 const isLoading = ref(false);
 const likeCount = ref(0);
+const feedbackMessage = ref('');
 
 const isLiked = computed(() => {
   // likes 변화를 명시적으로 감지하도록 함
@@ -51,6 +64,31 @@ const isLiked = computed(() => {
   console.log('🔄 LikeButton computed isLiked:', result, 'likes count:', userLikes.length);
   return result;
 });
+
+const getAriaLabel = () => {
+  const contentTypeText = getContentTypeName(props.contentType);
+  const baseText = `${contentTypeText} 좋아요`;
+  const statusText = isLiked.value ? '취소' : '추가';
+  const countText = showCount.value && likeCount.value > 0 ? `, 현재 ${likeCount.value}개` : '';
+  
+  if (isLoading.value) {
+    return `${baseText} 처리 중`;
+  }
+  
+  return `${baseText} ${statusText}${countText}`;
+};
+
+const getContentTypeName = (type: ContentType): string => {
+  const typeNames = {
+    word: '단어',
+    book: '그림책',
+    quiz: '퀴즈',
+    puzzle: '퍼즐'
+  };
+  return typeNames[type] || type;
+};
+
+const showCount = computed(() => props.showCount);
 
 const handleToggle = async () => {
   if (isLoading.value) return;
@@ -67,12 +105,20 @@ const handleToggle = async () => {
         await updateLikeCount();
       }
       
-      // 사용자에게 피드백 제공
+      // 사용자에게 피드백 제공 (스크린 리더 포함)
+      const contentTypeName = getContentTypeName(props.contentType);
       if (result.isLiked) {
         console.log('✅ 좋아요를 눌렀습니다!');
+        feedbackMessage.value = `${contentTypeName}에 좋아요를 추가했습니다`;
       } else {
         console.log('ℹ️ 좋아요를 취소했습니다.');
+        feedbackMessage.value = `${contentTypeName} 좋아요를 취소했습니다`;
       }
+      
+      // Clear feedback message after a delay
+      setTimeout(() => {
+        feedbackMessage.value = '';
+      }, 2000);
     }
   } catch (error) {
     console.error('❌ 좋아요 처리 중 오류:', error);
@@ -104,6 +150,19 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+/* Screen reader only content */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 .like-btn {
   display: inline-flex;
   align-items: center;
@@ -118,12 +177,19 @@ onMounted(async () => {
   font-weight: 500;
   color: var(--color-text-secondary);
   min-height: 44px;
+  position: relative;
 }
 
 .like-btn:hover:not(:disabled) {
   border-color: var(--color-primary);
   background: rgba(59, 130, 246, 0.1);
   transform: translateY(-1px);
+}
+
+.like-btn:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  border-color: var(--color-primary);
 }
 
 .like-btn.active {
@@ -221,6 +287,40 @@ onMounted(async () => {
   
   .like-btn:active {
     transform: scale(0.95);
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .like-btn:focus {
+    outline: 3px solid currentColor;
+    outline-offset: 2px;
+  }
+  
+  .like-btn.active {
+    border-width: 3px;
+  }
+}
+
+/* Reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .like-btn,
+  .heart-icon,
+  .loading-spinner {
+    transition: none;
+    animation: none;
+  }
+  
+  .like-btn:hover {
+    transform: none;
+  }
+  
+  .like-btn:hover .heart-icon {
+    transform: none;
+  }
+  
+  .like-btn.active .heart-icon {
+    animation: none;
   }
 }
 </style>

@@ -297,11 +297,11 @@ onMounted(() => {
 <style scoped>
 .learning-stats-view {
   min-height: 100vh;
-  background: var(--color-bg-secondary);
+  background: var(--color-bg-primary);
 }
 
 .main-content {
-  padding: var(--spacing-xl) 0;
+  padding: 40px 0;
 }
 
 .container {
@@ -312,24 +312,28 @@ onMounted(() => {
 
 .stats-header {
   text-align: center;
-  margin-bottom: var(--spacing-2xl);
+  margin-bottom: 40px;
 }
 
 .stats-header h1 {
-  font-size: 2.5rem;
-  font-weight: 700;
+  font-size: 2.25rem;
+  font-weight: 600;
   color: var(--color-text-primary);
-  margin-bottom: var(--spacing-md);
+  margin-bottom: 16px;
+  letter-spacing: -0.025em;
 }
 
 .stats-header p {
-  font-size: 1.1rem;
+  font-size: 1rem;
   color: var(--color-text-secondary);
+  max-width: 600px;
+  margin: 0 auto;
+  line-height: 1.6;
 }
 
 .loading-state {
   text-align: center;
-  padding: var(--spacing-2xl);
+  padding: 64px;
 }
 
 .loading-spinner {
@@ -349,7 +353,7 @@ onMounted(() => {
 
 .error-state {
   text-align: center;
-  padding: var(--spacing-2xl);
+  padding: 64px;
 }
 
 .error-message {
@@ -360,37 +364,46 @@ onMounted(() => {
 .stats-content {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-2xl);
+  gap: 40px;
 }
 
 .stats-content section {
   background: var(--color-bg-card);
-  border-radius: var(--radius-xl);
-  padding: var(--spacing-xl);
+  border-radius: 16px;
+  padding: 32px;
   border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-card);
 }
 
 .stats-content section h2 {
   font-size: 1.5rem;
   font-weight: 600;
   color: var(--color-text-primary);
-  margin-bottom: var(--spacing-lg);
+  margin-bottom: 24px;
+  letter-spacing: -0.025em;
 }
 
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: var(--spacing-lg);
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
 }
 
 .stat-card {
   display: flex;
   align-items: center;
-  gap: var(--spacing-md);
-  padding: var(--spacing-lg);
+  gap: 16px;
+  padding: 24px;
   background: var(--color-bg-primary);
-  border-radius: var(--radius-lg);
+  border-radius: 12px;
   border: 1px solid var(--color-border);
+  transition: all 0.2s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--color-border-dark);
 }
 
 .stat-icon {
@@ -723,14 +736,51 @@ onMounted(() => {
   color: var(--color-success);
 }
 
+/* Responsive grid adjustments */
+@media (max-width: 1200px) {
+  .stats-grid {
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 20px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .main-content {
+    padding: 32px 0;
+  }
+  
+  .stats-header h1 {
+    font-size: 2rem;
+  }
+}
+
 @media (max-width: 768px) {
+  .main-content {
+    padding: 24px 0;
+  }
+  
+  .stats-header h1 {
+    font-size: 1.75rem;
+  }
+  
+  .stats-header p {
+    font-size: 0.875rem;
+  }
+  
   .stats-grid {
     grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .stat-card {
+    padding: 16px;
+    gap: 12px;
   }
   
   .percentile-display {
     flex-direction: column;
     text-align: center;
+    gap: 16px;
   }
   
   .comparison-details {
@@ -747,6 +797,74 @@ onMounted(() => {
   
   .progress-bar {
     height: 100px;
+  }
+}
+
+@media (max-width: 480px) {
+  .main-content {
+    padding: 20px 0;
+  }
+  
+  .stats-header h1 {
+    font-size: 1.5rem;
+  }
+  
+  .stats-content section {
+    padding: 20px;
+  }
+  
+  .stats-content {
+    gap: 24px;
+  }
+  
+  .difficulty-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .stat-card {
+    padding: 12px;
+    gap: 8px;
+  }
+  
+  .percentile-circle {
+    width: 80px;
+    height: 80px;
+  }
+  
+  .percentile-circle::before {
+    width: 60px;
+    height: 60px;
+  }
+  
+  .percentile-value {
+    font-size: 1.25rem;
+  }
+}
+
+/* Touch-friendly improvements */
+@media (hover: none) and (pointer: coarse) {
+  .stat-card:hover {
+    transform: none;
+  }
+  
+  .stat-card:active {
+    transform: scale(0.98);
+    transition: transform 0.1s ease;
+  }
+}
+
+/* Accessibility improvements */
+@media (prefers-reduced-motion: reduce) {
+  .stat-card {
+    transition: none;
+  }
+  
+  .progress-fill {
+    transition: none;
+  }
+  
+  .stat-card:hover {
+    transform: none;
   }
 }
 </style>

@@ -428,34 +428,32 @@ onUnmounted(() => {
 
 .words-view {
   min-height: 100vh;
-  background: linear-gradient(135deg, var(--color-bg-primary) 0%, var(--color-bg-secondary) 100%);
+  background: var(--color-bg-primary);
 }
 
 .main-content {
-  padding: var(--spacing-2xl) 0;
-  padding-bottom: 150px; /* Adjust based on content-controls height */
+  padding: 40px 0 120px;
 }
 
 .page-header {
   text-align: center;
-  margin-bottom: var(--spacing-2xl);
+  margin-bottom: 40px;
 }
 
 .page-title {
-  font-size: 2.5rem;
-  font-weight: 700;
-  margin-bottom: var(--spacing-md);
-  background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  font-size: 2.25rem;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: var(--color-text-primary);
+  letter-spacing: -0.025em;
 }
 
 .page-description {
-  font-size: 1.125rem;
+  font-size: 1rem;
   color: var(--color-text-secondary);
   max-width: 600px;
   margin: 0 auto;
+  line-height: 1.6;
 }
 
 .content-controls {
@@ -466,39 +464,65 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--spacing-md);
-  padding: var(--spacing-md);
-  background: var(--color-bg-card);
+  gap: 16px;
+  padding: 20px;
+  background: var(--color-bg-primary);
   border-top: 1px solid var(--color-border);
   z-index: 999;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
 }
 
 .view-mode-toggle {
   display: flex;
-  gap: var(--spacing-sm);
+  gap: 4px;
   background: var(--color-bg-secondary);
-  border-radius: var(--radius-md);
-  padding: 2px;
+  border-radius: 12px;
+  padding: 4px;
+  border: 1px solid var(--color-border);
 }
 
 .category-filter {
   display: flex;
-  gap: var(--spacing-sm);
+  gap: 8px;
   flex-wrap: wrap;
   justify-content: center;
+  max-width: 100%;
 }
 
 .words-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: var(--spacing-xl);
-  margin-bottom: var(--spacing-2xl);
+  gap: 24px;
+  margin-bottom: 40px;
+}
+
+/* Responsive grid adjustments */
+@media (max-width: 1200px) {
+  .words-grid {
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .words-grid {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 16px;
+  }
 }
 
 @media (max-width: 640px) {
   .words-grid {
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: var(--spacing-lg);
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .words-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
   }
 }
 
@@ -520,9 +544,10 @@ onUnmounted(() => {
 }
 
 .learning-container {
-  max-width: 600px;
+  max-width: 500px;
   margin: 0 auto;
   text-align: center;
+  padding: 0 20px;
 }
 
 .learning-header.compact {
@@ -604,26 +629,25 @@ onUnmounted(() => {
 }
 
 .single-word-card {
-  margin-bottom: var(--spacing-2xl);
+  margin-bottom: 32px;
 }
 
 .single-word-card :deep(.word-card) {
-  transform: scale(1.1);
   max-width: 400px;
   margin: 0 auto;
 }
 
 .learning-controls {
   display: flex;
-  justify-content: space-around;
-  gap: var(--spacing-sm);
-  margin-bottom: var(--spacing-xl);
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 32px;
 }
 
 .learning-controls .btn {
-  flex: 1;
-  padding: var(--spacing-sm) var(--spacing-md); /* Smaller padding */
-  font-size: 0.875rem; /* Smaller font size */
+  min-width: 120px;
+  padding: 12px 20px;
+  font-size: 0.875rem;
 }
 
 .auto-advance-progress {
@@ -670,74 +694,101 @@ onUnmounted(() => {
   margin-bottom: var(--spacing-xl);
 }
 
-@media (max-width: 768px) {
+/* Tablet styles */
+@media (max-width: 1024px) {
   .main-content {
-    padding: var(--spacing-lg) 0;
+    padding: 32px 0 100px;
   }
   
   .page-title {
     font-size: 2rem;
   }
   
-  .words-grid {
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: var(--spacing-lg);
+  .content-controls {
+    padding: 16px;
+    gap: 12px;
+  }
+}
+
+/* Mobile styles */
+@media (max-width: 768px) {
+  .main-content {
+    padding: 24px 0 100px;
+  }
+  
+  .page-title {
+    font-size: 1.75rem;
+  }
+  
+  .page-description {
+    font-size: 0.875rem;
+  }
+  
+  .content-controls {
+    padding: 12px;
+    gap: 8px;
   }
   
   .category-filter {
-    gap: var(--spacing-xs);
+    gap: 6px;
   }
   
   .category-filter .btn {
-    padding: var(--spacing-sm) var(--spacing-md);
-    font-size: 0.875rem;
+    padding: 8px 12px;
+    font-size: 0.75rem;
   }
 
   .learning-container {
-    display: flex;
-    flex-direction: column;
-    height: calc(100vh - 150px); /* Adjust based on header height */
-  }
-
-  .learning-header {
-    flex-shrink: 0;
-  }
-
-  .single-word-card {
-    flex-grow: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: var(--spacing-md);
-    min-height: 0; /* Prevent flexbox overflow */
+    padding: 0 16px;
+    max-width: none;
   }
 
   .single-word-card :deep(.word-card) {
-    transform: none;
-    max-width: none;
-    width: 100%;
-    height: 100%;
+    max-width: 350px;
   }
   
   .learning-controls {
-    flex-shrink: 0;
-    display: flex;
-    justify-content: space-around;
-    gap: var(--spacing-sm);
+    flex-direction: column;
+    gap: 8px;
   }
   
   .learning-controls .btn {
-    flex: 1;
-    padding: var(--spacing-sm) var(--spacing-md); /* Smaller padding */
-    font-size: 0.875rem; /* Smaller font size */
+    min-width: auto;
+    width: 100%;
+    padding: 14px 20px;
+  }
+}
+
+/* Small mobile styles */
+@media (max-width: 480px) {
+  .main-content {
+    padding: 20px 0 80px;
   }
   
-  .auto-advance-progress {
-    bottom: var(--spacing-md);
-    left: var(--spacing-md);
-    right: var(--spacing-md);
-    transform: none;
-    min-width: auto;
+  .page-title {
+    font-size: 1.5rem;
+  }
+  
+  .learning-container {
+    padding: 0 12px;
+  }
+
+  .single-word-card :deep(.word-card) {
+    max-width: 300px;
+  }
+  
+  .content-controls {
+    padding: 8px;
+  }
+  
+  .view-mode-toggle {
+    flex-direction: column;
+    gap: 2px;
+  }
+  
+  .view-mode-toggle .btn {
+    font-size: 0.75rem;
+    padding: 8px 12px;
   }
 }
 </style>
