@@ -224,10 +224,14 @@ const features = computed(() => [
 .home-view {
   min-height: 100vh;
   background: var(--color-bg-primary);
+  overflow-x: hidden;
+  width: 100%;
 }
 
 .main-content {
   flex: 1;
+  overflow-x: hidden;
+  width: 100%;
 }
 
 .hero-section {
@@ -355,6 +359,9 @@ const features = computed(() => [
   display: flex;
   gap: 16px;
   justify-content: center;
+  flex-wrap: wrap;
+  width: 100%;
+  max-width: 100%;
 }
 
 .features-section {
@@ -384,6 +391,8 @@ const features = computed(() => [
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 32px;
+  width: 100%;
+  overflow-x: hidden;
 }
 
 .feature-card {
@@ -481,13 +490,23 @@ const features = computed(() => [
   font-size: 0.875rem;
 }
 
+@media (max-width: 1024px) {
+  .features-grid {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 24px;
+  }
+}
+
 @media (max-width: 768px) {
   .hero-section {
     padding: 80px 0 60px;
+    overflow-x: hidden;
   }
   
   .hero-title {
     font-size: 2.5rem;
+    word-break: keep-all;
+    overflow-wrap: break-word;
   }
   
   .hero-description {
@@ -497,6 +516,7 @@ const features = computed(() => [
   .hero-actions {
     flex-direction: column;
     align-items: center;
+    width: 100%;
   }
 
   .hero-actions .btn {

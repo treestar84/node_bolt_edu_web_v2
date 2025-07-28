@@ -151,6 +151,10 @@ body {
   line-height: 1.5;
   color: var(--color-text-primary);
   background: var(--color-bg-primary);
+  /* 가로 스크롤 방지 */
+  overflow-x: hidden;
+  width: 100%;
+  min-width: 320px;
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -422,6 +426,9 @@ span, div, label {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 var(--spacing-lg);
+  /* 오버플로우 방지 */
+  overflow-x: hidden;
+  box-sizing: border-box;
 }
 
 .container-sm {
@@ -429,10 +436,27 @@ span, div, label {
 }
 
 /* Responsive container improvements */
+@media (max-width: 1024px) {
+  .container {
+    padding: 0 var(--spacing-lg);
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 0 var(--spacing-md);
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+}
+
 @media (max-width: 480px) {
   .container {
     padding: 0 var(--spacing-md);
     max-width: 100%;
+    overflow-x: hidden;
   }
 }
 
