@@ -1,0 +1,663 @@
+<template>
+  <div class="admin-dashboard">
+    <AdminHeader />
+    
+    <main class="main-content">
+      <div class="container">
+        <div class="dashboard-header">
+          <h1 class="page-title">관리자 대시보드</h1>
+          <p class="page-description">
+            유아 학습 앱의 콘텐츠를 관리하고 통계를 확인하세요
+          </p>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon">📚</div>
+            <div class="stat-content">
+              <div class="stat-value">{{ store.currentWords.length }}</div>
+              <div class="stat-label">등록된 단어</div>
+            </div>
+            <router-link to="/admin/words" class="stat-action">
+              관리하기 →
+            </router-link>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon">📖</div>
+            <div class="stat-content">
+              <div class="stat-value">{{ store.currentBooks.length }}</div>
+              <div class="stat-label">등록된 책</div>
+            </div>
+            <router-link to="/admin/books" class="stat-action">
+              관리하기 →
+            </router-link>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon">🏆</div>
+            <div class="stat-content">
+              <div class="stat-value">{{ store.quizScore }}</div>
+              <div class="stat-label">총 퀴즈 점수</div>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon">🎯</div>
+            <div class="stat-content">
+              <div class="stat-value">{{ store.quizStreak }}</div>
+              <div class="stat-label">현재 연속 정답</div>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon">🏅</div>
+            <div class="stat-content">
+              <div class="stat-value">{{ store.availableBadges.length }}</div>
+              <div class="stat-label">획득한 뱃지</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="quick-actions">
+          <h2 class="section-title">빠른 작업</h2>
+          <div class="actions-grid">
+            <router-link to="/admin/words" class="action-card">
+              <div class="action-icon">➕</div>
+              <h3>단어 추가</h3>
+              <p>새로운 학습 단어를 추가하세요</p>
+            </router-link>
+
+            <router-link to="/admin/books" class="action-card">
+              <div class="action-icon">📖</div>
+              <h3>책 추가</h3>
+              <p>새로운 그림책을 만들어보세요</p>
+            </router-link>
+
+            <router-link to="/" class="action-card">
+              <div class="action-icon">👶</div>
+              <h3>앱 미리보기</h3>
+              <p>사용자 화면을 확인해보세요</p>
+            </router-link>
+          </div>
+        </div>
+
+        <div class="recent-activity">
+          <h2 class="section-title">카테고리별 단어 현황</h2>
+          <div class="category-stats">
+            <div 
+              v-for="(words, category) in store.wordsByCategory" 
+              :key="category"
+              class="category-item"
+            >
+              <div class="category-name">{{ getCategoryName(category) }}</div>
+              <div class="category-count">{{ words.length }}개</div>
+              <div class="category-bar">
+                <div 
+                  class="category-progress" 
+                  :style="{ width: `${(words.length / store.currentWords.length) * 100}%` }"
+                ></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="badge-overview">
+          <h2 class="section-title">뱃지 시스템 현황</h2>
+          <div class="badge-stats">
+            <div class="badge-progress-card">
+              <h3>전체 뱃지 진행률</h3>
+              <div class="overall-progress">
+                <div class="progress-bar">
+                  <div 
+                    class="progress-fill" 
+                    :style="{ width: `${(store.availableBadges.length / store.currentBadges.length) * 100}%` }"
+                  ></div>
+                </div>
+                <div class="progress-text">
+                  {{ store.availableBadges.length }} / {{ store.currentBadges.length }} 뱃지 획득
+                </div>
+              </div>
+            </div>
+            
+            <div class="recent-badges">
+              <h3>최근 획득 뱃지</h3>
+              <div v-if="store.availableBadges.length > 0" class="badge-list">
+                <div 
+                  v-for="badge in store.availableBadges.slice(-3)" 
+                  :key="badge.id"
+                  class="badge-item"
+                >
+                  <span class="badge-icon">{{ badge.icon }}</span>
+                  <span class="badge-name">{{ badge.name }}</span>
+                </div>
+              </div>
+              <div v-else class="no-badges">
+                아직 획득한 뱃지가 없습니다
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 데이터베이스 연결 상태 표시 -->
+        <div class="database-status">
+          <h2 class="section-title">시스템 상태</h2>
+          <div class="status-grid">
+            <div class="status-card">
+              <div class="status-icon">💾</div>
+              <div class="status-content">
+                <div class="status-label">데이터베이스</div>
+                <div class="status-value connected">연결됨</div>
+              </div>
+            </div>
+            <div class="status-card">
+              <div class="status-icon">🔄</div>
+              <div class="status-content">
+                <div class="status-label">데이터 동기화</div>
+                <div class="status-value">실시간</div>
+              </div>
+            </div>
+            <div class="status-card">
+              <div class="status-icon">💿</div>
+              <div class="status-content">
+                <div class="status-label">저장 방식</div>
+                <div class="status-value">Supabase DB</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { onMounted } from 'vue';
+import AdminHeader from '@/components/AdminHeader.vue';
+import { useAppStore } from '@/stores/app';
+
+const store = useAppStore();
+
+const getCategoryName = (category: string) => {
+  const categoryNames: Record<string, string> = {
+    'animals': '동물',
+    'fruits': '과일',
+    'vehicles': '탈것',
+    'objects': '사물',
+    'nature': '자연',
+    'toys': '장난감',
+    'clothes': '옷'
+  };
+  return categoryNames[category] || category;
+};
+
+onMounted(async () => {
+  // 관리자 대시보드 로드 시 최신 데이터 가져오기
+  console.log('🔄 Loading admin dashboard data...');
+  await store.loadAllData();
+});
+</script>
+
+<style scoped>
+.admin-dashboard {
+  min-height: 100vh;
+  background: var(--color-bg-primary);
+}
+
+.main-content {
+  padding: 40px 0;
+}
+
+.dashboard-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.page-title {
+  font-size: 2.25rem;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: var(--color-text-primary);
+  letter-spacing: -0.025em;
+}
+
+.page-description {
+  font-size: 1rem;
+  color: var(--color-text-secondary);
+  max-width: 600px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
+  margin-bottom: 40px;
+}
+
+.stat-card {
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow-card);
+}
+
+.stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--color-border-dark);
+}
+
+.stat-icon {
+  font-size: 2.5rem;
+  flex-shrink: 0;
+}
+
+.stat-content {
+  flex: 1;
+}
+
+.stat-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  line-height: 1;
+}
+
+.stat-label {
+  color: var(--color-text-secondary);
+  font-size: 0.875rem;
+  margin-top: var(--spacing-xs);
+}
+
+.stat-action {
+  color: var(--color-primary);
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.875rem;
+  transition: color 0.2s ease;
+}
+
+.stat-action:hover {
+  color: var(--color-primary-dark);
+}
+
+.section-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: 24px;
+  letter-spacing: -0.025em;
+}
+
+.quick-actions {
+  margin-bottom: 40px;
+}
+
+.actions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
+}
+
+.action-card {
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  padding: 32px;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  text-align: center;
+  box-shadow: var(--shadow-card);
+}
+
+.action-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--color-border-dark);
+}
+
+.action-icon {
+  font-size: 3rem;
+  margin-bottom: var(--spacing-lg);
+}
+
+.action-card h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-sm);
+}
+
+.action-card p {
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+}
+
+.recent-activity {
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  padding: 32px;
+  margin-bottom: 40px;
+  box-shadow: var(--shadow-card);
+}
+
+.category-stats {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.category-item {
+  display: grid;
+  grid-template-columns: 1fr auto 200px;
+  gap: var(--spacing-md);
+  align-items: center;
+}
+
+.category-name {
+  font-weight: 500;
+  color: var(--color-text-primary);
+}
+
+.category-count {
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  font-size: 0.875rem;
+}
+
+.category-bar {
+  height: 8px;
+  background: var(--color-bg-secondary);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.category-progress {
+  height: 100%;
+  background: linear-gradient(90deg, var(--color-primary), var(--color-secondary));
+  transition: width 0.3s ease;
+}
+
+.badge-overview {
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  padding: 32px;
+  margin-bottom: 40px;
+  box-shadow: var(--shadow-card);
+}
+
+.badge-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-xl);
+}
+
+.badge-progress-card h3,
+.recent-badges h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-lg);
+}
+
+.overall-progress {
+  text-align: center;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 12px;
+  background: var(--color-bg-secondary);
+  border-radius: 6px;
+  overflow: hidden;
+  margin-bottom: var(--spacing-md);
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--color-success), var(--color-secondary));
+  transition: width 0.3s ease;
+}
+
+.progress-text {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+}
+
+.badge-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.badge-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-md);
+}
+
+.badge-icon {
+  font-size: 1.5rem;
+}
+
+.badge-name {
+  font-weight: 500;
+  color: var(--color-text-primary);
+}
+
+.no-badges {
+  text-align: center;
+  color: var(--color-text-secondary);
+  font-style: italic;
+  padding: var(--spacing-lg);
+}
+
+.database-status {
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  padding: 32px;
+  box-shadow: var(--shadow-card);
+}
+
+.status-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--spacing-lg);
+}
+
+.status-card {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-lg);
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-md);
+}
+
+.status-icon {
+  font-size: 2rem;
+  flex-shrink: 0;
+}
+
+.status-content {
+  flex: 1;
+}
+
+.status-label {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  margin-bottom: var(--spacing-xs);
+}
+
+.status-value {
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.status-value.connected {
+  color: var(--color-success);
+}
+
+/* Responsive grid adjustments */
+@media (max-width: 1200px) {
+  .stats-grid {
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 20px;
+  }
+  
+  .actions-grid {
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 20px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .main-content {
+    padding: 32px 0;
+  }
+  
+  .page-title {
+    font-size: 2rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .main-content {
+    padding: 24px 0;
+  }
+  
+  .page-title {
+    font-size: 1.75rem;
+  }
+  
+  .page-description {
+    font-size: 0.875rem;
+  }
+  
+  .stats-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .stat-card {
+    padding: 20px;
+  }
+  
+  .stat-icon {
+    font-size: 2rem;
+  }
+  
+  .stat-value {
+    font-size: 1.5rem;
+  }
+  
+  .actions-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .action-card {
+    padding: 24px;
+  }
+  
+  .recent-activity,
+  .badge-overview,
+  .database-status {
+    padding: 20px;
+  }
+  
+  .category-item {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    text-align: center;
+  }
+  
+  .category-bar {
+    width: 100%;
+  }
+  
+  .badge-stats {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .status-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .main-content {
+    padding: 20px 0;
+  }
+  
+  .page-title {
+    font-size: 1.5rem;
+  }
+  
+  .dashboard-header {
+    margin-bottom: 24px;
+  }
+  
+  .stats-grid,
+  .actions-grid {
+    gap: 12px;
+  }
+  
+  .stat-card,
+  .action-card {
+    padding: 16px;
+  }
+  
+  .recent-activity,
+  .badge-overview,
+  .database-status {
+    padding: 16px;
+  }
+  
+  .section-title {
+    font-size: 1.25rem;
+  }
+}
+
+/* Touch-friendly improvements */
+@media (hover: none) and (pointer: coarse) {
+  .stat-card:hover,
+  .action-card:hover {
+    transform: none;
+  }
+  
+  .stat-card:active,
+  .action-card:active {
+    transform: scale(0.98);
+    transition: transform 0.1s ease;
+  }
+}
+
+/* Accessibility improvements */
+@media (prefers-reduced-motion: reduce) {
+  .stat-card,
+  .action-card {
+    transition: none;
+  }
+  
+  .stat-card:hover,
+  .action-card:hover {
+    transform: none;
+  }
+}
+</style>

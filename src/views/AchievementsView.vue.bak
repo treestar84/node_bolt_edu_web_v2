@@ -656,7 +656,7 @@ onMounted(async () => {
   top: var(--spacing-xs);
   right: var(--spacing-xs);
   background: var(--color-success);
-  color: var(--color-text-white);
+  color: white;
   padding: 2px var(--spacing-xs);
   border-radius: var(--radius-sm);
   font-size: 0.6rem;
@@ -1116,7 +1116,7 @@ onMounted(async () => {
 
 .tab-button.active {
   background: var(--color-primary);
-  color: var(--color-text-white);
+  color: white;
   box-shadow: var(--shadow-sm);
 }
 
@@ -1144,32 +1144,6 @@ onMounted(async () => {
   to {
     opacity: 1;
     transform: translateY(0);
-  }
-}
-
-/* 태블릿 반응형 */
-@media (max-width: 1024px) {
-  .main-content {
-    padding: 20px 0 60px;
-    min-height: calc(100vh - 80px);
-  }
-  
-  .page-title {
-    font-size: 2rem;
-    margin-bottom: 16px;
-  }
-  
-  .achievements-container {
-    padding: 0 20px;
-  }
-  
-  .achievements-grid {
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 20px;
-  }
-  
-  .tabs-container {
-    margin-bottom: 24px;
   }
 }
 

@@ -302,6 +302,28 @@ onMounted(async () => {
   }
 }
 
+/* Tablet styles */
+@media (max-width: 1024px) {
+  .main-content {
+    padding: 20px 0 60px;
+    min-height: calc(100vh - 80px);
+  }
+  
+  .page-title {
+    font-size: 2rem;
+    margin-bottom: 12px;
+  }
+  
+  .books-grid {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+}
+
+/* Mobile styles */
 @media (max-width: 768px) {
   .main-content {
     padding: 24px 0;

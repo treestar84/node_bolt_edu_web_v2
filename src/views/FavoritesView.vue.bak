@@ -356,7 +356,7 @@ onMounted(async () => {
 }
 
 .play-text {
-  color: var(--color-text-white);
+  color: white;
   font-weight: 600;
   font-size: 1.125rem;
 }

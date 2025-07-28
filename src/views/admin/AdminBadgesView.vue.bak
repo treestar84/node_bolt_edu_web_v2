@@ -460,7 +460,7 @@ const confirmDelete = () => {
 
 .status-badge.unlocked {
   background: var(--color-success);
-  color: var(--color-text-white);
+  color: white;
 }
 
 .actions-cell {

@@ -245,7 +245,7 @@ onMounted(async () => {
 
 .like-btn.active .like-count {
   background: var(--color-danger);
-  color: white;
+  color: var(--color-text-white);
 }
 
 @keyframes heartbeat {

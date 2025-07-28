@@ -497,7 +497,7 @@ onMounted(() => {
 
 .status-badge.active {
   background: var(--color-success);
-  color: var(--color-text-white);
+  color: white;
 }
 
 .modal-overlay {

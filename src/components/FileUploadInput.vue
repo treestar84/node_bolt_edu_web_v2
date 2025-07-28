@@ -311,7 +311,7 @@ const getPreviewUrl = (url: string) => {
 
 .remove-button {
   background: var(--color-danger);
-  color: white;
+  color: var(--color-text-white);
   border: none;
   padding: var(--spacing-xs) var(--spacing-sm);
   border-radius: var(--radius-sm);

@@ -475,7 +475,7 @@ onUnmounted(() => {
   left: 0;
   right: 0;
   background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
-  color: var(--color-text-white);
+  color: white;
   padding: var(--spacing-lg) var(--spacing-md) var(--spacing-md);
   font-size: 1.125rem;
   font-weight: 500;
@@ -516,7 +516,7 @@ onUnmounted(() => {
 
 .touch-hint {
   background: rgba(0, 0, 0, 0.5);
-  color: var(--color-text-white);
+  color: white;
   padding: var(--spacing-sm);
   border-radius: var(--radius-sm);
   font-size: 1.5rem;

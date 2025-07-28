@@ -697,16 +697,30 @@ onUnmounted(() => {
 /* Tablet styles */
 @media (max-width: 1024px) {
   .main-content {
-    padding: 32px 0 100px;
+    padding: 16px 0 60px;
+    min-height: calc(100vh - 80px);
+    display: flex;
+    flex-direction: column;
   }
   
   .page-title {
-    font-size: 2rem;
+    font-size: 1.75rem;
+    margin-bottom: 16px;
   }
   
   .content-controls {
-    padding: 16px;
-    gap: 12px;
+    padding: 12px 16px;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+  
+  .learning-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    max-width: 600px;
+    padding: 0 20px;
   }
 }
 

@@ -703,7 +703,7 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   font-weight: 600;
-  color: var(--color-text-white);
+  color: white;
   background: var(--color-danger);
 }
 
