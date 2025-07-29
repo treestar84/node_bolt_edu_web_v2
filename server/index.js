@@ -19,6 +19,9 @@ const __dirname = dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+// Trust proxy settings for Cloud Run/Load Balancer
+app.set('trust proxy', true);
+
 // Security middleware
 app.use(helmet({
   crossOriginEmbedderPolicy: false,
@@ -70,8 +73,8 @@ app.use(cors({
 }));
 
 // Body parsing middleware
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Static file serving for uploads
 app.use('/uploads', cors({
