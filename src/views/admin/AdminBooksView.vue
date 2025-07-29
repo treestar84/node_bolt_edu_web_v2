@@ -497,7 +497,8 @@ URL: ${result.data.video.url}`);
     }
   } catch (err) {
     console.error('❌ 테스트 비디오 생성 에러:', err);
-    error.value = `테스트 비디오 생성 실패: ${err.message}`;
+    const errorMessage = err instanceof Error ? err.message : String(err);
+    error.value = `테스트 비디오 생성 실패: ${errorMessage}`;
   } finally {
     isGeneratingTest.value = false;
   }
