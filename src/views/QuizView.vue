@@ -531,7 +531,7 @@ onMounted(() => {
   gap: var(--spacing-sm);
   padding: var(--spacing-lg) var(--spacing-xl);
   background: var(--color-primary);
-  color: var(--color-text-primary);
+  color: var(--color-bg-primary);
   border: none;
   border-radius: var(--radius-md);
   font-size: 1.125rem;

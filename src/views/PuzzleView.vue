@@ -832,7 +832,7 @@ watch(puzzleDifficulty, () => {
 }
 
 .play-text {
-  color: var(--color-text-white);
+  color: var(--color-bg-primary);
   font-weight: 600;
   font-size: 0.875rem;
 }
@@ -874,7 +874,7 @@ watch(puzzleDifficulty, () => {
 
 .aspect-ratio-info {
   background: var(--color-primary);
-  color: var(--color-text-primary);
+  color: var(--color-bg-primary);
   padding: 2px var(--spacing-xs);
   border-radius: var(--radius-sm);
   font-size: 0.75rem;

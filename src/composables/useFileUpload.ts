@@ -10,15 +10,22 @@ export function useFileUpload() {
   const isUploading = ref(false);
   const uploadProgress = ref(0);
 
-  // 서버 업로드 함수 (이미지/오디오)
-  const uploadFile = async (file: File, type: 'image' | 'audio'): Promise<string> => {
+  // 서버 업로드 함수 (이미지/오디오/비디오)
+  const uploadFile = async (file: File, type: 'image' | 'audio' | 'video'): Promise<string> => {
     try {
       isUploading.value = true;
       uploadProgress.value = 0;
 
       const formData = new FormData();
       formData.append(type, file);
-      const endpoint = type === 'image' ? '/api/upload/image' : '/api/upload/audio';
+      let endpoint;
+      if (type === 'image') {
+        endpoint = '/api/upload/image';
+      } else if (type === 'audio') {
+        endpoint = '/api/upload/audio';
+      } else if (type === 'video') {
+        endpoint = '/api/upload/video';
+      }
 
       // 업로드 진행률 시뮬레이션
       const progressInterval = setInterval(() => {
@@ -54,7 +61,7 @@ export function useFileUpload() {
 
   // 서버 파일 경로만 반환
   const getUploadedFileUrl = (filename: string): string | null => {
-    if (filename.startsWith('/uploads/images/') || filename.startsWith('/uploads/audio/')) {
+    if (filename.startsWith('/uploads/images/') || filename.startsWith('/uploads/audio/') || filename.startsWith('/uploads/videos/')) {
       return filename;
     }
     return null;
@@ -94,7 +101,7 @@ export function useFileUpload() {
   // 향상된 업로드 함수 (이미지 크기 정보 포함)
   const uploadFileWithDimensions = async (
     file: File, 
-    type: 'image' | 'audio'
+    type: 'image' | 'audio' | 'video'
   ): Promise<{ url: string; dimensions?: ImageDimensions }> => {
     try {
       isUploading.value = true;
@@ -122,7 +129,14 @@ export function useFileUpload() {
         formData.append('imageAspectRatio', dimensions.aspectRatio.toString());
       }
 
-      const endpoint = type === 'image' ? '/api/upload/image' : '/api/upload/audio';
+      let endpoint;
+      if (type === 'image') {
+        endpoint = '/api/upload/image';
+      } else if (type === 'audio') {
+        endpoint = '/api/upload/audio';
+      } else if (type === 'video') {
+        endpoint = '/api/upload/video';
+      }
 
       // 업로드 진행률 시뮬레이션
       const progressInterval = setInterval(() => {
@@ -159,10 +173,10 @@ export function useFileUpload() {
     }
   };
 
-  const validateFile = (file: File, type: 'image' | 'audio'): { valid: boolean; error?: string } => {
-    const maxSize = 10 * 1024 * 1024; // 10MB
+  const validateFile = (file: File, type: 'image' | 'audio' | 'video'): { valid: boolean; error?: string } => {
+    const maxSize = 200 * 1024 * 1024; // 200MB
     if (file.size > maxSize) {
-      return { valid: false, error: '파일 크기는 10MB 이하여야 합니다.' };
+      return { valid: false, error: '파일 크기는 200MB 이하여야 합니다.' };
     }
     if (type === 'image') {
       const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
@@ -173,6 +187,11 @@ export function useFileUpload() {
       const validTypes = ['audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/ogg'];
       if (!validTypes.includes(file.type)) {
         return { valid: false, error: '지원되는 오디오 형식: MP3, WAV, OGG' };
+      }
+    } else if (type === 'video') {
+      const validTypes = ['video/mp4', 'video/avi', 'video/mov', 'video/wmv', 'video/webm'];
+      if (!validTypes.includes(file.type)) {
+        return { valid: false, error: '지원되는 비디오 형식: MP4, AVI, MOV, WMV, WebM' };
       }
     }
     return { valid: true };

@@ -4,8 +4,9 @@ import { generateToken, verifyToken, authenticateAdmin } from '../middleware/aut
 
 const router = express.Router();
 
-// Admin credentials (in production, store in database)
-const ADMIN_PASSWORD_HASH = bcrypt.hashSync('aa11##', 10);
+// Admin credentials - 환경변수에서 비밀번호 읽어와서 해시화
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123';
+const ADMIN_PASSWORD_HASH = bcrypt.hashSync(ADMIN_PASSWORD, 10);
 
 // Admin login
 router.post('/login', async (req, res) => {

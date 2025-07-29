@@ -50,37 +50,78 @@ router.get('/:id', async (req, res) => {
 // Create new book (requires API key)
 router.post('/', authenticateApiKey, async (req, res) => {
   try {
-    const { title, coverImage, pages } = req.body;
+    const { title, coverImage, pages, isVideoMode, videoUrl, minAge, maxAge } = req.body;
     
-    // Validation
-    if (!title || !coverImage || !Array.isArray(pages) || pages.length !== 4) {
+    // Basic validation
+    if (!title) {
       return res.status(400).json({
         error: 'Bad request',
-        message: 'Title, coverImage, and exactly 4 pages are required'
+        message: 'Title is required'
       });
     }
-    
-    // Validate each page
-    for (let i = 0; i < pages.length; i++) {
-      const page = pages[i];
-      if (!page.imageUrl || !(page.audio || page.audioUrl)) {
+
+    // Cover image is only required for non-video mode
+    if (!isVideoMode && !coverImage) {
+      return res.status(400).json({
+        error: 'Bad request',
+        message: 'Cover image is required for traditional books'
+      });
+    }
+
+    let bookData;
+
+    if (isVideoMode) {
+      // Video mode validation
+      if (!videoUrl) {
         return res.status(400).json({
           error: 'Bad request',
-          message: `Page ${i + 1} must have imageUrl and audioUrl`
+          message: 'Video URL is required for video mode books'
         });
       }
+      
+      bookData = {
+        title: title.trim(),
+        coverImage: coverImage ? coverImage.trim() : '', // Allow empty coverImage for video mode
+        isVideoMode: true,
+        videoUrl: videoUrl.trim(),
+        pages: [], // Video mode books don't have individual pages
+        minAge: minAge || 3,
+        maxAge: maxAge || 7
+      };
+    } else {
+      // Traditional page mode validation
+      if (!Array.isArray(pages) || pages.length === 0) {
+        return res.status(400).json({
+          error: 'Bad request',
+          message: 'Pages array is required for traditional books'
+        });
+      }
+      
+      // Validate each page
+      for (let i = 0; i < pages.length; i++) {
+        const page = pages[i];
+        if (!page.imageUrl || !(page.audio || page.audioUrl)) {
+          return res.status(400).json({
+            error: 'Bad request',
+            message: `Page ${i + 1} must have imageUrl and audioUrl`
+          });
+        }
+      }
+      
+      bookData = {
+        title: title.trim(),
+        coverImage: coverImage.trim(),
+        isVideoMode: false,
+        pages: pages.map((page, index) => ({
+          id: uuidv4(),
+          imageUrl: page.imageUrl.trim(),
+          audioUrl: (page.audioUrl || page.audio || '').trim(),
+          textContent: page.textContent ? page.textContent.trim() : (page.text ? page.text.trim() : undefined)
+        })),
+        minAge: minAge || 3,
+        maxAge: maxAge || 7
+      };
     }
-    
-    const bookData = {
-      title: title.trim(),
-      coverImage: coverImage.trim(),
-      pages: pages.map((page, index) => ({
-        id: uuidv4(),
-        imageUrl: page.imageUrl.trim(),
-        audioUrl: (page.audioUrl || page.audio || '').trim(),
-        textContent: page.textContent ? page.textContent.trim() : (page.text ? page.text.trim() : undefined)
-      }))
-    };
     
     const newBook = await addBook(bookData);
     

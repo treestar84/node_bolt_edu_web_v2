@@ -95,22 +95,20 @@ export const useAppStore = defineStore('app', () => {
   // 공용 책 우선 로드 (인증 없이도 접근 가능)
   const loadBooks = async () => {
     try {
-      console.log('📖 Loading books from database (all books, no owner_type restriction)...');
-      let data, error;
-      ({ data, error } = await supabase
-        .from('books')
-        .select(`*, book_pages (*)`)
-        .order('created_at', { ascending: false })
-      );
-      if (error) {
-        console.error('❌ Error loading books:', error);
-        currentBooks.value = [];
-        return;
+      console.log('📖 Loading books from API server...');
+      const response = await fetch('/api/books');
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
-      currentBooks.value = (data || []).map(transformBookFromDB);
+      const result = await response.json();
+      if (!result.success) {
+        throw new Error('Failed to load books from API');
+      }
+      currentBooks.value = result.data || [];
       console.log('✅ Books loaded:', currentBooks.value.length);
     } catch (error) {
       console.error('💥 Error loading books:', error);
+      currentBooks.value = [];
     }
   };
 
@@ -346,94 +344,30 @@ export const useAppStore = defineStore('app', () => {
   // 책 추가 (관리자 권한 확인 개선)
   const addBook = async (book: Omit<Book, 'id'>) => {
     try {
-      console.log('➕ Adding book to database:', book.title);
-      // 관리자 권한 확인을 위해 현재 사용자 정보 가져오기
-      const { data: { user } } = await supabase.auth.getUser();
-      let ownerId = null;
-      let ownerType = 'user'; // 항상 'user'로 저장
-      if (user) {
-        ownerId = user.id;
-        // 사용자 프로필 확인 (로그인한 경우만)
-        const { data: profile, error: profileError } = await supabase
-          .from('user_profiles')
-          .select('user_type')
-          .eq('user_id', user.id)
-          .single();
-        if (profileError) {
-          console.error('❌ Error getting user profile:', profileError);
-          throw new Error('사용자 프로필을 확인할 수 없습니다.');
-        }
-        ownerType = (profile.user_type === 'teacher' || profile.user_type === 'admin') ? 'global' : 'user';
-      }
-      console.log('👤 User type:', ownerType);
-      // 1. 책 먼저 저장
-      const { data: bookData, error: bookError } = await supabase
-        .from('books')
-        .insert({
-          title: book.title,
-          cover_image: book.coverImage,
-          min_age: book.minAge,
-          max_age: book.maxAge,
-          owner_type: ownerType,
-          owner_id: ownerId,
-        })
-        .select()
-        .single();
-      if (bookError || !bookData) {
-        console.error('❌ Error inserting book:', bookError, bookData);
-        throw new Error('책 등록에 실패했습니다. (권한/정책/DB 오류)');
-      }
-      // 2. 페이지 데이터 준비 (snake_case, 필수값 체크, toRaw로 프록시 해제, _value fallback)
-      const pagesData = book.pages.map((page, idx) => {
-        const rawPage = toRaw(page);
-        // 1. camelCase 우선
-        let imageUrl = rawPage.imageUrl;
-        let audioUrl = rawPage.audioUrl;
-        let textContent = rawPage.textContent;
-        // 2. snake_case fallback (as any)
-        if ((!imageUrl || !audioUrl) && ((rawPage as any).image_url || (rawPage as any).audio_url)) {
-          imageUrl = (rawPage as any).image_url;
-          audioUrl = (rawPage as any).audio_url;
-          textContent = (rawPage as any).text_content;
-        }
-        // 3. _value fallback (camelCase/snake_case 모두)
-        const rawValue = (rawPage as any)._value;
-        if ((!imageUrl || !audioUrl) && rawValue) {
-          imageUrl = rawValue.imageUrl || rawValue.image_url;
-          audioUrl = rawValue.audioUrl || rawValue.audio_url;
-          textContent = rawValue.textContent || rawValue.text_content;
-        }
-        if (!imageUrl || !audioUrl) {
-          console.log('DEBUG page structure', idx, rawPage);
-          throw new Error(`페이지 ${idx + 1}에 이미지/음성 파일이 누락되었습니다.`);
-        }
-        return {
-          book_id: bookData.id,
-          page_number: idx + 1,
-          image_url: imageUrl,
-          audio_url: audioUrl,
-          text_content: textContent || null
-        };
+      console.log('📚 Adding book via API server:', book.title);
+      
+      const response = await fetch('/api/books', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-API-Key': import.meta.env.VITE_API_KEY
+        },
+        body: JSON.stringify(book)
       });
-      // 3. book_pages insert
-      const { data: pagesResult, error: pagesError } = await supabase
-        .from('book_pages')
-        .insert(pagesData)
-        .select();
-      if (pagesError) {
-        console.error('❌ Error adding book pages:', pagesError, pagesError.details, pagesError.hint);
-        // 책 삭제 후 에러 던지기
-        await supabase.from('books').delete().eq('id', bookData.id);
-        throw pagesError;
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
       }
-      // 4. 성공 로그
-      console.log('✅ Book and pages added:', bookData, pagesResult);
-      // 로컬 상태 업데이트
-      const newBook = transformBookFromDB({
-        ...bookData,
-        book_pages: pagesResult
-      });
+
+      const result = await response.json();
+      if (!result.success) {
+        throw new Error(result.message || 'Failed to add book');
+      }
+
+      const newBook = result.data;
       currentBooks.value.unshift(newBook);
+      console.log('✅ Book added successfully:', newBook.id);
       return newBook;
     } catch (error: any) {
       console.error('💥 Error in addBook:', error, error?.details, error?.hint);
@@ -444,77 +378,35 @@ export const useAppStore = defineStore('app', () => {
   // 책 수정
   const updateBook = async (id: string, updates: Partial<Book>) => {
     try {
-      console.log('📝 Updating book in database:', id);
-      
-      const dbUpdates: any = { updated_at: new Date().toISOString() };
-      if (updates.title) dbUpdates.title = updates.title;
-      if (updates.coverImage) dbUpdates.cover_image = updates.coverImage;
-      if (updates.minAge) dbUpdates.min_age = updates.minAge;
-      if (updates.maxAge) dbUpdates.max_age = updates.maxAge;
-      if (updates.ownerType) dbUpdates.owner_type = updates.ownerType;
-      if (updates.ownerId !== undefined) dbUpdates.owner_id = updates.ownerId;
+      console.log('📝 Updating book via API server:', id);
 
-      const { data, error } = await supabase
-        .from('books')
-        .update(dbUpdates)
-        .eq('id', id)
-        .select()
-        .single();
+      const response = await fetch(`/api/books/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-API-Key': import.meta.env.VITE_API_KEY
+        },
+        body: JSON.stringify(updates)
+      });
 
-      if (error) {
-        console.error('❌ Error updating book:', error);
-        throw error;
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
       }
 
-      // 페이지 업데이트 (필요한 경우)
-      if (updates.pages) {
-        // 기존 페이지 삭제
-        await supabase
-          .from('book_pages')
-          .delete()
-          .eq('book_id', id);
-
-        // 새 페이지 삽입
-        const pagesData = updates.pages.map((page, index) => ({
-          book_id: id,
-          page_number: index + 1,
-          image_url: page.imageUrl || '',
-          audio_url: page.audioUrl || '',
-          text_content: page.textContent || null
-        }));
-
-        const { data: pagesResult, error: pagesError } = await supabase
-          .from('book_pages')
-          .insert(pagesData)
-          .select();
-
-        if (pagesError) {
-          console.error('❌ Error updating book pages:', pagesError);
-          throw pagesError;
-        }
-
-        // 로컬 상태 업데이트
-        const updatedBook = transformBookFromDB({
-          ...data,
-          book_pages: pagesResult
-        });
-
-        const index = currentBooks.value.findIndex(b => b.id === id);
-        if (index !== -1) {
-          currentBooks.value[index] = updatedBook;
-        }
-
-        return updatedBook;
-      } else {
-        // 페이지 업데이트 없이 책 정보만 업데이트
-        const index = currentBooks.value.findIndex(b => b.id === id);
-        if (index !== -1) {
-          currentBooks.value[index] = { ...currentBooks.value[index], ...updates };
-        }
+      const result = await response.json();
+      if (!result.success) {
+        throw new Error(result.message || 'Failed to update book');
       }
-      
-      console.log('✅ Book updated successfully');
-      return currentBooks.value.find(b => b.id === id);
+
+      const updatedBook = result.data;
+      const index = currentBooks.value.findIndex(b => b.id === id);
+      if (index !== -1) {
+        currentBooks.value[index] = updatedBook;
+      }
+
+      console.log('✅ Book updated successfully:', updatedBook.id);
+      return updatedBook;
     } catch (error) {
       console.error('💥 Error in updateBook:', error);
       throw error;
@@ -524,17 +416,23 @@ export const useAppStore = defineStore('app', () => {
   // 책 삭제
   const deleteBook = async (id: string) => {
     try {
-      console.log('🗑️ Deleting book from database:', id);
+      console.log('🗑️ Deleting book via API server:', id);
       
-      // 책 페이지들이 CASCADE로 자동 삭제됨
-      const { error } = await supabase
-        .from('books')
-        .delete()
-        .eq('id', id);
+      const response = await fetch(`/api/books/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'X-API-Key': import.meta.env.VITE_API_KEY
+        }
+      });
 
-      if (error) {
-        console.error('❌ Error deleting book:', error);
-        throw error;
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      if (!result.success) {
+        throw new Error(result.message || 'Failed to delete book');
       }
 
       // 로컬 상태 업데이트
@@ -573,6 +471,8 @@ export const useAppStore = defineStore('app', () => {
     maxAge: dbBook.max_age,
     ownerType: dbBook.owner_type,
     ownerId: dbBook.owner_id,
+    isVideoMode: dbBook.is_video_mode || false,
+    videoUrl: dbBook.video_url || '',
     pages: (dbBook.book_pages || dbBook.pages || [])
       .sort((a: any, b: any) => (a.page_number || a.pageNumber || 0) - (b.page_number || b.pageNumber || 0))
       .map((page: any) => ({

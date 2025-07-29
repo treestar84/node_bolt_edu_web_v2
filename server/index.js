@@ -34,10 +34,12 @@ app.use(helmet({
   },
 }));
 
-// Rate limiting
+// Rate limiting - 개발 환경에서는 더 관대하게 설정
+const isDevelopment = process.env.NODE_ENV !== 'production';
+
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
+  max: isDevelopment ? 1000 : 100, // 개발: 1000, 프로덕션: 100 requests per windowMs
   message: {
     error: 'Too many requests from this IP, please try again later.'
   }
@@ -45,19 +47,24 @@ const limiter = rateLimit({
 
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 50, // limit each IP to 50 API requests per windowMs
+  max: isDevelopment ? 500 : 50, // 개발: 500, 프로덕션: 50 API requests per windowMs
   message: {
     error: 'Too many API requests from this IP, please try again later.'
   }
 });
 
-app.use(limiter);
-app.use('/api', apiLimiter);
+// 개발 환경에서는 rate limiting 비활성화
+if (!isDevelopment) {
+  app.use(limiter);
+  app.use('/api', apiLimiter);
+} else {
+  console.log('🔧 Development mode: Rate limiting disabled');
+}
 
 // CORS configuration
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' 
-    ? ['https://your-domain.com'] 
+    ? (process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : [])
     : ['http://localhost:5173', 'http://localhost:3000'],
   credentials: true
 }));

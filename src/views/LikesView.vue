@@ -496,7 +496,7 @@ onMounted(async () => {
 .tab-btn.active {
   background: var(--color-primary);
   border-color: var(--color-primary);
-  color: var(--color-text-white);
+  color: var(--color-bg-primary);
 }
 
 .likes-section {
@@ -604,7 +604,7 @@ onMounted(async () => {
 }
 
 .play-text {
-  color: var(--color-text-white);
+  color: var(--color-bg-primary);
   font-weight: 600;
   font-size: 1.125rem;
 }
@@ -687,7 +687,7 @@ onMounted(async () => {
 .type-btn.active {
   background: var(--color-primary);
   border-color: var(--color-primary);
-  color: var(--color-text-white);
+  color: var(--color-bg-primary);
 }
 
 .ranking-list {

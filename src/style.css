@@ -266,6 +266,14 @@ span, div, label {
   box-shadow: var(--shadow-button);
 }
 
+/* 다크 모드에서 primary 버튼 텍스트 색상 보정 */
+:root.dark .btn-primary,
+:root.dark .btn.btn-primary,
+:root.dark .btn-primary.active,
+:root.dark .btn.btn-primary.active {
+  color: #0a0a0a;
+}
+
 .btn-primary:hover:not(:disabled),
 .btn.btn-primary:hover:not(:disabled),
 .btn-primary.active:hover:not(:disabled),
@@ -274,6 +282,14 @@ span, div, label {
   color: var(--color-bg-primary);
   transform: translateY(-1px);
   box-shadow: var(--shadow-md);
+}
+
+/* 다크 모드에서 primary 버튼 hover 시 텍스트 색상 보정 */
+:root.dark .btn-primary:hover:not(:disabled),
+:root.dark .btn.btn-primary:hover:not(:disabled),
+:root.dark .btn-primary.active:hover:not(:disabled),
+:root.dark .btn.btn-primary.active:hover:not(:disabled) {
+  color: #0a0a0a;
 }
 
 .btn-secondary {

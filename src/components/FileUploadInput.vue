@@ -34,10 +34,10 @@
         />
         
         <div v-if="!isUploading && !uploadedFile" class="upload-placeholder">
-          <div class="upload-icon">{{ fileType === 'image' ? '🖼️' : '🎵' }}</div>
+          <div class="upload-icon">{{ getFileTypeIcon() }}</div>
           <div class="upload-text">
             <p>클릭하거나 파일을 드래그해서 업로드</p>
-            <p class="upload-hint">{{ fileType === 'image' ? 'JPG, PNG, GIF, WebP' : 'MP3, WAV, OGG' }} (최대 10MB)</p>
+            <p class="upload-hint">{{ getFileTypeHint() }}</p>
             <p class="upload-hint">서버에 업로드되며, 다른 기기에서도 접근 가능합니다</p>
           </div>
         </div>
@@ -91,7 +91,7 @@ interface Props {
   modelValue: string;
   label: string;
   placeholder: string;
-  fileType: 'image' | 'audio';
+  fileType: 'image' | 'audio' | 'video';
   required?: boolean;
 }
 
@@ -112,9 +112,14 @@ const isDragOver = ref(false);
 const error = ref<string>('');
 
 const acceptedTypes = computed(() => {
-  return props.fileType === 'image' 
-    ? 'image/jpeg,image/jpg,image/png,image/gif,image/webp'
-    : 'audio/mpeg,audio/mp3,audio/wav,audio/ogg';
+  if (props.fileType === 'image') {
+    return 'image/jpeg,image/jpg,image/png,image/gif,image/webp';
+  } else if (props.fileType === 'audio') {
+    return 'audio/mpeg,audio/mp3,audio/wav,audio/ogg';
+  } else if (props.fileType === 'video') {
+    return 'video/mp4,video/avi,video/mov,video/wmv,video/webm';
+  }
+  return '';
 });
 
 const triggerFileInput = () => {
@@ -182,6 +187,20 @@ watch(() => props.modelValue, (newValue) => {
 const getPreviewUrl = (url: string) => {
   return url;
 };
+
+const getFileTypeIcon = () => {
+  if (props.fileType === 'image') return '🖼️';
+  if (props.fileType === 'audio') return '🎵';
+  if (props.fileType === 'video') return '🎬';
+  return '📁';
+};
+
+const getFileTypeHint = () => {
+  if (props.fileType === 'image') return 'JPG, PNG, GIF, WebP (최대 200MB)';
+  if (props.fileType === 'audio') return 'MP3, WAV, OGG (최대 200MB)';
+  if (props.fileType === 'video') return 'MP4, AVI, MOV, WMV, WebM (최대 200MB)';
+  return '최대 200MB';
+};
 </script>
 
 <style scoped>
@@ -212,7 +231,7 @@ const getPreviewUrl = (url: string) => {
 
 .tab-button.active {
   background: var(--color-primary);
-  color: var(--color-text-primary);
+  color: var(--color-bg-primary);
 }
 
 .tab-button:hover:not(.active) {

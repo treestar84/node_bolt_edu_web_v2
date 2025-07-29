@@ -38,6 +38,8 @@ export interface Book {
   ownerType: 'global' | 'user';
   ownerId?: string;
   pages: BookPage[];
+  videoUrl?: string; // 영상 모드용
+  isVideoMode?: boolean; // 영상 모드 여부
   coverImageWidth?: number;
   coverImageHeight?: number;
   coverImageAspectRatio?: number;

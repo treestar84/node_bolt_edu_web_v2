@@ -65,6 +65,37 @@ router.post('/audio', upload.single('audio'), handleUploadError, (req, res) => {
   }
 });
 
+// Upload single video file
+router.post('/video', upload.single('video'), handleUploadError, (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({
+        error: 'Bad request',
+        message: 'No video file provided'
+      });
+    }
+    
+    const fileUrl = `/uploads/videos/${req.file.filename}`;
+    
+    res.json({
+      success: true,
+      data: {
+        filename: req.file.filename,
+        originalName: req.file.originalname,
+        size: req.file.size,
+        mimetype: req.file.mimetype,
+        url: fileUrl
+      },
+      message: 'Video uploaded successfully'
+    });
+  } catch (error) {
+    res.status(500).json({
+      error: 'Internal server error',
+      message: error.message
+    });
+  }
+});
+
 // Upload multiple files (batch upload)
 router.post('/batch', upload.fields([
   { name: 'images', maxCount: 10 },

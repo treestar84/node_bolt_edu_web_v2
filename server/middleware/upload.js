@@ -5,9 +5,14 @@ import { v4 as uuidv4 } from 'uuid';
 // Configure multer for file uploads
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    const uploadPath = file.fieldname === 'audio' 
-      ? join(process.cwd(), 'server/uploads/audio')
-      : join(process.cwd(), 'server/uploads/images');
+    let uploadPath;
+    if (file.fieldname === 'audio') {
+      uploadPath = join(process.cwd(), 'server/uploads/audio');
+    } else if (file.fieldname === 'video') {
+      uploadPath = join(process.cwd(), 'server/uploads/videos');
+    } else {
+      uploadPath = join(process.cwd(), 'server/uploads/images');
+    }
     cb(null, uploadPath);
   },
   filename: (req, file, cb) => {
@@ -32,6 +37,13 @@ const fileFilter = (req, file, cb) => {
     } else {
       cb(new Error('Only audio files are allowed for audio uploads'), false);
     }
+  } else if (file.fieldname === 'video') {
+    // Accept video files
+    if (file.mimetype.startsWith('video/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only video files are allowed for video uploads'), false);
+    }
   } else {
     cb(new Error('Invalid field name'), false);
   }
@@ -42,7 +54,7 @@ export const upload = multer({
   storage,
   fileFilter,
   limits: {
-    fileSize: 50 * 1024 * 1024, // 50MB limit
+    fileSize: 200 * 1024 * 1024, // 200MB limit for videos
     files: 10 // Maximum 10 files per request
   }
 });
@@ -53,7 +65,7 @@ export const handleUploadError = (err, req, res, next) => {
     if (err.code === 'LIMIT_FILE_SIZE') {
       return res.status(413).json({
         error: 'File too large',
-        message: 'File size exceeds 50MB limit'
+        message: 'File size exceeds 200MB limit'
       });
     }
     if (err.code === 'LIMIT_FILE_COUNT') {

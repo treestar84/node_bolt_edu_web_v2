@@ -8,14 +8,17 @@
         </button>
         <div class="title-section">
           <h1 class="book-title">{{ book?.title }}</h1>
-          <div class="page-indicator">
+          <div class="page-indicator" v-if="!book?.isVideoMode">
             {{ currentPageIndex + 1 }} / {{ book?.pages?.length }}
+          </div>
+          <div class="video-indicator" v-else>
+            📹 영상 스토리
           </div>
         </div>
       </div>
       
-      <!-- Navigation buttons (hidden on mobile, shown on desktop) -->
-      <div class="desktop-nav">
+      <!-- Navigation buttons (hidden on mobile, shown on desktop) - 영상 모드에서는 숨김 -->
+      <div class="desktop-nav" v-if="!book?.isVideoMode">
         <button
           @click="previousPage"
           :disabled="currentPageIndex === 0"
@@ -43,7 +46,7 @@
         </router-link>
       </div>
     </div>
-    <div v-else-if="!book.pages || book.pages.length === 0">
+    <div v-else-if="!book.isVideoMode && (!book.pages || book.pages.length === 0)">
       <div class="book-not-found">
         <div class="error-icon">📖</div>
         <h2>책 페이지가 없습니다</h2>
@@ -54,13 +57,36 @@
       </div>
     </div>
     <div v-else class="reader-content">
-      <!-- Swipeable book container -->
-      <div 
-        class="book-container"
-        @touchstart="handleTouchStart"
-        @touchmove="handleTouchMove"
-        @touchend="handleTouchEnd"
-      >
+      <!-- 영상 모드 -->
+      <template v-if="book.isVideoMode && book.videoUrl">
+        <div class="video-container">
+          <video 
+            :src="store.getImageUrl(book.videoUrl)"
+            class="story-video"
+            controls
+            preload="metadata"
+            @loadeddata="onVideoLoaded"
+            @error="onVideoError"
+          >
+            비디오를 지원하지 않는 브라우저입니다.
+          </video>
+          <div class="video-controls">
+            <p class="video-description">
+              전체 스토리가 담긴 영상을 시청하세요
+            </p>
+          </div>
+        </div>
+      </template>
+      
+      <!-- 일반 페이지 모드 -->
+      <template v-else>
+        <!-- Swipeable book container -->
+        <div 
+          class="book-container"
+          @touchstart="handleTouchStart"
+          @touchmove="handleTouchMove"
+          @touchend="handleTouchEnd"
+        >
         <div class="book-page" :class="{ 'page-transitioning': pageTransitioning }">
           <div class="page-image">
             <template v-if="currentPage && currentPage.imageUrl">
@@ -136,38 +162,39 @@
             </div>
           </div>
         </div>
-      </div>
-      
-      <!-- Mobile navigation buttons -->
-      <div class="mobile-nav">
-        <button
-          @click="previousPage"
-          :disabled="currentPageIndex === 0"
-          class="btn btn-lg btn-secondary nav-btn"
-        >
-          ← 이전
-        </button>
-        <button
-          @click="nextPage"
-          :disabled="currentPageIndex === book.pages.length - 1"
-          class="btn btn-lg btn-secondary nav-btn"
-        >
-          다음 →
-        </button>
-      </div>
-      
-      <!-- Progress bar -->
-      <div class="progress-container">
-        <div class="progress-bar">
-          <div 
-            class="progress-fill"
-            :style="{ width: `${((currentPageIndex + 1) / book.pages.length) * 100}%` }"
-          ></div>
         </div>
-        <div class="progress-text">
-          {{ currentPageIndex + 1 }} / {{ book.pages.length }}
+        
+        <!-- Mobile navigation buttons -->
+        <div class="mobile-nav">
+          <button
+            @click="previousPage"
+            :disabled="currentPageIndex === 0"
+            class="btn btn-lg btn-secondary nav-btn"
+          >
+            ← 이전
+          </button>
+          <button
+            @click="nextPage"
+            :disabled="currentPageIndex === book.pages.length - 1"
+            class="btn btn-lg btn-secondary nav-btn"
+          >
+            다음 →
+          </button>
         </div>
-      </div>
+        
+        <!-- Progress bar -->
+        <div class="progress-container">
+          <div class="progress-bar">
+            <div 
+              class="progress-fill"
+              :style="{ width: `${((currentPageIndex + 1) / book.pages.length) * 100}%` }"
+            ></div>
+          </div>
+          <div class="progress-text">
+            {{ currentPageIndex + 1 }} / {{ book.pages.length }}
+          </div>
+        </div>
+      </template>
     </div>
   </div>
 </template>
@@ -345,6 +372,15 @@ onMounted(async () => {
 onUnmounted(() => {
   stopAudio(); // Ensure audio stops when the component is left
 });
+
+// 비디오 이벤트 핸들러들
+const onVideoLoaded = () => {
+  console.log('📹 Video loaded successfully');
+};
+
+const onVideoError = (event: Event) => {
+  console.error('❌ Video loading error:', event);
+};
 </script>
 
 <style scoped>
@@ -392,7 +428,7 @@ onUnmounted(() => {
   word-break: break-word;
 }
 
-.page-indicator {
+.page-indicator, .video-indicator {
   font-size: 0.875rem;
   color: var(--color-text-secondary);
   font-weight: 500;
@@ -415,6 +451,44 @@ onUnmounted(() => {
   flex-direction: column;
   padding: var(--spacing-md);
   gap: var(--spacing-lg);
+}
+
+/* Video mode styles */
+.video-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  background: var(--color-bg-card);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+}
+
+.story-video {
+  width: 100%;
+  height: auto;
+  max-height: 60vh;
+  display: block;
+  background: #000;
+}
+
+.video-controls {
+  padding: var(--spacing-lg);
+  text-align: center;
+  background: var(--color-bg-card);
+  width: 100%;
+}
+
+.video-description {
+  margin: 0;
+  font-size: 1rem;
+  color: var(--color-text-secondary);
+  font-weight: 500;
 }
 
 .book-container {
@@ -542,7 +616,7 @@ onUnmounted(() => {
   gap: var(--spacing-sm);
   padding: var(--spacing-md) var(--spacing-lg);
   background: var(--color-primary);
-  color: var(--color-text-primary);
+  color: var(--color-bg-primary);
   border: none;
   border-radius: var(--radius-md);
   font-size: 1rem;
@@ -734,6 +808,15 @@ onUnmounted(() => {
     flex-direction: row;
     justify-content: center;
   }
+  
+  /* Video mode tablet styles */
+  .story-video {
+    max-height: 70vh;
+  }
+  
+  .video-description {
+    font-size: 1.125rem;
+  }
 }
 
 /* Desktop optimizations */
@@ -797,6 +880,19 @@ onUnmounted(() => {
   
   .touch-zone:hover .touch-hint {
     opacity: 0.8;
+  }
+  
+  /* Video mode desktop styles */
+  .video-container {
+    max-width: 900px;
+  }
+  
+  .story-video {
+    max-height: 75vh;
+  }
+  
+  .video-description {
+    font-size: 1.25rem;
   }
 }
 

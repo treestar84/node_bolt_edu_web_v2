@@ -1,98 +1,132 @@
 # Toddler Learning Web App
 
-이 프로젝트는 유아의 단어, 그림책 학습을 돕는 인터랙티브 웹 애플리케이션입니다. Vue 3와 Supabase를 중심으로 구축되었으며, Express 기반의 보조 백엔드 서버를 포함합니다.
+This project is an interactive web application designed to help toddlers learn words and read picture books. It is built primarily with Vue 3 and Supabase, and includes a supplementary backend server using Express.
 
-## 주요 기능
+## Key Features
 
-- **단어 학습**: 단어 카드를 통해 이미지와 원어민 발음을 학습합니다.
-- **그림책 읽기**: 페이지별로 이미지, 텍스트, 음성을 함께 제공하는 그림책을 읽습니다.
-- **퀴즈 및 퍼즐**: 학습한 내용을 기반으로 한 간단한 퀴즈와 퍼즐 게임을 즐길 수 있습니다.
-- **학습 통계 및 업적**: 학습 진행 상황을 추적하고 뱃지를 획득할 수 있습니다.
-- **관리자 페이지**: 단어, 그림책, 뱃지, API 키 등 콘텐츠를 관리하는 기능을 제공합니다.
+- **Word Learning**: Learn words through interactive cards with images and native speaker pronunciation.
+- **Picture Book Reading**: Read picture books that provide images, text, and audio for each page.
+- **Quizzes and Puzzles**: Enjoy simple quizzes and puzzle games based on the learned content.
+- **Learning Statistics and Achievements**: Track learning progress and earn badges.
+- **Admin Page**: Provides functionality to manage content such as words, picture books, badges, and API keys.
 
-## 기술 스택
+## Tech Stack
 
-- **프론트엔드**: Vue 3, Vite, TypeScript, Pinia, Tailwind CSS
-- **백엔드**:
-    - **주요 데이터 및 인증**: Supabase (PostgreSQL, Auth)
-    - **보조 서버 (파일 업로드 등)**: Node.js, Express
-- **데이터베이스 마이그레이션**: Supabase CLI
+- **Frontend**: Vue 3, Vite, TypeScript, Pinia, Tailwind CSS
+- **Backend**:
+    - **Primary Data and Authentication**: Supabase (PostgreSQL, Auth)
+    - **Auxiliary Server (File Uploads, etc.)**: Node.js, Express
+- **Database Migrations**: Supabase CLI
 
-## 프로젝트 구조
+## Project Structure
 
 ```
 /
-├── server/              # Express 백엔드 (파일 업로드, API)
-├── src/                 # Vue.js 프론트엔드 소스 코드
-│   ├── components/      # 공통 컴포넌트
-│   ├── views/           # 페이지 뷰
-│   ├── stores/          # Pinia 상태 관리
-│   ├── router/          # Vue Router 설정
-│   ├── composables/     # 재사용 가능한 로직
-│   └── types/           # TypeScript 타입 정의
-├── supabase/            # Supabase 관련 파일
-│   └── migrations/      # DB 스키마 마이그레이션
-├── public/              # 정적 파일
-├── package.json         # 프로젝트 의존성 및 스크립트
-└── vite.config.ts       # Vite 설정 (프록시 포함)
+├── server/              # Express backend (file uploads, API)
+├── src/                 # Vue.js frontend source code
+│   ├── components/      # Common components
+│   ├── views/           # Page views
+│   ├── stores/          # Pinia state management
+│   ├── router/          # Vue Router configuration
+│   ├── composables/     # Reusable logic
+│   └── types/           # TypeScript type definitions
+├── supabase/            # Supabase related files
+│   └── migrations/      # DB schema migrations
+├── public/              # Static files
+├── package.json         # Project dependencies and scripts
+└── vite.config.ts       # Vite configuration (including proxy)
 ```
 
-## 실행 방법
+## Architecture and Data Flow
 
-### 1. 의존성 설치
+This project utilizes a hybrid backend approach, combining Supabase for core data and authentication with a separate Express server for handling file uploads and specific API endpoints.
 
-프로젝트 루트 디렉토리에서 다음 명령어를 실행합니다.
+### Frontend Architecture
+
+The frontend is built with Vue 3 and uses Pinia for state management, structured into several key stores:
+
+- **`auth.ts`**: Manages user authentication, including registration, login, logout, and user profile data.
+- **`app.ts`**: Handles global application state, such as language settings, and manages public content like words and books. It also contains the logic for admin functions and API key management.
+- **`content.ts`**: Manages personalized content for authenticated users, including user-specific words, books, and badges.
+
+### Data Models
+
+The primary data models are defined in `src/types/index.ts` and include:
+
+- `WordItem`: Represents a single word with its English and Korean names, image, audio files, and category.
+- `Book`: Represents a picture book with a title, cover image, and a collection of `BookPage` objects.
+- `UserProfile`: Stores user-specific information, such as user type, site name, and child's information.
+- `UserProgress`: Tracks a user's learning progress, including quiz scores, puzzles completed, and words learned.
+- `Badge`: Defines an achievement that can be unlocked by meeting certain criteria.
+
+### Backend and API
+
+The Express server, located in the `server/` directory, provides a RESTful API for content management and file uploads. Key routes include:
+
+- `/api/auth`: Handles administrator login and token verification.
+- `/api/keys`: Manages API keys for accessing content creation endpoints.
+- `/api/words`: CRUD operations for words.
+- `/api/books`: CRUD operations for books.
+- `/api/upload`: Handles image, audio, and video file uploads.
+
+For detailed information about the API, please refer to the [API Documentation](API_DOCS.md).
+
+## Getting Started
+
+### 1. Install Dependencies
+
+Run the following command in the project root directory:
 
 ```bash
 npm install
 ```
 
-### 2. 환경 변수 설정
+### 2. Set Up Environment Variables
 
-`.env` 파일을 프로젝트 루트에 생성하고 Supabase 관련 키를 설정해야 합니다. `.env.example` 파일을 참고하세요. (Supabase 프로젝트 설정에서 확인 가능)
+Create a `.env` file in the project root and configure the Supabase keys. Refer to the `.env.example` file for guidance. (You can find these keys in your Supabase project settings.)
 
 ```
 VITE_SUPABASE_URL=YOUR_SUPABASE_URL
 VITE_SUPABASE_ANON_KEY=YOUR_SUPABASE_ANON_KEY
 ```
 
-### 3. Supabase 데이터베이스 설정
+### 3. Configure Supabase Database
 
-로컬 또는 원격 Supabase 프로젝트에 마이그레이션 파일을 적용하여 데이터베이스 스키마를 설정해야 합니다. [Supabase CLI](https://supabase.com/docs/guides/cli)를 사용하여 아래 명령어를 실행할 수 있습니다.
+You need to apply the migration files to your local or remote Supabase project to set up the database schema. You can use the [Supabase CLI](https://supabase.com/docs/guides/cli) to run the following commands:
 
 ```bash
-# Supabase 프로젝트와 연결 (최초 1회)
+# Link to your Supabase project (one-time setup)
 supabase link --project-ref <your-project-id>
 
-# 원격 DB에 마이그레이션 적용
+# Apply migrations to the remote database
 supabase db push
 
-# 또는 로컬 개발 환경 시작
+# Or start a local development environment
 supabase start
 ```
 
-### 4. 개발 서버 실행
+### 4. Run the Development Servers
 
-프론트엔드 개발 서버와 백엔드 API 서버를 동시에 실행해야 합니다.
+You need to run both the frontend development server and the backend API server concurrently.
 
-- **프론트엔드 (Vue)**:
+- **Frontend (Vue)**:
   ```bash
   npm run dev
   ```
-  > 기본적으로 `http://localhost:5173` 에서 실행됩니다.
+  > Runs on `http://localhost:5173` by default.
 
-- **백엔드 (Express)**:
-  새 터미널을 열고 다음 명령어를 실행합니다.
+- **Backend (Express)**:
+  Open a new terminal and run the following command:
   ```bash
   npm run api
   ```
-  > 기본적으로 `http://localhost:3001` 에서 실행됩니다.
+  > Runs on `http://localhost:3001` by default.
 
-이제 브라우저에서 `http://localhost:5173`에 접속하여 애플리케이션을 확인할 수 있습니다.
+Now you can access the application by navigating to `http://localhost:5173` in your browser.
 
-## 주요 NPM 스크립트
+## Key NPM Scripts
 
-- `npm run dev`: 프론트엔드 개발 서버를 시작합니다.
-- `npm run build`: 프로덕션용으로 프론트엔드를 빌드합니다.
-- `npm run preview`: 빌드된 결과물을 미리 봅니다.
-- `npm run api`: 백엔드 Express 서버를 시작합니다.
+- `npm run dev`: Starts the frontend development server.
+- `npm run build`: Builds the frontend for production.
+- `npm run preview`: Previews the built application.
+- `npm run api`: Starts the backend Express server.
