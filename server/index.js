@@ -57,13 +57,14 @@ const apiLimiter = rateLimit({
   }
 });
 
-// 개발 환경에서는 rate limiting 비활성화
-if (!isDevelopment) {
-  app.use(limiter);
-  app.use('/api', apiLimiter);
-} else {
-  console.log('🔧 Development mode: Rate limiting disabled');
-}
+// Rate limiting 완전 비활성화 (임시)
+console.log('🔧 Rate limiting completely disabled for testing');
+// if (!isDevelopment) {
+//   app.use(limiter);
+//   app.use('/api', apiLimiter);
+// } else {
+//   console.log('🔧 Development mode: Rate limiting disabled');
+// }
 
 // CORS configuration
 app.use(cors({
