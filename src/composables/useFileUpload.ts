@@ -18,12 +18,12 @@ export function useFileUpload() {
 
       const formData = new FormData();
       formData.append(type, file);
-      let endpoint;
+      let endpoint: string;
       if (type === 'image') {
         endpoint = '/api/upload/image';
       } else if (type === 'audio') {
         endpoint = '/api/upload/audio';
-      } else if (type === 'video') {
+      } else {
         endpoint = '/api/upload/video';
       }
 
@@ -129,12 +129,12 @@ export function useFileUpload() {
         formData.append('imageAspectRatio', dimensions.aspectRatio.toString());
       }
 
-      let endpoint;
+      let endpoint: string;
       if (type === 'image') {
         endpoint = '/api/upload/image';
       } else if (type === 'audio') {
         endpoint = '/api/upload/audio';
-      } else if (type === 'video') {
+      } else {
         endpoint = '/api/upload/video';
       }
 

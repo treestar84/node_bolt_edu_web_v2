@@ -69,7 +69,7 @@ export const useVideoThumbnail = () => {
       });
 
       // 에러 핸들링
-      video.addEventListener('error', (e) => {
+      video.addEventListener('error', () => {
         isGenerating.value = false;
         const errorMessage = '비디오 로드 중 오류가 발생했습니다.';
         error.value = errorMessage;

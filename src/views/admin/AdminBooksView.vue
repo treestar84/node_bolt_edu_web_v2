@@ -357,7 +357,7 @@ import type { Book } from '@/types';
 
 const store = useAppStore();
 const authStore = useAuthStore();
-const { generateThumbnail, uploadThumbnail, isGenerating: isThumbnailGenerating, error: thumbnailError } = useVideoThumbnail();
+const { generateThumbnail, uploadThumbnail, isGenerating: isThumbnailGenerating } = useVideoThumbnail();
 
 const showAddModal = ref(false);
 const showEditModal = ref(false);

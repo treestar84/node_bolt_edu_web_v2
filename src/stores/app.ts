@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { ref, computed, toRaw } from 'vue';
+import { ref, computed } from 'vue';
 import { useSupabase } from '@/composables/useSupabase';
 import type { WordItem, Book, Badge, ApiKey, Language } from '@/types';
 import { i18n } from '@/main';
