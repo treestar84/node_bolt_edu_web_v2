@@ -14,6 +14,10 @@
               <span>➕</span>
               새 책 추가
             </button>
+            <button @click="generateTestVideo" class="btn btn-secondary" :disabled="isGeneratingTest">
+              <span>🎬</span>
+              {{ isGeneratingTest ? '생성 중...' : '테스트 비디오 생성' }}
+            </button>
           </div>
         </div>
 
@@ -366,6 +370,7 @@ const editingBook = ref<Book | null>(null);
 const bookToDelete = ref<Book | null>(null);
 const isLoading = ref(false);
 const error = ref('');
+const isGeneratingTest = ref(false);
 
 // 시스템 관리자 여부 확인
 const isSystemAdmin = computed(() => {
@@ -448,6 +453,54 @@ const editBook = (book: Book) => {
   
   error.value = '';
   showEditModal.value = true;
+};
+
+// 테스트 비디오 생성 함수
+const generateTestVideo = async () => {
+  if (isGeneratingTest.value) return;
+  
+  try {
+    isGeneratingTest.value = true;
+    error.value = '';
+    
+    const response = await fetch('/api/test/video', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-API-Key': import.meta.env.VITE_API_KEY
+      },
+      body: JSON.stringify({
+        title: `테스트 비디오 ${new Date().toLocaleTimeString()}`,
+        createBook: true
+      })
+    });
+    
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+    
+    const result = await response.json();
+    
+    if (result.success) {
+      console.log('✅ 테스트 비디오 생성 성공:', result.data);
+      
+      // 책 목록 새로고침
+      await store.loadBooks();
+      
+      // 성공 메시지 표시 (간단한 alert)
+      alert(`테스트 비디오가 생성되었습니다!
+제목: ${result.data.video.title}
+크기: ${result.data.video.size} bytes
+URL: ${result.data.video.url}`);
+    } else {
+      throw new Error(result.message || '테스트 비디오 생성 실패');
+    }
+  } catch (err) {
+    console.error('❌ 테스트 비디오 생성 에러:', err);
+    error.value = `테스트 비디오 생성 실패: ${err.message}`;
+  } finally {
+    isGeneratingTest.value = false;
+  }
 };
 
 const saveBook = async () => {

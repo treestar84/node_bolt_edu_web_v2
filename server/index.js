@@ -12,6 +12,7 @@ import wordsRoutes from './routes/words.js';
 import booksRoutes from './routes/books.js';
 import uploadRoutes from './routes/upload.js';
 import apiKeyRoutes from './routes/apiKeys.js';
+import testDataRoutes from './routes/testData.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -100,6 +101,7 @@ app.use('/api/words', wordsRoutes);
 app.use('/api/books', booksRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/keys', apiKeyRoutes);
+app.use('/api/test', testDataRoutes);
 
 // API Documentation endpoint
 app.get('/api/docs', (req, res) => {
@@ -137,6 +139,11 @@ app.get('/api/docs', (req, res) => {
         'GET /keys': 'Get API keys (admin only)',
         'POST /keys': 'Create API key (admin only)',
         'DELETE /keys/:id': 'Delete API key (admin only)'
+      },
+      test: {
+        'POST /test/video': 'Generate single test video (development only)',
+        'POST /test/videos': 'Generate multiple test videos (development only)',
+        'DELETE /test/cleanup': 'Clean up test data (development only)'
       }
     },
     authentication: {
