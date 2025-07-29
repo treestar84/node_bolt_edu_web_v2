@@ -74,9 +74,10 @@ app.use(cors({
   credentials: true
 }));
 
-// Body parsing middleware
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+// Body parsing middleware - GCP 호환성을 위한 제한 설정
+app.use(express.raw({ limit: '5mb', type: 'application/octet-stream' }));
+app.use(express.json({ limit: '5mb' }));
+app.use(express.urlencoded({ extended: true, limit: '5mb' }));
 
 // Static file serving for uploads
 app.use('/uploads', cors({
