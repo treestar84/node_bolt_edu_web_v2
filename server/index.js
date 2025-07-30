@@ -66,17 +66,19 @@ console.log('🔧 Rate limiting completely disabled for testing');
 //   console.log('🔧 Development mode: Rate limiting disabled');
 // }
 
-// CORS configuration
+// CORS configuration - 환경에 관계없이 ALLOWED_ORIGINS 우선 사용
+const allowedOrigins = process.env.ALLOWED_ORIGINS 
+  ? process.env.ALLOWED_ORIGINS.split(',')
+  : ['http://localhost:5173', 'http://localhost:3000', 'https://duck-edu-word.duckdns.org'];
+
 app.use(cors({
-  origin: process.env.NODE_ENV === 'production' 
-    ? (process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : [])
-    : ['http://localhost:5173', 'http://localhost:3000'],
+  origin: allowedOrigins,
   credentials: true
 }));
 
-// Body parsing middleware - multipart 업로드를 방해하지 않도록 순서 조정
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+// Body parsing middleware - GCP 프록시 제한에 맞춰 1MB로 설정
+app.use(express.json({ limit: '1mb' }));
+app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 // Raw parser는 특정 라우트에서만 사용하도록 제거
 
 // Static file serving for uploads
