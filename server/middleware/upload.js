@@ -54,7 +54,7 @@ export const upload = multer({
   storage,
   fileFilter,
   limits: {
-    fileSize: 50 * 1024 * 1024, // 50MB limit - 충분한 여유
+    fileSize: 500 * 1024 * 1024, // 500MB limit - 매우 큰 파일도 허용
     files: 10 // Maximum 10 files per request
   }
 });
@@ -65,7 +65,7 @@ export const handleUploadError = (err, req, res, next) => {
     if (err.code === 'LIMIT_FILE_SIZE') {
       return res.status(413).json({
         error: 'File too large',
-        message: 'File size exceeds 50MB limit'
+        message: 'File size exceeds 500MB limit'
       });
     }
     if (err.code === 'LIMIT_FILE_COUNT') {

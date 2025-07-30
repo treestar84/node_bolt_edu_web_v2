@@ -23,19 +23,17 @@ const PORT = process.env.PORT || 3001;
 // Trust proxy settings for Cloud Run/Load Balancer
 app.set('trust proxy', true);
 
-// Security middleware
+// 타임아웃 제한 완화 (큰 파일 업로드 허용)
+app.use((req, res, next) => {
+  req.setTimeout(0); // 무제한 타임아웃
+  res.setTimeout(0); // 무제한 타임아웃
+  next();
+});
+
+// Security middleware - 파일 업로드를 위해 제한 완화
 app.use(helmet({
   crossOriginEmbedderPolicy: false,
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      styleSrc: ["'self'", "'unsafe-inline'"],
-      scriptSrc: ["'self'"],
-      imgSrc: ["'self'", 'data:', 'https:', 'http://localhost:3001', 'blob:'],
-      mediaSrc: ["'self'", 'data:', 'https:', 'http://localhost:3001', 'blob:'],
-      connectSrc: ["'self'", 'http://localhost:3001', 'ws://localhost:3001'],
-    },
-  },
+  contentSecurityPolicy: false, // CSP 완전 비활성화 (업로드 방해 방지)
 }));
 
 // Rate limiting - 개발 환경에서는 더 관대하게 설정
@@ -76,9 +74,9 @@ app.use(cors({
   credentials: true
 }));
 
-// Body parsing middleware - 50MB로 충분히 설정
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+// Body parsing middleware - 매우 큰 제한으로 설정 (업로드 실패 방지)
+app.use(express.json({ limit: '500mb' }));
+app.use(express.urlencoded({ extended: true, limit: '500mb' }));
 // Raw parser는 특정 라우트에서만 사용하도록 제거
 
 // Static file serving for uploads
