@@ -54,7 +54,7 @@ export const upload = multer({
   storage,
   fileFilter,
   limits: {
-    fileSize: 5 * 1024 * 1024, // 5MB limit for GCP compatibility
+    fileSize: 10 * 1024 * 1024, // 10MB limit - Express raw parser 제거로 증가
     files: 10 // Maximum 10 files per request
   }
 });
@@ -65,7 +65,7 @@ export const handleUploadError = (err, req, res, next) => {
     if (err.code === 'LIMIT_FILE_SIZE') {
       return res.status(413).json({
         error: 'File too large',
-        message: 'File size exceeds 5MB limit'
+        message: 'File size exceeds 10MB limit'
       });
     }
     if (err.code === 'LIMIT_FILE_COUNT') {

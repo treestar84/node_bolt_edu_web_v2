@@ -74,10 +74,10 @@ app.use(cors({
   credentials: true
 }));
 
-// Body parsing middleware - GCP 호환성을 위한 제한 설정
-app.use(express.raw({ limit: '5mb', type: 'application/octet-stream' }));
-app.use(express.json({ limit: '5mb' }));
-app.use(express.urlencoded({ extended: true, limit: '5mb' }));
+// Body parsing middleware - multipart 업로드를 방해하지 않도록 순서 조정
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+// Raw parser는 특정 라우트에서만 사용하도록 제거
 
 // Static file serving for uploads
 app.use('/uploads', cors({
