@@ -76,9 +76,9 @@ app.use(cors({
   credentials: true
 }));
 
-// Body parsing middleware - GCP 프록시 제한에 맞춰 1MB로 설정
-app.use(express.json({ limit: '1mb' }));
-app.use(express.urlencoded({ extended: true, limit: '1mb' }));
+// Body parsing middleware - 50MB로 충분히 설정
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 // Raw parser는 특정 라우트에서만 사용하도록 제거
 
 // Static file serving for uploads

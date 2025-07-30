@@ -196,10 +196,10 @@ const getFileTypeIcon = () => {
 };
 
 const getFileTypeHint = () => {
-  if (props.fileType === 'image') return 'JPG, PNG, GIF, WebP (최대 1MB)';
-  if (props.fileType === 'audio') return 'MP3, WAV, OGG (최대 1MB)';
-  if (props.fileType === 'video') return 'MP4, AVI, MOV, WMV, WebM (최대 1MB)';
-  return '최대 1MB';
+  if (props.fileType === 'image') return 'JPG, PNG, GIF, WebP (최대 50MB)';
+  if (props.fileType === 'audio') return 'MP3, WAV, OGG (최대 50MB)';
+  if (props.fileType === 'video') return 'MP4, AVI, MOV, WMV, WebM (최대 50MB)';
+  return '최대 50MB';
 };
 </script>
 
