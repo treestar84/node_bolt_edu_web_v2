@@ -130,11 +130,13 @@ app.get('/api/docs', (req, res) => {
         'POST /books': 'Create new book (requires API key)',
         'PUT /books/:id': 'Update book (requires API key)',
         'DELETE /books/:id': 'Delete book (requires API key)',
-        'POST /books/complete': 'Create complete book with all content (requires API key)'
+        'POST /books/complete': 'Create complete book with all content (requires API key)',
+        'POST /books/video-upload': 'Upload MP4 file and create video storybook in one step (requires API key)'
       },
       upload: {
         'POST /upload/image': 'Upload image file (requires API key)',
         'POST /upload/audio': 'Upload audio file (requires API key)',
+        'POST /upload/video': 'Upload video file (requires API key)',
         'POST /upload/batch': 'Upload multiple files (requires API key)'
       },
       keys: {
@@ -187,6 +189,7 @@ const initializeServer = async () => {
     const uploadsDir = join(__dirname, 'uploads');
     const imagesDir = join(uploadsDir, 'images');
     const audioDir = join(uploadsDir, 'audio');
+    const videosDir = join(uploadsDir, 'videos');
     try {
       await fs.access(uploadsDir);
     } catch {
@@ -201,6 +204,11 @@ const initializeServer = async () => {
       await fs.access(audioDir);
     } catch {
       await fs.mkdir(audioDir, { recursive: true });
+    }
+    try {
+      await fs.access(videosDir);
+    } catch {
+      await fs.mkdir(videosDir, { recursive: true });
     }
 
     // Start server

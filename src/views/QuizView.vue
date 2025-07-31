@@ -550,8 +550,9 @@ onMounted(() => {
 }
 
 .audio-text {
-  color: var(--color-text-primary);
+  color: var(--color-bg-primary);
   font-weight: 700;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .quiz-options {

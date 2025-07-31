@@ -7,7 +7,7 @@ const router = express.Router();
 // Get all API keys (admin only)
 router.get('/', authenticateAdmin, async (req, res) => {
   try {
-    const apiKeys = getApiKeys();
+    const apiKeys = await getApiKeys();
     
     // Don't expose the actual key values in the list
     const safeKeys = apiKeys.map(key => ({

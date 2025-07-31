@@ -1,6 +1,7 @@
 import express from 'express';
 import { authenticateApiKey } from '../middleware/auth.js';
 import { getBooks, addBook, updateBook, deleteBook } from '../data/store.js';
+import { upload, handleUploadError } from '../middleware/upload.js';
 import { v4 as uuidv4 } from 'uuid';
 
 const router = express.Router();
@@ -138,6 +139,81 @@ router.post('/', authenticateApiKey, async (req, res) => {
   }
 });
 
+// Upload video and create storybook in one step (requires API key)
+router.post('/video-upload', authenticateApiKey, upload.fields([
+  { name: 'video', maxCount: 1 },
+  { name: 'coverImage', maxCount: 1 }
+]), handleUploadError, async (req, res) => {
+  try {
+    const { title, minAge, maxAge } = req.body;
+    
+    // Basic validation
+    if (!title) {
+      return res.status(400).json({
+        error: 'Bad request',
+        message: 'Title is required'
+      });
+    }
+    
+    if (!req.files || !req.files.video || req.files.video.length === 0) {
+      return res.status(400).json({
+        error: 'Bad request',
+        message: 'Video file is required'
+      });
+    }
+    
+    const videoFile = req.files.video[0];
+    const coverImageFile = req.files.coverImage ? req.files.coverImage[0] : null;
+    
+    // Construct file URLs
+    const videoUrl = `/uploads/videos/${videoFile.filename}`;
+    const coverImageUrl = coverImageFile ? `/uploads/images/${coverImageFile.filename}` : '';
+    
+    // Create video storybook data
+    const bookData = {
+      title: title.trim(),
+      coverImage: coverImageUrl,
+      isVideoMode: true,
+      videoUrl: videoUrl,
+      pages: [], // Video mode books don't have individual pages
+      minAge: minAge ? parseInt(minAge) : 3,
+      maxAge: maxAge ? parseInt(maxAge) : 7
+    };
+    
+    const newBook = await addBook(bookData);
+    
+    res.status(201).json({
+      success: true,
+      data: {
+        ...newBook,
+        uploadedFiles: {
+          video: {
+            filename: videoFile.filename,
+            originalName: videoFile.originalname,
+            size: videoFile.size,
+            mimetype: videoFile.mimetype,
+            url: videoUrl
+          },
+          coverImage: coverImageFile ? {
+            filename: coverImageFile.filename,
+            originalName: coverImageFile.originalname,
+            size: coverImageFile.size,
+            mimetype: coverImageFile.mimetype,
+            url: coverImageUrl
+          } : null
+        }
+      },
+      message: 'Video storybook created successfully'
+    });
+  } catch (error) {
+    console.error('Video upload error:', error);
+    res.status(500).json({
+      error: 'Internal server error',
+      message: error.message
+    });
+  }
+});
+
 // Create complete book with all content (one-shot API)
 router.post('/complete', authenticateApiKey, async (req, res) => {
   try {
@@ -211,17 +287,20 @@ router.post('/complete', authenticateApiKey, async (req, res) => {
 // Update book (requires API key)
 router.put('/:id', authenticateApiKey, async (req, res) => {
   try {
-    const { title, coverImage, pages } = req.body;
+    const { title, coverImage, pages, isVideoMode, videoUrl } = req.body;
     
     const updateData = {};
     if (title) updateData.title = title.trim();
     if (coverImage) updateData.coverImage = coverImage.trim();
+    if (videoUrl) updateData.videoUrl = videoUrl.trim();
+    if (typeof isVideoMode === 'boolean') updateData.isVideoMode = isVideoMode;
+    
     if (pages && Array.isArray(pages)) {
-      // Validate pages if provided
-      if (pages.length !== 4) {
+      // 비디오 모드가 아닌 경우에만 4페이지 체크
+      if (!isVideoMode && pages.length !== 4) {
         return res.status(400).json({
           error: 'Bad request',
-          message: 'Exactly 4 pages are required'
+          message: 'Exactly 4 pages are required for traditional books'
         });
       }
       updateData.pages = pages.map((page, index) => ({
