@@ -76,7 +76,7 @@
           </router-link>
         </div>
 
-        <!-- Quiz Stats and Badges -->
+        <!-- Quiz Stats -->
         <div class="quiz-footer-stats">
           <div class="quiz-stats">
             <div class="stat">
@@ -88,7 +88,6 @@
               <span class="stat-value">{{ authStore.userProgress?.quizStreak || 0 }}</span>
             </div>
           </div>
-          <BadgeDisplay />
         </div>
       </div>
     </main>
@@ -98,12 +97,12 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import Navigation from '@/components/Navigation.vue';
-import BadgeDisplay from '@/components/BadgeDisplay.vue';
 import { useAppStore } from '@/stores/app';
 import { useAuthStore } from '@/stores/auth';
 import { useContentStore } from '@/stores/content';
 import { useAudio } from '@/composables/useAudio';
 import { useQuizTracking } from '@/composables/useQuizTracking';
+import { useGameSounds } from '@/composables/useGameSounds';
 import type { Quiz, Badge } from '@/types';
 
 const store = useAppStore();
@@ -111,6 +110,7 @@ const authStore = useAuthStore();
 const contentStore = useContentStore();
 const { isPlaying, playAudio } = useAudio();
 const { saveQuizResult } = useQuizTracking();
+const { playSuccessSound, playFailureSound } = useGameSounds();
 
 const gameStarted = ref(false);
 const currentQuiz = ref<Quiz | null>(null);
@@ -285,97 +285,6 @@ const selectAnswer = async (answerId: string) => {
   }
 };
 
-const playSuccessSound = () => {
-  // Create success sound using Web Audio API
-  if ('AudioContext' in window || 'webkitAudioContext' in window) {
-    const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
-    const audioContext = new AudioContext();
-    
-    // Create a celebratory sound
-    const oscillator = audioContext.createOscillator();
-    const gainNode = audioContext.createGain();
-    
-    oscillator.connect(gainNode);
-    gainNode.connect(audioContext.destination);
-    
-    oscillator.frequency.setValueAtTime(523.25, audioContext.currentTime); // C5
-    oscillator.frequency.setValueAtTime(659.25, audioContext.currentTime + 0.1); // E5
-    oscillator.frequency.setValueAtTime(783.99, audioContext.currentTime + 0.2); // G5
-    
-    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
-    
-    oscillator.start(audioContext.currentTime);
-    oscillator.stop(audioContext.currentTime + 0.5);
-  }
-};
-
-const playFailureSound = () => {
-  // Create failure sound using Web Audio API
-  if ('AudioContext' in window || 'webkitAudioContext' in window) {
-    const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
-    const audioContext = new AudioContext();
-    
-    const sounds = [
-      // Sound 1: Descending notes
-      () => {
-        const oscillator = audioContext.createOscillator();
-        const gainNode = audioContext.createGain();
-        
-        oscillator.connect(gainNode);
-        gainNode.connect(audioContext.destination);
-        
-        oscillator.frequency.setValueAtTime(400, audioContext.currentTime);
-        oscillator.frequency.exponentialRampToValueAtTime(200, audioContext.currentTime + 0.3);
-        
-        gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
-        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
-        
-        oscillator.start(audioContext.currentTime);
-        oscillator.stop(audioContext.currentTime + 0.3);
-      },
-      // Sound 2: Wobble effect
-      () => {
-        const oscillator = audioContext.createOscillator();
-        const gainNode = audioContext.createGain();
-        
-        oscillator.connect(gainNode);
-        gainNode.connect(audioContext.destination);
-        
-        oscillator.frequency.setValueAtTime(300, audioContext.currentTime);
-        oscillator.frequency.setValueAtTime(250, audioContext.currentTime + 0.1);
-        oscillator.frequency.setValueAtTime(300, audioContext.currentTime + 0.2);
-        
-        gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
-        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
-        
-        oscillator.start(audioContext.currentTime);
-        oscillator.stop(audioContext.currentTime + 0.3);
-      },
-      // Sound 3: Cartoon-like boing
-      () => {
-        const oscillator = audioContext.createOscillator();
-        const gainNode = audioContext.createGain();
-        
-        oscillator.connect(gainNode);
-        gainNode.connect(audioContext.destination);
-        
-        oscillator.frequency.setValueAtTime(150, audioContext.currentTime);
-        oscillator.frequency.exponentialRampToValueAtTime(100, audioContext.currentTime + 0.2);
-        
-        gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
-        
-        oscillator.start(audioContext.currentTime);
-        oscillator.stop(audioContext.currentTime + 0.2);
-      }
-    ];
-    
-    // Play random failure sound
-    const randomSound = sounds[Math.floor(Math.random() * sounds.length)];
-    randomSound();
-  }
-};
 
 const getConfettiStyle = (index: number) => {
   const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#ffeaa7', '#dda0dd'];

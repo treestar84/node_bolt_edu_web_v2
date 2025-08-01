@@ -191,6 +191,7 @@ import Navigation from '@/components/Navigation.vue';
 import { useAppStore } from '@/stores/app';
 import { useAuthStore } from '@/stores/auth';
 import { useContentStore } from '@/stores/content';
+import { useGameSounds } from '@/composables/useGameSounds';
 import type { WordItem, Badge } from '@/types';
 
 interface PuzzlePiece {
@@ -208,6 +209,7 @@ interface PuzzleSlot {
 const store = useAppStore();
 const authStore = useAuthStore();
 const contentStore = useContentStore();
+const { playSuccessSound, playFailureSound, playCompletionSound } = useGameSounds();
 
 const gameState = ref<'selection' | 'playing' | 'completed'>('selection');
 const puzzleDifficulty = ref<'3x2' | '3x3'>('3x2');
@@ -522,7 +524,7 @@ const placePiece = (piece: PuzzlePiece, slotIndex: number) => {
     }
   } else {
     // Wrong placement - play error sound
-    playErrorSound();
+    playFailureSound();
     
     // Visual feedback for wrong placement
     const slotElement = puzzleBoard.value?.children[slotIndex] as HTMLElement;
@@ -562,128 +564,8 @@ const completePuzzle = async () => {
   playCompletionSound();
 };
 
-const playSuccessSound = () => {
-  // Create "딩동댕" sound
-  if ('AudioContext' in window || 'webkitAudioContext' in window) {
-    const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
-    const audioContext = new AudioContext();
-    
-    const oscillator = audioContext.createOscillator();
-    const gainNode = audioContext.createGain();
-    
-    oscillator.connect(gainNode);
-    gainNode.connect(audioContext.destination);
-    
-    // 딩동댕 melody
-    oscillator.frequency.setValueAtTime(523.25, audioContext.currentTime); // C5
-    oscillator.frequency.setValueAtTime(659.25, audioContext.currentTime + 0.15); // E5
-    oscillator.frequency.setValueAtTime(783.99, audioContext.currentTime + 0.3); // G5
-    
-    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
-    
-    oscillator.start(audioContext.currentTime);
-    oscillator.stop(audioContext.currentTime + 0.5);
-  }
-};
 
-const playErrorSound = () => {
-  if ('AudioContext' in window || 'webkitAudioContext' in window) {
-    const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
-    const audioContext = new AudioContext();
-    
-    // 3가지 재미있는 실패 효과음 중 랜덤 선택
-    const errorSounds = [
-      // 삐~ 소리
-      () => {
-        const oscillator = audioContext.createOscillator();
-        const gainNode = audioContext.createGain();
-        
-        oscillator.connect(gainNode);
-        gainNode.connect(audioContext.destination);
-        
-        oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
-        oscillator.frequency.exponentialRampToValueAtTime(400, audioContext.currentTime + 0.3);
-        
-        gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
-        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
-        
-        oscillator.start(audioContext.currentTime);
-        oscillator.stop(audioContext.currentTime + 0.3);
-      },
-      
-      // 뿡~~ 소리 (만화 같은)
-      () => {
-        const oscillator = audioContext.createOscillator();
-        const gainNode = audioContext.createGain();
-        
-        oscillator.connect(gainNode);
-        gainNode.connect(audioContext.destination);
-        
-        oscillator.frequency.setValueAtTime(150, audioContext.currentTime);
-        oscillator.frequency.setValueAtTime(120, audioContext.currentTime + 0.1);
-        oscillator.frequency.setValueAtTime(100, audioContext.currentTime + 0.2);
-        oscillator.frequency.setValueAtTime(80, audioContext.currentTime + 0.3);
-        
-        gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.4);
-        
-        oscillator.start(audioContext.currentTime);
-        oscillator.stop(audioContext.currentTime + 0.4);
-      },
-      
-      // 삐리리~ 소리 (경고음 같은)
-      () => {
-        for (let i = 0; i < 3; i++) {
-          const oscillator = audioContext.createOscillator();
-          const gainNode = audioContext.createGain();
-          
-          oscillator.connect(gainNode);
-          gainNode.connect(audioContext.destination);
-          
-          oscillator.frequency.setValueAtTime(600, audioContext.currentTime + i * 0.15);
-          oscillator.frequency.setValueAtTime(400, audioContext.currentTime + i * 0.15 + 0.1);
-          
-          gainNode.gain.setValueAtTime(0.15, audioContext.currentTime + i * 0.15);
-          gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + i * 0.15 + 0.1);
-          
-          oscillator.start(audioContext.currentTime + i * 0.15);
-          oscillator.stop(audioContext.currentTime + i * 0.15 + 0.1);
-        }
-      }
-    ];
-    
-    // 랜덤하게 하나의 효과음 선택
-    const randomSound = errorSounds[Math.floor(Math.random() * errorSounds.length)];
-    randomSound();
-  }
-};
 
-const playCompletionSound = () => {
-  if ('AudioContext' in window || 'webkitAudioContext' in window) {
-    const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
-    const audioContext = new AudioContext();
-    
-    // Play a triumphant melody
-    const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
-    
-    notes.forEach((freq, index) => {
-      const oscillator = audioContext.createOscillator();
-      const gainNode = audioContext.createGain();
-      
-      oscillator.connect(gainNode);
-      gainNode.connect(audioContext.destination);
-      
-      oscillator.frequency.setValueAtTime(freq, audioContext.currentTime + index * 0.2);
-      
-      gainNode.gain.setValueAtTime(0.3, audioContext.currentTime + index * 0.2);
-      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + index * 0.2 + 0.3);
-      
-      oscillator.start(audioContext.currentTime + index * 0.2);
-      oscillator.stop(audioContext.currentTime + index * 0.2 + 0.3);
-    });
-  }
-};
 
 const resetPuzzle = () => {
   initializePuzzle();

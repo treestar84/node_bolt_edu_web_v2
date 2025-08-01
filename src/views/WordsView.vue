@@ -4,12 +4,6 @@
     
     <main class="main-content">
       <div class="container">
-        <div class="page-header">
-          <h1 class="page-title">{{$t('page.title')}}</h1>
-          <p class="page-description">
-            {{$t('page.desc', { lang: store.currentLanguage === 'ko' ? '한국어' : '영어' })}}
-          </p>
-        </div>
 
         <div class="content-controls">
           <div class="view-mode-toggle">
@@ -89,30 +83,6 @@
               />
             </div>
 
-            <div class="learning-controls">
-              <button 
-                @click="previousWord" 
-                :disabled="currentWordIndex === 0"
-                class="btn btn-lg btn-secondary"
-              >
-                {{$t('page.prev')}}
-              </button>
-              
-              <button 
-                @click="shuffleWords"
-                class="btn btn-lg btn-secondary"
-              >
-                {{$t('page.shuffle')}}
-              </button>
-              
-              <button 
-                @click="nextWord" 
-                :disabled="currentWordIndex === filteredWords.length - 1"
-                class="btn btn-lg btn-secondary"
-              >
-                {{$t('page.next')}}
-              </button>
-            </div>
 
             <div class="learning-header">
               <div class="learning-desc">{{$t('page.singleDesc')}}</div>
@@ -161,33 +131,63 @@
     </main>
 
     <div class="content-controls">
-      <div class="view-mode-toggle">
-        <button 
-          @click="viewMode = 'grid'"
-          class="btn btn-sm"
-          :class="viewMode === 'grid' ? 'btn-primary' : 'btn-secondary'"
-        >
-          📱 전체보기
-        </button>
-        <button 
-          @click="viewMode = 'single'"
-          class="btn btn-sm"
-          :class="viewMode === 'single' ? 'btn-primary' : 'btn-secondary'"
-        >
-          🎯 학습모드
-        </button>
+      <div class="footer-top-row">
+        <h1 class="footer-title">{{$t('page.title')}}</h1>
+        <div class="view-mode-toggle">
+          <button 
+            @click="viewMode = 'grid'"
+            class="btn btn-sm"
+            :class="viewMode === 'grid' ? 'btn-primary' : 'btn-secondary'"
+          >
+            📱 전체보기
+          </button>
+          <button 
+            @click="viewMode = 'single'"
+            class="btn btn-sm"
+            :class="viewMode === 'single' ? 'btn-primary' : 'btn-secondary'"
+          >
+            🎯 학습모드
+          </button>
+        </div>
       </div>
       
-      <div class="category-filter">
-        <button 
-          v-for="category in categories" 
-          :key="category"
-          @click="selectedCategory = category"
-          class="btn btn-sm"
-          :class="selectedCategory === category ? 'btn-primary' : 'btn-secondary'"
-        >
-          {{$t('categories.'+category)}}
-        </button>
+      <div class="footer-bottom-row">
+        <div v-if="viewMode === 'single' && filteredWords.length > 0" class="learning-controls">
+          <button 
+            @click="previousWord" 
+            :disabled="currentWordIndex === 0"
+            class="btn btn-sm btn-secondary"
+          >
+            {{$t('page.prev')}}
+          </button>
+          
+          <button 
+            @click="shuffleWords"
+            class="btn btn-sm btn-secondary"
+          >
+            {{$t('page.shuffle')}}
+          </button>
+          
+          <button 
+            @click="nextWord" 
+            :disabled="currentWordIndex === filteredWords.length - 1"
+            class="btn btn-sm btn-secondary"
+          >
+            {{$t('page.next')}}
+          </button>
+        </div>
+        
+        <div class="category-filter">
+          <button 
+            v-for="category in categories" 
+            :key="category"
+            @click="selectedCategory = category"
+            class="btn btn-sm"
+            :class="selectedCategory === category ? 'btn-primary' : 'btn-secondary'"
+          >
+            {{$t('categories.'+category)}}
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -463,14 +463,35 @@ onUnmounted(() => {
   right: 0;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 16px;
-  padding: 20px;
+  gap: 12px;
+  padding: 16px 20px;
   background: var(--color-bg-primary);
   border-top: 1px solid var(--color-border);
   z-index: 999;
   backdrop-filter: blur(8px);
   box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.footer-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.footer-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.footer-bottom-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  gap: 16px;
 }
 
 .view-mode-toggle {
@@ -639,15 +660,13 @@ onUnmounted(() => {
 
 .learning-controls {
   display: flex;
-  justify-content: center;
-  gap: 12px;
-  margin-bottom: 32px;
+  gap: 8px;
 }
 
 .learning-controls .btn {
-  min-width: 120px;
-  padding: 12px 20px;
-  font-size: 0.875rem;
+  min-width: 80px;
+  padding: 8px 12px;
+  font-size: 0.75rem;
 }
 
 .auto-advance-progress {
@@ -727,19 +746,26 @@ onUnmounted(() => {
 /* Mobile styles */
 @media (max-width: 768px) {
   .main-content {
-    padding: 24px 0 100px;
-  }
-  
-  .page-title {
-    font-size: 1.75rem;
-  }
-  
-  .page-description {
-    font-size: 0.875rem;
+    padding: 24px 0 120px;
   }
   
   .content-controls {
     padding: 12px;
+    gap: 8px;
+  }
+  
+  .footer-top-row {
+    flex-direction: column;
+    gap: 8px;
+    align-items: center;
+  }
+  
+  .footer-title {
+    font-size: 1.125rem;
+  }
+  
+  .footer-bottom-row {
+    flex-direction: column;
     gap: 8px;
   }
   
@@ -748,7 +774,7 @@ onUnmounted(() => {
   }
   
   .category-filter .btn {
-    padding: 8px 12px;
+    padding: 6px 10px;
     font-size: 0.75rem;
   }
 
@@ -762,25 +788,20 @@ onUnmounted(() => {
   }
   
   .learning-controls {
-    flex-direction: column;
-    gap: 8px;
+    gap: 6px;
   }
   
   .learning-controls .btn {
-    min-width: auto;
-    width: 100%;
-    padding: 14px 20px;
+    min-width: 70px;
+    padding: 6px 10px;
+    font-size: 0.75rem;
   }
 }
 
 /* Small mobile styles */
 @media (max-width: 480px) {
   .main-content {
-    padding: 20px 0 80px;
-  }
-  
-  .page-title {
-    font-size: 1.5rem;
+    padding: 20px 0 140px;
   }
   
   .learning-container {
@@ -795,14 +816,23 @@ onUnmounted(() => {
     padding: 8px;
   }
   
+  .footer-title {
+    font-size: 1rem;
+  }
+  
   .view-mode-toggle {
-    flex-direction: column;
     gap: 2px;
   }
   
   .view-mode-toggle .btn {
     font-size: 0.75rem;
-    padding: 8px 12px;
+    padding: 6px 10px;
+  }
+  
+  .learning-controls .btn {
+    min-width: 60px;
+    padding: 6px 8px;
+    font-size: 0.7rem;
   }
 }
 </style>
