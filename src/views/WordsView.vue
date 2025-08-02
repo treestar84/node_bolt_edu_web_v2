@@ -139,14 +139,14 @@
             class="btn btn-sm"
             :class="viewMode === 'grid' ? 'btn-primary' : 'btn-secondary'"
           >
-            📱 전체보기
+            전체보기
           </button>
           <button 
             @click="viewMode = 'single'"
             class="btn btn-sm"
             :class="viewMode === 'single' ? 'btn-primary' : 'btn-secondary'"
           >
-            🎯 학습모드
+            학습모드
           </button>
         </div>
       </div>

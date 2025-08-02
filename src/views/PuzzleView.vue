@@ -173,7 +173,7 @@
         </div>
 
         <div v-if="store.currentWords.length === 0" class="empty-state">
-          <div class="empty-icon">🧩</div>
+          <div class="empty-icon"></div>
           <h3>{{$t('puzzle.noImage')}}</h3>
           <p>{{$t('puzzle.addWord')}}</p>
           <router-link to="/admin/words" class="btn btn-primary">

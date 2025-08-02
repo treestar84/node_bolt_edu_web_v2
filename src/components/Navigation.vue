@@ -2,114 +2,237 @@
   <nav class="navigation" role="navigation" aria-label="메인 네비게이션">
     <div class="container">
       <div class="nav-content">
-        <router-link 
-          to="/" 
-          class="nav-brand"
-          aria-label="홈페이지로 이동"
-        >
-          <span class="brand-text">{{ authStore.siteName }}</span>
-        </router-link>
+        <div class="nav-left">
+          <router-link 
+            to="/" 
+            class="nav-brand"
+            aria-label="홈페이지로 이동"
+          >
+            <span class="brand-text">{{ authStore.siteName }}</span>
+          </router-link>
+          
+          <ul class="nav-menu desktop-menu" role="menubar" aria-label="데스크톱 메뉴">
+            <li role="none" v-for="item in menuItems" :key="item.path">
+              <router-link 
+                :to="item.path" 
+                class="nav-item"
+                :class="{ active: $route.path === item.path }"
+                role="menuitem"
+                :aria-current="$route.path === item.path ? 'page' : undefined"
+              >
+                <span class="nav-text">{{$t('menu.'+item.key)}}</span>
+              </router-link>
+            </li>
+          </ul>
+        </div>
         
-        <!-- Mobile menu button -->
-        <button 
-          @click="toggleMobileMenu"
-          @keydown.escape="closeMobileMenu"
-          class="mobile-menu-btn"
-          :class="{ active: mobileMenuOpen }"
-          :aria-label="mobileMenuOpen ? '메뉴 닫기' : '메뉴 열기'"
-          :aria-expanded="mobileMenuOpen"
-          aria-controls="mobile-menu"
-          type="button"
-        >
-          <span class="hamburger-line" aria-hidden="true"></span>
-          <span class="hamburger-line" aria-hidden="true"></span>
-          <span class="hamburger-line" aria-hidden="true"></span>
-        </button>
-        
-        <!-- Desktop menu -->
-        <ul class="nav-menu desktop-menu" role="menubar" aria-label="데스크톱 메뉴">
-          <li role="none" v-for="item in menuItems" :key="item.path">
-            <router-link 
-              :to="item.path" 
-              class="nav-item"
-              :class="{ active: $route.path === item.path }"
-              role="menuitem"
-              :aria-current="$route.path === item.path ? 'page' : undefined"
-            >
-              <span class="nav-text">{{$t('menu.'+item.key)}}</span>
-            </router-link>
-          </li>
-        </ul>
+        <div class="nav-right">
+          <!-- Mobile menu button -->
+          <button 
+            @click="toggleMobileMenu"
+            @keydown.escape="closeMobileMenu"
+            class="mobile-menu-btn"
+            :class="{ active: mobileMenuOpen }"
+            :aria-label="mobileMenuOpen ? '메뉴 닫기' : '메뉴 열기'"
+            :aria-expanded="mobileMenuOpen"
+            aria-controls="mobile-menu"
+            type="button"
+          >
+            <span class="hamburger-line" aria-hidden="true"></span>
+            <span class="hamburger-line" aria-hidden="true"></span>
+            <span class="hamburger-line" aria-hidden="true"></span>
+          </button>
 
-        <div class="nav-controls desktop-controls">
+          <div class="nav-controls desktop-controls">
+            <div class="age-indicator" v-if="authStore.userProfile" role="status" aria-label="자녀 나이">
+              <span class="age-badge">{{ authStore.childAge }}세</span>
+            </div>
+            
+            <div class="theme-toggle">
+              <button 
+                @click="toggleTheme"
+                class="theme-btn"
+                :aria-label="isDark ? '라이트 모드로 변경' : '다크 모드로 변경'"
+                :title="isDark ? '라이트 모드로 변경' : '다크 모드로 변경'"
+                type="button"
+              >
+                <span class="theme-icon" aria-hidden="true">{{ isDark ? '☀️' : '🌙' }}</span>
+              </button>
+            </div>
+            
+            <fieldset class="language-toggle" aria-label="언어 선택">
+              <legend class="sr-only">언어 선택</legend>
+              <button 
+                @click="() => setLanguage('ko')"
+                class="btn btn-secondary btn-sm"
+                :class="{ active: store.currentLanguage === 'ko' }"
+                :aria-pressed="store.currentLanguage === 'ko'"
+                aria-label="한국어로 변경"
+                type="button"
+              >
+                한글
+              </button>
+              <button 
+                @click="() => setLanguage('en')"
+                class="btn btn-secondary btn-sm"
+                :class="{ active: store.currentLanguage === 'en' }"
+                :aria-pressed="store.currentLanguage === 'en'"
+                aria-label="영어로 변경"
+                type="button"
+              >
+                ENG
+              </button>
+            </fieldset>
+            
+            <nav class="user-menu" v-if="authStore.isAuthenticated" aria-label="사용자 메뉴">
+              <router-link 
+                to="/settings" 
+                class="btn btn-sm btn-secondary"
+                aria-label="설정 페이지로 이동"
+              >
+                {{$t('menu.settings')}}
+              </router-link>
+              <router-link 
+                to="/admin" 
+                class="btn btn-sm btn-secondary"
+                aria-label="관리자 페이지로 이동"
+              >
+                {{$t('menu.admin')}}
+              </router-link>
+            </nav>
+            
+            <div class="auth-buttons" v-else>
+              <router-link 
+                to="/login" 
+                class="btn btn-sm btn-primary"
+                aria-label="로그인 페이지로 이동"
+              >
+                {{$t('menu.login')}}
+              </router-link>
+              <router-link 
+                to="/admin" 
+                class="btn btn-sm btn-secondary"
+                aria-label="관리자 페이지로 이동"
+              >
+                {{$t('menu.admin')}}
+              </router-link>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+      
+    <!-- Mobile menu overlay -->
+    <div 
+      v-if="mobileMenuOpen" 
+      class="mobile-menu-overlay"
+      @click="closeMobileMenu"
+      @keydown.escape="closeMobileMenu"
+      aria-hidden="true"
+    ></div>
+    
+    <!-- Mobile menu -->
+    <aside 
+      id="mobile-menu"
+      class="mobile-menu" 
+      :class="{ open: mobileMenuOpen }"
+      :aria-hidden="!mobileMenuOpen"
+      aria-label="모바일 메뉴"
+    >
+      <div class="mobile-menu-content">
+        <div class="mobile-menu-header">
           <div class="age-indicator" v-if="authStore.userProfile" role="status" aria-label="자녀 나이">
             <span class="age-badge">{{ authStore.childAge }}세</span>
           </div>
           
-          <div class="theme-toggle">
-            <button 
-              @click="toggleTheme"
-              class="theme-btn"
-              :aria-label="isDark ? '라이트 모드로 변경' : '다크 모드로 변경'"
-              :title="isDark ? '라이트 모드로 변경' : '다크 모드로 변경'"
-              type="button"
-            >
-              <span class="theme-icon" aria-hidden="true">{{ isDark ? '☀️' : '🌙' }}</span>
-            </button>
+          <div class="mobile-controls">
+            <div class="theme-toggle">
+              <button 
+                @click="toggleTheme"
+                class="theme-btn"
+                :aria-label="isDark ? '라이트 모드로 변경' : '다크 모드로 변경'"
+                :title="isDark ? '라이트 모드로 변경' : '다크 모드로 변경'"
+                type="button"
+              >
+                <span class="theme-icon" aria-hidden="true">{{ isDark ? '☀️' : '🌙' }}</span>
+                <span class="theme-text">{{ isDark ? '라이트' : '다크' }}</span>
+              </button>
+            </div>
+            
+            <fieldset class="language-toggle" aria-label="언어 선택">
+              <legend class="sr-only">언어 선택</legend>
+              <button 
+                @click="() => setLanguage('ko')"
+                class="btn btn-secondary btn-sm"
+                :class="{ active: store.currentLanguage === 'ko' }"
+                :aria-pressed="store.currentLanguage === 'ko'"
+                aria-label="한국어로 변경"
+                type="button"
+              >
+                한글
+              </button>
+              <button 
+                @click="() => setLanguage('en')"
+                class="btn btn-secondary btn-sm"
+                :class="{ active: store.currentLanguage === 'en' }"
+                :aria-pressed="store.currentLanguage === 'en'"
+                aria-label="영어로 변경"
+                type="button"
+              >
+                ENG
+              </button>
+            </fieldset>
           </div>
-          
-          <fieldset class="language-toggle" aria-label="언어 선택">
-            <legend class="sr-only">언어 선택</legend>
-            <button 
-              @click="() => setLanguage('ko')"
-              class="btn btn-secondary btn-sm"
-              :class="{ active: store.currentLanguage === 'ko' }"
-              :aria-pressed="store.currentLanguage === 'ko'"
-              aria-label="한국어로 변경"
-              type="button"
-            >
-              한글
-            </button>
-            <button 
-              @click="() => setLanguage('en')"
-              class="btn btn-secondary btn-sm"
-              :class="{ active: store.currentLanguage === 'en' }"
-              :aria-pressed="store.currentLanguage === 'en'"
-              aria-label="영어로 변경"
-              type="button"
-            >
-              ENG
-            </button>
-          </fieldset>
-          
-          <nav class="user-menu" v-if="authStore.isAuthenticated" aria-label="사용자 메뉴">
+        </div>
+        
+        <nav class="mobile-menu-items" aria-label="모바일 메뉴 항목">
+          <router-link 
+            v-for="item in menuItems" 
+            :key="item.path"
+            :to="item.path" 
+            class="mobile-nav-item"
+            :class="{ active: $route.path === item.path }"
+            :aria-current="$route.path === item.path ? 'page' : undefined"
+            @click="closeMobileMenu"
+            @keydown.escape="closeMobileMenu"
+          >
+            <span class="nav-text">{{$t('menu.'+item.key)}}</span>
+          </router-link>
+        </nav>
+        
+        <div class="mobile-menu-footer">
+          <nav class="mobile-auth-buttons" v-if="authStore.isAuthenticated" aria-label="사용자 메뉴">
             <router-link 
               to="/settings" 
-              class="btn btn-sm btn-secondary"
+              class="btn btn-sm btn-secondary" 
+              @click="closeMobileMenu"
               aria-label="설정 페이지로 이동"
             >
               {{$t('menu.settings')}}
             </router-link>
             <router-link 
               to="/admin" 
-              class="btn btn-sm btn-secondary"
+              class="btn btn-sm btn-secondary" 
+              @click="closeMobileMenu"
               aria-label="관리자 페이지로 이동"
             >
               {{$t('menu.admin')}}
             </router-link>
           </nav>
           
-          <div class="auth-buttons" v-else>
+          <div class="mobile-auth-buttons" v-else>
             <router-link 
               to="/login" 
-              class="btn btn-sm btn-primary"
+              class="btn btn-sm btn-primary" 
+              @click="closeMobileMenu"
               aria-label="로그인 페이지로 이동"
             >
               {{$t('menu.login')}}
             </router-link>
             <router-link 
               to="/admin" 
-              class="btn btn-sm btn-secondary"
+              class="btn btn-sm btn-secondary" 
+              @click="closeMobileMenu"
               aria-label="관리자 페이지로 이동"
             >
               {{$t('menu.admin')}}
@@ -117,127 +240,7 @@
           </div>
         </div>
       </div>
-      
-      <!-- Mobile menu overlay -->
-      <div 
-        v-if="mobileMenuOpen" 
-        class="mobile-menu-overlay"
-        @click="closeMobileMenu"
-        @keydown.escape="closeMobileMenu"
-        aria-hidden="true"
-      ></div>
-      
-      <!-- Mobile menu -->
-      <aside 
-        id="mobile-menu"
-        class="mobile-menu" 
-        :class="{ open: mobileMenuOpen }"
-        :aria-hidden="!mobileMenuOpen"
-        aria-label="모바일 메뉴"
-      >
-        <div class="mobile-menu-content">
-          <div class="mobile-menu-header">
-            <div class="age-indicator" v-if="authStore.userProfile" role="status" aria-label="자녀 나이">
-              <span class="age-badge">{{ authStore.childAge }}세</span>
-            </div>
-            
-            <div class="mobile-controls">
-              <div class="theme-toggle">
-                <button 
-                  @click="toggleTheme"
-                  class="theme-btn"
-                  :aria-label="isDark ? '라이트 모드로 변경' : '다크 모드로 변경'"
-                  :title="isDark ? '라이트 모드로 변경' : '다크 모드로 변경'"
-                  type="button"
-                >
-                  <span class="theme-icon" aria-hidden="true">{{ isDark ? '☀️' : '🌙' }}</span>
-                  <span class="theme-text">{{ isDark ? '라이트' : '다크' }}</span>
-                </button>
-              </div>
-              
-              <fieldset class="language-toggle" aria-label="언어 선택">
-                <legend class="sr-only">언어 선택</legend>
-                <button 
-                  @click="() => setLanguage('ko')"
-                  class="btn btn-secondary btn-sm"
-                  :class="{ active: store.currentLanguage === 'ko' }"
-                  :aria-pressed="store.currentLanguage === 'ko'"
-                  aria-label="한국어로 변경"
-                  type="button"
-                >
-                  한글
-                </button>
-                <button 
-                  @click="() => setLanguage('en')"
-                  class="btn btn-secondary btn-sm"
-                  :class="{ active: store.currentLanguage === 'en' }"
-                  :aria-pressed="store.currentLanguage === 'en'"
-                  aria-label="영어로 변경"
-                  type="button"
-                >
-                  ENG
-                </button>
-              </fieldset>
-            </div>
-          </div>
-          
-          <nav class="mobile-menu-items" aria-label="모바일 메뉴 항목">
-            <router-link 
-              v-for="item in menuItems" 
-              :key="item.path"
-              :to="item.path" 
-              class="mobile-nav-item"
-              :class="{ active: $route.path === item.path }"
-              :aria-current="$route.path === item.path ? 'page' : undefined"
-              @click="closeMobileMenu"
-              @keydown.escape="closeMobileMenu"
-            >
-              <span class="nav-text">{{$t('menu.'+item.key)}}</span>
-            </router-link>
-          </nav>
-          
-          <div class="mobile-menu-footer">
-            <nav class="mobile-auth-buttons" v-if="authStore.isAuthenticated" aria-label="사용자 메뉴">
-              <router-link 
-                to="/settings" 
-                class="btn btn-sm btn-secondary" 
-                @click="closeMobileMenu"
-                aria-label="설정 페이지로 이동"
-              >
-                {{$t('menu.settings')}}
-              </router-link>
-              <router-link 
-                to="/admin" 
-                class="btn btn-sm btn-secondary" 
-                @click="closeMobileMenu"
-                aria-label="관리자 페이지로 이동"
-              >
-                {{$t('menu.admin')}}
-              </router-link>
-            </nav>
-            
-            <div class="mobile-auth-buttons" v-else>
-              <router-link 
-                to="/login" 
-                class="btn btn-sm btn-primary" 
-                @click="closeMobileMenu"
-                aria-label="로그인 페이지로 이동"
-              >
-                {{$t('menu.login')}}
-              </router-link>
-              <router-link 
-                to="/admin" 
-                class="btn btn-sm btn-secondary" 
-                @click="closeMobileMenu"
-                aria-label="관리자 페이지로 이동"
-              >
-                {{$t('menu.admin')}}
-              </router-link>
-            </div>
-          </div>
-        </div>
-      </aside>
-    </div>
+    </aside>
   </nav>
 </template>
 
@@ -259,6 +262,7 @@ const menuItems = computed(() => [
   { key: 'quiz', path: '/quiz' },
   { key: 'puzzle', path: '/puzzle' },
   { key: 'coloring', path: '/coloring' },
+  { key: 'music', path: '/music' },
   { key: 'storybook', path: '/books' },
   { key: 'achievements', path: '/achievements' }
 ]);
@@ -382,14 +386,29 @@ onUnmounted(() => {
   font-weight: 500;
 }
 
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
 .nav-content {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 20px 24px;
-  max-width: 1200px;
-  margin: 0 auto;
-  position: relative;
+  padding: 20px 0;
+}
+
+.nav-left {
+  display: flex;
+  align-items: center;
+  gap: 48px;
+}
+
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
 }
 
 .nav-brand {
@@ -462,10 +481,10 @@ onUnmounted(() => {
 /* Desktop menu */
 .desktop-menu {
   display: flex;
+  list-style: none;
+  margin: 0;
+  padding: 0;
   gap: 48px;
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
 }
 
 .nav-item {

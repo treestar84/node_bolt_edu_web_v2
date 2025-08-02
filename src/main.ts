@@ -23,7 +23,8 @@ const messages = {
       logout: '로그아웃',
       mypage: '마이페이지',
       settings: '설정',
-      admin: '관리자'
+      admin: '관리자',
+      music: '악기연주'
     },
     landing: {
       welcome: '환영합니다!',
@@ -199,6 +200,27 @@ const messages = {
       noImages: '색칠할 그림이 없어요',
       addWords: '먼저 단어를 추가해주세요',
       addWordsBtn: '단어 추가하기'
+    },
+    music: {
+      title: '악기 연주',
+      description: '좋아하는 악기를 선택해서 자유롭게 연주해보세요!',
+      play: '연주하기',
+      back: '뒤로가기',
+      piano: {
+        name: '피아노',
+        description: '아름다운 선율을 연주해보세요'
+      },
+      drums: {
+        name: '드럼킷 & 재미소리',
+        description: '드럼을 치고 재미있는 소리들을 들어보세요'
+      },
+      violin: {
+        name: '바이올린',
+        description: '우아한 바이올린 선율을 만들어보세요'
+      },
+      freePlay: '자유 연주',
+      guideMode: '가이드 모드',
+      stop: '정지'
     }
   },
   en: {
@@ -218,7 +240,29 @@ const messages = {
       logout: 'Logout',
       mypage: 'My Page',
       settings: 'Settings',
-      admin: 'Admin'
+      admin: 'Admin',
+      music: 'Play Instruments'
+    },
+    music: {
+      title: 'Play Instruments',
+      description: 'Choose your favorite instrument and play freely!',
+      play: 'Play',
+      back: 'Back',
+      piano: {
+        name: 'Piano',
+        description: 'Play beautiful melodies.'
+      },
+      drums: {
+        name: 'Drum Kit & Fun Sounds',
+        description: 'Play the drums and listen to fun sounds.'
+      },
+      violin: {
+        name: 'Violin',
+        description: 'Create elegant violin melodies.'
+      },
+      freePlay: 'Free Play',
+      guideMode: 'Guide Mode',
+      stop: 'Stop'
     },
     landing: {
       welcome: 'Welcome!',
@@ -329,7 +373,7 @@ const messages = {
       mainImageHint: 'Set the main image for the home screen (persists after refresh)',
       currentImage: 'Current Image:',
       currentImageAlt: 'Current main image',
-      saveSuccess: '✅ Settings saved successfully!'
+      saveSuccess: 'Settings saved successfully!'
     },
     admin: {
       panel: 'Admin Panel',
@@ -393,7 +437,8 @@ const messages = {
       easy: 'Easy',
       noImages: 'No pictures to color',
       addWords: 'Please add words first',
-      addWordsBtn: 'Add Words'
+      addWordsBtn: 'Add Words',
+      gallery: 'View My Gallery'
     }
   }
 };

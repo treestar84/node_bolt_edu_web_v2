@@ -194,28 +194,28 @@ const features = computed(() => [
     description: '이미지를 누르면 음성과 함께 단어를 배워요',
     path: '/words',
     count: contentStore.words.length,
-    icon: '📖'
+    icon: ''
   },
   {
     title: '퀴즈 게임',
     description: '음성을 듣고 정답을 찾는 재미있는 퀴즈',
     path: '/quiz',
     count: Math.floor(contentStore.words.length / 3),
-    icon: '🎯'
+    icon: ''
   },
   {
     title: '퍼즐 맞추기',
     description: '이미지 조각을 맞춰서 완성하는 퍼즐 게임',
     path: '/puzzle',
     count: contentStore.words.length,
-    icon: '🧩'
+    icon: ''
   },
   {
     title: '그림책',
     description: '재미있는 그림책 읽기',
     path: '/books',
     count: contentStore.books.length,
-    icon: '📚'
+    icon: ''
   }
 ]);
 </script>

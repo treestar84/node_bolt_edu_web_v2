@@ -287,9 +287,9 @@ const showDebugInfo = ref(false);
 // 탭 관리
 const activeTab = ref('achievements');
 const tabs = [
-  { key: 'achievements', label: '달성도', icon: '🏆' },
-  { key: 'stats', label: '통계', icon: '📊' },
-  { key: 'likes', label: '좋아요', icon: '❤️' }
+  { key: 'achievements', label: '달성도', icon: '' },
+  { key: 'stats', label: '통계', icon: '' },
+  { key: 'likes', label: '좋아요', icon: '' }
 ];
 
 // FIXED: 실제 표시될 뱃지 계산 (여러 방법으로 시도)

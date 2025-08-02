@@ -216,10 +216,10 @@
             
             <div class="modal-actions">
               <button @click="downloadArtwork(selectedArtwork)" class="btn btn-secondary">
-                💾 다운로드
+                다운로드
               </button>
               <button @click="shareArtwork(selectedArtwork)" class="btn btn-primary">
-                📤 공유하기
+                공유하기
               </button>
             </div>
           </div>

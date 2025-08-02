@@ -46,6 +46,11 @@ const routes = [
     meta: { requiresAuth: true }
   },
   {
+    path: '/music',
+    name: 'Music',
+    component: () => import('@/views/MusicView.vue')
+  },
+  {
     path: '/books',
     name: 'Books',
     component: () => import('@/views/BooksView.vue')
