@@ -12,6 +12,7 @@ const messages = {
       words: '단어학습',
       quiz: '퀴즈',
       puzzle: '퍼즐',
+      coloring: '색칠공부',
       storybook: '스토리북',
       achievements: '달성도',
       books: '책',
@@ -178,6 +179,26 @@ const messages = {
       rank: '{rank}위',
       likeCount: '{count}개',
       emptyRanking: '랭킹 데이터가 없습니다'
+    },
+    coloring: {
+      title: '색칠공부',
+      description: '좋아하는 그림을 선택해서 예쁘게 색칠해보세요',
+      start: '색칠하기',
+      back: '뒤로가기',
+      clear: '지우기',
+      colors: '색상',
+      brushSize: '붓 크기',
+      undo: '되돌리기',
+      save: '저장하기',
+      share: '공유하기',
+      completed: '완성!',
+      finished: '색칠 완료!',
+      colorAnother: '다른 그림 색칠하기',
+      goHome: '홈으로',
+      easy: '쉬움',
+      noImages: '색칠할 그림이 없어요',
+      addWords: '먼저 단어를 추가해주세요',
+      addWordsBtn: '단어 추가하기'
     }
   },
   en: {
@@ -186,6 +207,7 @@ const messages = {
       words: 'Words',
       quiz: 'Quiz',
       puzzle: 'Puzzle',
+      coloring: 'Coloring',
       storybook: 'Storybook',
       achievements: 'Achievements',
       books: 'Books',
@@ -352,6 +374,26 @@ const messages = {
       rank: 'Rank {rank}',
       likeCount: '{count} likes',
       emptyRanking: 'No ranking data'
+    },
+    coloring: {
+      title: 'Coloring',
+      description: 'Choose your favorite picture and color it beautifully',
+      start: 'Start Coloring',
+      back: 'Back',
+      clear: 'Clear',
+      colors: 'Colors',
+      brushSize: 'Brush Size',
+      undo: 'Undo',
+      save: 'Save',
+      share: 'Share',
+      completed: 'Complete!',
+      finished: 'Coloring Finished!',
+      colorAnother: 'Color Another Picture',
+      goHome: 'Go Home',
+      easy: 'Easy',
+      noImages: 'No pictures to color',
+      addWords: 'Please add words first',
+      addWordsBtn: 'Add Words'
     }
   }
 };

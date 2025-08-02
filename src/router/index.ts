@@ -35,6 +35,17 @@ const routes = [
     component: () => import('@/views/PuzzleView.vue')
   },
   {
+    path: '/coloring',
+    name: 'Coloring',
+    component: () => import('@/views/ColoringView.vue')
+  },
+  {
+    path: '/coloring/gallery',
+    name: 'ColoringGallery',
+    component: () => import('@/views/ColoringGalleryView.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
     path: '/books',
     name: 'Books',
     component: () => import('@/views/BooksView.vue')

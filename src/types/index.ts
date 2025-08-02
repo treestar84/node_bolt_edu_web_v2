@@ -191,8 +191,42 @@ export interface AgeGroupComparison {
   };
 }
 
+// 색칠 작품 인터페이스
+export interface ColoringArtwork {
+  id: string;
+  userId: string;
+  wordId: string;
+  wordName: string;
+  artworkData: string; // Base64 이미지 데이터
+  completionPercentage: number;
+  colorsUsed: string[]; // 사용된 색상 배열
+  brushStrokes: number;
+  timeSpentSeconds: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// 색칠 갤러리 응답 인터페이스
+export interface ColoringGalleryResponse {
+  artworks: ColoringArtwork[];
+  totalCount: number;
+  currentPage: number;
+  totalPages: number;
+  hasNextPage: boolean;
+}
+
+// 색칠 통계 인터페이스
+export interface ColoringStats {
+  totalArtworks: number;
+  avgCompletionRate: number;
+  totalTimeSpent: number;
+  uniqueWordsColored: number;
+  lastArtworkDate: string;
+  favoriteColor: string;
+}
+
 export type Language = 'ko' | 'en';
-export type GameMode = 'words' | 'quiz' | 'books' | 'puzzle';
+export type GameMode = 'words' | 'quiz' | 'books' | 'puzzle' | 'coloring';
 export type UserType = 'teacher' | 'director' | 'parent';
-export type ContentType = 'word' | 'book' | 'quiz' | 'puzzle';
+export type ContentType = 'word' | 'book' | 'quiz' | 'puzzle' | 'coloring';
 export type LikePeriod = 'all' | 'monthly' | 'weekly';
