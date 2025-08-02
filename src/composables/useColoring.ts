@@ -20,7 +20,7 @@ export type ColoringGameState = 'selection' | 'coloring' | 'completed';
 
 export function useColoring() {
   const canvas = useCanvas();
-  const { playSuccessSound } = useGameSounds();
+  const { playSuccessSound, playColoringSound, playColoringCompletionSound } = useGameSounds();
   
   // 외부에서 캔버스 레퍼런스를 설정할 수 있는 함수
   const setCanvasRefs = (bgCanvas: HTMLCanvasElement, drawCanvas: HTMLCanvasElement) => {
@@ -58,25 +58,25 @@ export function useColoring() {
   const gameState = ref<ColoringGameState>('selection');
   const selectedWord = ref<WordItem | null>(null);
   
-  // 색상 팔레트 (3-4세 유아에게 친숙한 색상들)
+  // 3-4세 유아에게 최적화된 색상 팔레트 (더 밝고 친숙한 색상들)
   const colorPalette: ColorItem[] = [
-    { name: 'red', value: '#FF6B6B', displayName: '빨간색' },
-    { name: 'orange', value: '#FF8E53', displayName: '주황색' },
-    { name: 'yellow', value: '#FFD93D', displayName: '노란색' },
-    { name: 'green', value: '#6BCF7F', displayName: '초록색' },
-    { name: 'blue', value: '#4DABF7', displayName: '파란색' },
-    { name: 'purple', value: '#845EC2', displayName: '보라색' },
-    { name: 'pink', value: '#FF8FA3', displayName: '분홍색' },
-    { name: 'brown', value: '#D2691E', displayName: '갈색' },
-    { name: 'black', value: '#495057', displayName: '검은색' },
-    { name: 'white', value: '#FFFFFF', displayName: '하얀색' }
+    { name: 'red', value: '#FF4757', displayName: '빨간색' },      // 더 선명한 빨강
+    { name: 'orange', value: '#FFA502', displayName: '주황색' },   // 더 밝은 주황
+    { name: 'yellow', value: '#FFDD59', displayName: '노란색' },   // 부드러운 노랑
+    { name: 'green', value: '#7ED321', displayName: '초록색' },    // 생생한 초록
+    { name: 'blue', value: '#5DADE2', displayName: '파란색' },     // 하늘색 블루
+    { name: 'purple', value: '#A55EEA', displayName: '보라색' },   // 밝은 보라
+    { name: 'pink', value: '#FF6B9D', displayName: '분홍색' },     // 사랑스러운 핑크
+    { name: 'brown', value: '#D2691E', displayName: '갈색' },      // 따뜻한 갈색
+    { name: 'black', value: '#2F3542', displayName: '검은색' },    // 부드러운 검정
+    { name: 'white', value: '#FFFFFF', displayName: '하얀색' }     // 순수한 흰색
   ];
 
-  // 브러쉬 크기 (3-4세 손가락 크기를 고려)
+  // 3-4세 유아 손가락 크기에 최적화된 브러쉬 크기
   const brushSizes: BrushSize[] = [
-    { name: 'small', size: 8, preview: 10, displayName: '작게' },
-    { name: 'medium', size: 15, preview: 16, displayName: '보통' },
-    { name: 'large', size: 25, preview: 22, displayName: '크게' }
+    { name: 'small', size: 12, preview: 12, displayName: '작게' },   // 세밀한 작업용
+    { name: 'medium', size: 20, preview: 18, displayName: '보통' },  // 기본 색칠용 (더 큰 크기)
+    { name: 'large', size: 35, preview: 26, displayName: '크게' }    // 넓은 영역 색칠용
   ];
 
   // 현재 선택된 색상과 브러쉬
@@ -191,7 +191,7 @@ export function useColoring() {
     if (!selectedWord.value) return;
 
     gameState.value = 'completed';
-    playSuccessSound();
+    playColoringCompletionSound();
     
     console.log('🎉 Coloring completed!', {
       word: getCurrentName(selectedWord.value),
@@ -378,7 +378,14 @@ export function useColoring() {
   };
 
   const handleMouseUp = () => {
+    const wasDrawing = canvas.canvasState.value.isDrawing;
     canvas.stopDrawing();
+    
+    // 실제로 그리기를 했다면 효과음 재생
+    if (wasDrawing) {
+      playColoringSound();
+    }
+    
     // 그리기 완료 후 진행률 업데이트
     setTimeout(() => updateProgress(), 100);
   };
@@ -408,7 +415,14 @@ export function useColoring() {
 
   const handleTouchEnd = (event: TouchEvent) => {
     event.preventDefault();
+    const wasDrawing = canvas.canvasState.value.isDrawing;
     canvas.stopDrawing();
+    
+    // 실제로 그리기를 했다면 효과음 재생
+    if (wasDrawing) {
+      playColoringSound();
+    }
+    
     // 그리기 완료 후 진행률 업데이트
     setTimeout(() => updateProgress(), 100);
   };

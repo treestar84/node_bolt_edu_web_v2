@@ -225,9 +225,178 @@ export function useGameSounds() {
     }
   };
 
+  /**
+   * 색칠할 때 재생되는 부드러운 효과음들 (5가지 랜덤)
+   */
+  const playColoringSound = () => {
+    if ('AudioContext' in window || 'webkitAudioContext' in window) {
+      const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+      const audioContext = new AudioContext();
+      
+      const coloringSounds = [
+        // 1. 부드러운 붓 터치 소리
+        () => {
+          const oscillator = audioContext.createOscillator();
+          const gainNode = audioContext.createGain();
+          
+          oscillator.connect(gainNode);
+          gainNode.connect(audioContext.destination);
+          oscillator.type = 'sine';
+          
+          oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+          oscillator.frequency.exponentialRampToValueAtTime(400, audioContext.currentTime + 0.1);
+          
+          gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+          gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+          
+          oscillator.start(audioContext.currentTime);
+          oscillator.stop(audioContext.currentTime + 0.1);
+        },
+        
+        // 2. 물방울 소리 (톡~)
+        () => {
+          const oscillator = audioContext.createOscillator();
+          const gainNode = audioContext.createGain();
+          
+          oscillator.connect(gainNode);
+          gainNode.connect(audioContext.destination);
+          oscillator.type = 'triangle';
+          
+          oscillator.frequency.setValueAtTime(1200, audioContext.currentTime);
+          oscillator.frequency.exponentialRampToValueAtTime(600, audioContext.currentTime + 0.05);
+          
+          gainNode.gain.setValueAtTime(0.08, audioContext.currentTime);
+          gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.05);
+          
+          oscillator.start(audioContext.currentTime);
+          oscillator.stop(audioContext.currentTime + 0.05);
+        },
+        
+        // 3. 부드러운 하프 소리
+        () => {
+          const oscillator = audioContext.createOscillator();
+          const gainNode = audioContext.createGain();
+          
+          oscillator.connect(gainNode);
+          gainNode.connect(audioContext.destination);
+          oscillator.type = 'triangle';
+          
+          const notes = [523, 659, 783]; // C, E, G 화음
+          const randomNote = notes[Math.floor(Math.random() * notes.length)];
+          
+          oscillator.frequency.setValueAtTime(randomNote, audioContext.currentTime);
+          
+          gainNode.gain.setValueAtTime(0.06, audioContext.currentTime);
+          gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+          
+          oscillator.start(audioContext.currentTime);
+          oscillator.stop(audioContext.currentTime + 0.3);
+        },
+        
+        // 4. 종소리 (딩~)
+        () => {
+          const oscillator = audioContext.createOscillator();
+          const gainNode = audioContext.createGain();
+          
+          oscillator.connect(gainNode);
+          gainNode.connect(audioContext.destination);
+          oscillator.type = 'sine';
+          
+          oscillator.frequency.setValueAtTime(1000, audioContext.currentTime);
+          oscillator.frequency.exponentialRampToValueAtTime(800, audioContext.currentTime + 0.2);
+          
+          gainNode.gain.setValueAtTime(0.05, audioContext.currentTime);
+          gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+          
+          oscillator.start(audioContext.currentTime);
+          oscillator.stop(audioContext.currentTime + 0.2);
+        },
+        
+        // 5. 바람 소리 (쉬익~)
+        () => {
+          const oscillator = audioContext.createOscillator();
+          const gainNode = audioContext.createGain();
+          
+          oscillator.connect(gainNode);
+          gainNode.connect(audioContext.destination);
+          oscillator.type = 'sawtooth';
+          
+          oscillator.frequency.setValueAtTime(300, audioContext.currentTime);
+          oscillator.frequency.exponentialRampToValueAtTime(150, audioContext.currentTime + 0.15);
+          
+          gainNode.gain.setValueAtTime(0.04, audioContext.currentTime);
+          gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.15);
+          
+          oscillator.start(audioContext.currentTime);
+          oscillator.stop(audioContext.currentTime + 0.15);
+        }
+      ];
+      
+      // 랜덤하게 하나의 색칠 효과음 선택
+      const randomSound = coloringSounds[Math.floor(Math.random() * coloringSounds.length)];
+      randomSound();
+    }
+  };
+
+  /**
+   * 색칠 완성 시 특별한 축하 효과음 (더 화려함)
+   */
+  const playColoringCompletionSound = () => {
+    if ('AudioContext' in window || 'webkitAudioContext' in window) {
+      const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+      const audioContext = new AudioContext();
+      
+      // 더 화려한 팡파르 (C-E-G-C-E-G-C 상승)
+      const notes = [523.25, 659.25, 783.99, 1046.50, 1318.51, 1567.98, 2093.00]; // C5-C7
+      
+      // 첫 번째 파트: 상승하는 음계
+      notes.forEach((freq, index) => {
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        oscillator.type = 'triangle';
+        
+        const startTime = audioContext.currentTime + index * 0.15;
+        oscillator.frequency.setValueAtTime(freq, startTime);
+        
+        gainNode.gain.setValueAtTime(0.2, startTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, startTime + 0.4);
+        
+        oscillator.start(startTime);
+        oscillator.stop(startTime + 0.4);
+      });
+      
+      // 두 번째 파트: 화려한 코드 (1초 후)
+      setTimeout(() => {
+        const chord = [1046.50, 1318.51, 1567.98]; // C6, E6, G6
+        chord.forEach((freq, index) => {
+          const oscillator = audioContext.createOscillator();
+          const gainNode = audioContext.createGain();
+          
+          oscillator.connect(gainNode);
+          gainNode.connect(audioContext.destination);
+          oscillator.type = 'sine';
+          
+          const startTime = audioContext.currentTime + index * 0.05;
+          oscillator.frequency.setValueAtTime(freq, startTime);
+          
+          gainNode.gain.setValueAtTime(0.25, startTime);
+          gainNode.gain.exponentialRampToValueAtTime(0.01, startTime + 1.5);
+          
+          oscillator.start(startTime);
+          oscillator.stop(startTime + 1.5);
+        });
+      }, 50);
+    }
+  };
+
   return {
     playSuccessSound,
     playFailureSound,
     playCompletionSound,
+    playColoringSound,
+    playColoringCompletionSound,
   };
 }

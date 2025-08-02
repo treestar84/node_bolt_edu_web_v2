@@ -568,22 +568,24 @@ const getFireworkStyle = (index: number) => {
   align-items: start;
 }
 
-/* 색상 팔레트 */
+/* 색상 팔레트 - 3-4세 유아 친화적 디자인 */
 .color-palette {
-  background: var(--color-bg-card);
-  border: 1px solid var(--color-border);
-  border-radius: 12px;
-  padding: 20px;
+  background: linear-gradient(135deg, #ffeaa7 0%, #fab1a0 100%);
+  border: 3px solid #fdcb6e;
+  border-radius: 20px;
+  padding: 24px;
   position: sticky;
   top: 20px;
+  box-shadow: 0 8px 25px rgba(253, 203, 110, 0.3);
 }
 
 .palette-title {
-  font-size: 1.125rem;
-  font-weight: 600;
-  color: var(--color-text-primary);
-  margin-bottom: 16px;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #2d3436;
+  margin-bottom: 20px;
   text-align: center;
+  text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.8);
 }
 
 .color-grid {
@@ -594,42 +596,64 @@ const getFireworkStyle = (index: number) => {
 }
 
 .color-item {
-  width: 50px;
-  height: 50px;
-  border-radius: 8px;
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
   cursor: pointer;
-  border: 3px solid transparent;
-  transition: all 0.2s ease;
+  border: 4px solid rgba(255, 255, 255, 0.8);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transform: scale(1);
 }
 
 .color-item:hover {
-  transform: scale(1.05);
-  border-color: var(--color-primary);
+  transform: scale(1.15);
+  border-color: #fdcb6e;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
 }
 
 .color-item.active {
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+  transform: scale(1.1);
+  border-color: #e17055;
+  box-shadow: 0 0 0 4px rgba(225, 112, 85, 0.4);
+  animation: colorPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes colorPulse {
+  0%, 100% { 
+    box-shadow: 0 0 0 4px rgba(225, 112, 85, 0.4);
+  }
+  50% { 
+    box-shadow: 0 0 0 8px rgba(225, 112, 85, 0.2);
+  }
 }
 
 .selected-check {
-  color: var(--color-text-primary);
-  font-weight: bold;
-  font-size: 1.2rem;
-  text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+  color: white;
+  font-weight: 900;
+  font-size: 1.4rem;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+  animation: checkBounce 0.6s ease-out;
 }
 
-/* 브러쉬 크기 */
+@keyframes checkBounce {
+  0% { transform: scale(0); }
+  50% { transform: scale(1.3); }
+  100% { transform: scale(1); }
+}
+
+/* 브러쉬 크기 - 유아 친화적 디자인 */
 .brush-size h4 {
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--color-text-primary);
-  margin-bottom: 12px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #2d3436;
+  margin-bottom: 16px;
   text-align: center;
+  text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.8);
 }
 
 .brush-options {
@@ -642,46 +666,55 @@ const getFireworkStyle = (index: number) => {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 8px 12px;
-  border: 2px solid var(--color-border);
-  border-radius: 8px;
-  background: var(--color-bg-secondary);
+  padding: 12px 16px;
+  border: 3px solid rgba(255, 255, 255, 0.6);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.3);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(10px);
 }
 
 .brush-btn:hover {
-  border-color: var(--color-primary);
+  border-color: #fdcb6e;
+  background: rgba(255, 255, 255, 0.5);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(253, 203, 110, 0.3);
 }
 
 .brush-btn.active {
-  border-color: var(--color-primary);
-  background: rgba(59, 130, 246, 0.1);
+  border-color: #e17055;
+  background: rgba(225, 112, 85, 0.2);
+  transform: scale(1.05);
+  box-shadow: 0 4px 16px rgba(225, 112, 85, 0.4);
 }
 
 .brush-preview {
-  background: var(--color-text-primary);
+  background: linear-gradient(135deg, #2d3436, #636e72);
   border-radius: 50%;
   flex-shrink: 0;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
 }
 
-/* 캔버스 영역 */
+/* 캔버스 영역 - 밝고 친근한 디자인 */
 .canvas-area {
-  background: var(--color-bg-card);
-  border: 1px solid var(--color-border);
-  border-radius: 12px;
-  padding: 20px;
+  background: linear-gradient(135deg, #dfe6e9 0%, #b2bec3 100%);
+  border: 3px solid #74b9ff;
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 0 8px 25px rgba(116, 185, 255, 0.2);
 }
 
 .canvas-container {
   position: relative;
   display: flex;
   justify-content: center;
-  margin-bottom: 20px;
-  border: 2px solid var(--color-border);
-  border-radius: 8px;
+  margin-bottom: 24px;
+  border: 4px solid #00b894;
+  border-radius: 16px;
   overflow: hidden;
   background: white;
+  box-shadow: 0 6px 20px rgba(0, 184, 148, 0.25);
 }
 
 .background-canvas,
@@ -1167,7 +1200,7 @@ const getFireworkStyle = (index: number) => {
   }
 }
 
-/* 터치 최적화 */
+/* 터치 최적화 - 3-4세 유아용 */
 @media (hover: none) and (pointer: coarse) {
   .coloring-overlay {
     opacity: 1;
@@ -1179,12 +1212,25 @@ const getFireworkStyle = (index: number) => {
   }
   
   .color-item {
-    min-width: 44px;
-    min-height: 44px;
+    min-width: 60px;
+    min-height: 60px;
+    border-width: 5px;
   }
   
   .brush-btn {
-    min-height: 44px;
+    min-height: 50px;
+    padding: 16px;
+  }
+  
+  /* 터치 피드백 강화 */
+  .color-item:active {
+    transform: scale(0.9);
+    transition: transform 0.1s ease;
+  }
+  
+  .brush-btn:active {
+    transform: scale(0.95);
+    transition: transform 0.1s ease;
   }
 }
 </style>
