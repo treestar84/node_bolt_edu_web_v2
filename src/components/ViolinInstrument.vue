@@ -153,40 +153,26 @@
         </div>
       </div>
 
-      <!-- 리듬 가이드 -->
-      <div v-if="practiceMode === 'rhythm' && currentSong" class="rhythm-guide">
-        <h4>🎵 {{ currentSong.name }} 연습하기</h4>
-        <div class="rhythm-pattern">
-          <div 
-            v-for="(note, index) in currentSong.rhythm"
-            :key="index"
-            class="rhythm-note"
-            :class="{ 
-              active: currentRhythmIndex === index,
-              completed: index < currentRhythmIndex 
-            }"
-          >
-            {{ note }}
-          </div>
-        </div>
-        <div class="rhythm-controls">
-          <button @click="startRhythmPractice" class="rhythm-btn start">
-            {{ isRhythmPlaying ? '⏸️ 일시정지' : '▶️ 시작' }}
-          </button>
-          <button @click="resetRhythmPractice" class="rhythm-btn reset">
-            🔄 다시하기
-          </button>
-        </div>
-        <div class="rhythm-progress">
+      <!-- 드래그 연주 안내 -->
+      <div v-if="practiceMode === 'rhythm' && currentSong" class="drag-guide">
+        <h4>🎯 {{ currentSong.name }}</h4>
+        <p class="drag-instruction">
+          🎻 활을 드래그하여 연주하세요! 움직일 때마다 다음 음이 연주됩니다.
+        </p>
+        <div class="song-progress">
           <div class="progress-bar">
             <div 
               class="progress-fill" 
-              :style="{ width: `${(currentRhythmIndex / currentSong.rhythm.length) * 100}%` }"
+              :style="{ width: `${(currentNoteIndex / currentSong.rhythm.length) * 100}%` }"
             ></div>
           </div>
           <div class="progress-text">
-            {{ currentRhythmIndex }} / {{ currentSong.rhythm.length }}
+            {{ currentNoteIndex }} / {{ currentSong.rhythm.length }}
           </div>
+        </div>
+        <div class="current-note">
+          <span class="note-label">다음 음:</span>
+          <span class="note-display">{{ getCurrentNote() }}</span>
         </div>
       </div>
     </div>
@@ -216,12 +202,12 @@ interface RhythmSong {
 const music = useMusic();
 const activeStrings = ref<Set<string>>(new Set());
 const isPlaying = ref(false);
-const practiceMode = ref<'free' | 'rhythm'>('free');
+const practiceMode = ref<'free' | 'rhythm'>('rhythm');
 const currentSong = ref<RhythmSong | null>(null);
-const currentRhythmIndex = ref(0);
-const isRhythmPlaying = ref(false);
+const currentNoteIndex = ref(0);
 const currentNote = ref<string | null>(null);
-const rhythmTimer = ref<number | null>(null);
+const lastDragPosition = ref({ x: 0, y: 0 });
+const isPlayingNote = ref(false); // 현재 음표가 재생 중인지
 
 // 활 드래그 관련 상태
 const isDragging = ref(false);
@@ -240,49 +226,35 @@ const violinStrings: ViolinString[] = [
   { note: 'E', displayName: 'E현 (미)', frequency: 659.25, color: 'linear-gradient(135deg, #bbdefb, #90caf9)' }  // E5
 ];
 
-// 리듬 연습곡들 (3세 아이에게 친숙한 리듬들)
+// 실제 동요 연습곡들 (1절 전체)
 const rhythmSongs: RhythmSong[] = [
   {
-    id: 'car-beep',
-    name: '자동차가 빵빵',
-    icon: '🚗',
-    rhythm: ['G', 'G', 'D', 'D'],
-    bpm: 120
-  },
-  {
-    id: 'train-choo',
-    name: '기차가 칙칙폭폭',
-    icon: '🚂',
-    rhythm: ['D', 'A', 'D', 'A', 'E', 'E'],
+    id: 'three-bears',
+    name: '곰 세 마리',
+    icon: '🐻',
+    rhythm: ['G', 'G', 'A', 'A', 'G', 'G', 'E', 'G', 'G', 'A', 'A', 'G', 'G', 'E', 'E', 'E', 'G', 'G', 'E', 'E', 'G', 'G', 'D', 'G', 'G', 'A', 'A', 'G', 'G', 'E'],
     bpm: 100
   },
   {
-    id: 'animal-sounds',
-    name: '동물친구들',
-    icon: '🐶',
-    rhythm: ['G', 'D', 'A', 'G'], // 멍멍, 야옹, 음메, 꿀꿀
+    id: 'butterfly',
+    name: '나비야',
+    icon: '🦋',
+    rhythm: ['E', 'G', 'G', 'G', 'E', 'G', 'A', 'A', 'G', 'E', 'G', 'G', 'G', 'E', 'D', 'E', 'G', 'G', 'A', 'G', 'E', 'G', 'G', 'G', 'E', 'G', 'A', 'A', 'G'],
     bpm: 90
   },
   {
-    id: 'twinkle-simple',
-    name: '반짝반짝 작은별',
-    icon: '⭐',
-    rhythm: ['G', 'G', 'D', 'D', 'A', 'A', 'D'],
+    id: 'santa',
+    name: '산토끼',
+    icon: '🐰',
+    rhythm: ['D', 'E', 'G', 'G', 'A', 'G', 'E', 'D', 'E', 'G', 'G', 'A', 'G', 'E', 'G', 'A', 'G', 'E', 'D', 'E', 'G', 'A', 'G', 'E', 'D'],
+    bpm: 120
+  },
+  {
+    id: 'mom-sister',
+    name: '엄마야 누나야',
+    icon: '👪',
+    rhythm: ['G', 'A', 'G', 'E', 'G', 'A', 'G', 'E', 'G', 'G', 'A', 'G', 'E', 'D', 'E', 'G', 'A', 'G', 'E', 'G', 'A', 'G', 'E', 'G', 'G', 'A', 'G', 'E', 'D'],
     bpm: 80
-  },
-  {
-    id: 'happy-birthday',
-    name: '생일축하합니다',
-    icon: '🎂',
-    rhythm: ['G', 'G', 'A', 'G', 'D', 'D'],
-    bpm: 85
-  },
-  {
-    id: 'rain-drop',
-    name: '비가 내려요',
-    icon: '🌧️',
-    rhythm: ['A', 'D', 'A', 'D', 'G', 'G'],
-    bpm: 70
   }
 ];
 
@@ -296,7 +268,7 @@ const setPracticeMode = (mode: 'free' | 'rhythm') => {
   practiceMode.value = mode;
   if (mode === 'free') {
     currentSong.value = null;
-    resetRhythmPractice();
+    resetSongProgress();
   }
 };
 
@@ -305,7 +277,68 @@ const setPracticeMode = (mode: 'free' | 'rhythm') => {
  */
 const selectSong = (song: RhythmSong) => {
   currentSong.value = song;
-  resetRhythmPractice();
+  resetSongProgress();
+};
+
+/**
+ * 곡 진행 상태 초기화
+ */
+const resetSongProgress = () => {
+  currentNoteIndex.value = 0;
+  currentNote.value = null;
+};
+
+/**
+ * 현재 연주해야 할 음표 가져오기
+ */
+const getCurrentNote = () => {
+  if (!currentSong.value || currentNoteIndex.value >= currentSong.value.rhythm.length) {
+    return '완료!';
+  }
+  return currentSong.value.rhythm[currentNoteIndex.value];
+};
+
+/**
+ * 다음 음표로 진행 (1초 지속)
+ */
+const playNextNote = async () => {
+  if (!currentSong.value || isPlayingNote.value) return;
+  
+  const currentNoteValue = getCurrentNote();
+  if (currentNoteValue === '완료!') return;
+  
+  isPlayingNote.value = true;
+  
+  // 이전 현 비활성화
+  activeStrings.value.clear();
+  
+  // 현재 음표에 해당하는 현 활성화
+  activeStrings.value.add(currentNoteValue);
+  
+  // 현재 음표 연주 (동요의 음을 바이올린 현 음으로, 1초 지속)
+  await music.playViolinNote(currentNoteValue, 1.0);
+  
+  // 진동 효과
+  if (navigator.vibrate) {
+    navigator.vibrate(40);
+  }
+  
+  console.log(`🎵 Playing song note: ${currentNoteValue} (${currentNoteIndex.value + 1}/${currentSong.value.rhythm.length})`);
+  
+  // 다음 음표로 진행
+  currentNoteIndex.value++;
+  
+  // 1초 후에 현 비활성화 및 다음 음 준비
+  setTimeout(() => {
+    activeStrings.value.clear();
+    isPlayingNote.value = false;
+    
+    // 곡이 완료되었는지 확인
+    if (currentNoteIndex.value >= currentSong.value.rhythm.length) {
+      console.log(`🎉 "${currentSong.value?.name}" 연주 완료!`);
+      resetSongProgress();
+    }
+  }, 1000);
 };
 
 /**
@@ -342,16 +375,18 @@ const playStringDirect = (string: ViolinString) => {
 };
 
 /**
- * 활 드래그 시작 (자유 연주 모드에서만)
+ * 활 드래그/터치 시작
  */
 const startBowDrag = (event: MouseEvent | TouchEvent) => {
   event.preventDefault();
   
-  // 리듬 연습 모드에서는 활 드래그 차단
-  if (practiceMode.value === 'rhythm') {
-    return;
+  // 리듬 연습 모드에서는 터치/클릭으로 다음 음 재생
+  if (practiceMode.value === 'rhythm' && currentSong.value) {
+    playNextNote();
+    return; // 드래그 로직은 실행하지 않음
   }
   
+  // 자유 연주 모드에서만 드래그 로직 실행
   isDragging.value = true;
   isPlaying.value = true;
   
@@ -361,6 +396,7 @@ const startBowDrag = (event: MouseEvent | TouchEvent) => {
   dragStartX.value = clientX;
   dragStartY.value = clientY;
   bowPosition.value = { x: clientX, y: clientY };
+  lastDragPosition.value = { x: clientX, y: clientY };
   
   // 이벤트 리스너 추가
   document.addEventListener('mousemove', handleBowDrag);
@@ -389,41 +425,50 @@ const handleBowDrag = (event: MouseEvent | TouchEvent) => {
   bowPosition.value = { x: clientX, y: clientY };
   bowTransform.value = `translate(${deltaX}px, ${deltaY}px) rotate(${deltaX * 0.1}deg)`;
   
-  // 현재 활이 지나가는 현 감지
-  const stringElement = document.elementFromPoint(clientX, clientY);
-  if (stringElement && stringElement.closest('.violin-string')) {
-    const stringContainer = stringElement.closest('.violin-string') as HTMLElement;
-    const stringIndex = Array.from(stringContainer.parentElement!.children).indexOf(stringContainer);
+  // 자유 연주 모드에서만 드래그 감지 처리
+  if (practiceMode.value === 'free') {
+    // 드래그 거리 계산 (움직임 감지)
+    const dragDistance = Math.sqrt(
+      Math.pow(clientX - lastDragPosition.value.x, 2) + 
+      Math.pow(clientY - lastDragPosition.value.y, 2)
+    );
     
-    if (stringIndex >= 0 && stringIndex < violinStrings.length) {
-      const currentString = violinStrings[stringIndex];
+    // 충분한 움직임이 있을 때만 처리 (너무 민감하지 않게)
+    if (dragDistance > 15) {
+      lastDragPosition.value = { x: clientX, y: clientY };
       
-      // 새로운 현에 진입했을 때만 소리 재생
-      if (dragCurrentString.value !== currentString.note) {
-        dragCurrentString.value = currentString.note;
+      // 자유 연주 모드: 현재 활이 지나가는 현 감지
+      const stringElement = document.elementFromPoint(clientX, clientY);
+      if (stringElement && stringElement.closest('.violin-string')) {
+        const stringContainer = stringElement.closest('.violin-string') as HTMLElement;
+        const stringIndex = Array.from(stringContainer.parentElement!.children).indexOf(stringContainer);
         
-        // 이전 현 비활성화
-        if (lastPlayedString.value) {
-          activeStrings.value.delete(lastPlayedString.value);
+        if (stringIndex >= 0 && stringIndex < violinStrings.length) {
+          const currentString = violinStrings[stringIndex];
+          
+          // 새로운 현에 진입했을 때만 소리 재생
+          if (dragCurrentString.value !== currentString.note) {
+            dragCurrentString.value = currentString.note;
+            
+            // 이전 현 비활성화
+            if (lastPlayedString.value) {
+              activeStrings.value.delete(lastPlayedString.value);
+            }
+            
+            // 새 현 활성화 및 소리 재생
+            activeStrings.value.add(currentString.note);
+            music.playViolinNote(currentString.note, 0.8);
+            
+            // 진동 효과
+            if (navigator.vibrate) {
+              navigator.vibrate(60);
+            }
+            
+            lastPlayedString.value = currentString.note;
+            
+            console.log('🎻 Bow crossing string:', currentString.displayName);
+          }
         }
-        
-        // 새 현 활성화 및 소리 재생
-        activeStrings.value.add(currentString.note);
-        music.playViolinNote(currentString.note, 0.8);
-        
-        // 진동 효과
-        if (navigator.vibrate) {
-          navigator.vibrate(60);
-        }
-        
-        // 자유 연주 모드에서만 드래그 연주 허용
-        if (practiceMode.value === 'free') {
-          // 자유 연주만 허용
-        }
-        
-        lastPlayedString.value = currentString.note;
-        
-        console.log('🎻 Bow crossing string:', currentString.displayName);
       }
     }
   }
@@ -455,127 +500,7 @@ const stopBowDrag = () => {
   console.log('🎻 Stopped bow dragging');
 };
 
-/**
- * 리듬 연습 시작
- */
-const startRhythmPractice = () => {
-  if (!currentSong.value) return;
-  
-  isRhythmPlaying.value = !isRhythmPlaying.value;
-  
-  if (isRhythmPlaying.value) {
-    playRhythmGuide();
-  } else {
-    if (rhythmTimer.value) {
-      clearTimeout(rhythmTimer.value);
-      rhythmTimer.value = null;
-    }
-  }
-};
 
-/**
- * 리듬 가이드 자동 연주
- */
-const playRhythmGuide = () => {
-  if (!currentSong.value || !isRhythmPlaying.value) return;
-  
-  if (currentRhythmIndex.value >= currentSong.value.rhythm.length) {
-    // 곡 완성!
-    isRhythmPlaying.value = false;
-    currentNote.value = null;
-    showCompletionCelebration();
-    return;
-  }
-  
-  const noteToPlay = currentSong.value.rhythm[currentRhythmIndex.value];
-  currentNote.value = noteToPlay;
-  
-  // 자동으로 현 연주 (소리 재생)
-  music.playViolinNote(noteToPlay, 0.8);
-  
-  // 현 시각적 활성화
-  activeStrings.value.add(noteToPlay);
-  
-  // 진동 효과
-  if (navigator.vibrate) {
-    navigator.vibrate(60);
-  }
-  
-  // 비트 간격 계산 (BPM 기반)
-  const beatInterval = (60 / currentSong.value.bpm) * 1000;
-  
-  rhythmTimer.value = setTimeout(() => {
-    // 현 비활성화
-    activeStrings.value.delete(noteToPlay);
-    currentNote.value = null;
-    currentRhythmIndex.value++;
-    
-    // 다음 음표로 진행하기 전 잠시 대기
-    setTimeout(() => {
-      playRhythmGuide();
-    }, beatInterval * 0.2);
-  }, beatInterval * 0.6);
-};
-
-/**
- * 리듬 정확성 체크
- */
-const checkRhythmAccuracy = (playedNote: string) => {
-  if (!currentSong.value || !isRhythmPlaying.value) return;
-  
-  const expectedNote = currentSong.value.rhythm[currentRhythmIndex.value];
-  
-  if (playedNote === expectedNote) {
-    // 정확한 연주!
-    showCorrectFeedback();
-  } else {
-    // 틀린 연주
-    showIncorrectFeedback();
-  }
-};
-
-/**
- * 리듬 연습 리셋
- */
-const resetRhythmPractice = () => {
-  isRhythmPlaying.value = false;
-  currentRhythmIndex.value = 0;
-  currentNote.value = null;
-  
-  if (rhythmTimer.value) {
-    clearTimeout(rhythmTimer.value);
-    rhythmTimer.value = null;
-  }
-};
-
-/**
- * 정확한 연주 피드백
- */
-const showCorrectFeedback = () => {
-  // 여기에 맞춤 피드백 애니메이션 추가 가능
-  console.log('🎉 정확해요!');
-};
-
-/**
- * 틀린 연주 피드백
- */
-const showIncorrectFeedback = () => {
-  // 여기에 틀림 피드백 애니메이션 추가 가능
-  console.log('💭 다시 해볼까요?');
-};
-
-/**
- * 완성 축하 애니메이션
- */
-const showCompletionCelebration = () => {
-  // 완성 축하 효과
-  console.log('🎊 와! 완성했어요!');
-  
-  // 3초 후 자동으로 리셋
-  setTimeout(() => {
-    resetRhythmPractice();
-  }, 3000);
-};
 
 /**
  * 키보드 이벤트 처리
@@ -611,15 +536,16 @@ const handleKeyboardUp = (event: KeyboardEvent) => {
 onMounted(() => {
   window.addEventListener('keydown', handleKeyboard);
   window.addEventListener('keyup', handleKeyboardUp);
+  
+  // 기본으로 첫 번째 곡 선택
+  if (rhythmSongs.length > 0) {
+    selectSong(rhythmSongs[0]);
+  }
 });
 
 onUnmounted(() => {
   window.removeEventListener('keydown', handleKeyboard);
   window.removeEventListener('keyup', handleKeyboardUp);
-  
-  if (rhythmTimer.value) {
-    clearTimeout(rhythmTimer.value);
-  }
 });
 </script>
 
@@ -1227,8 +1153,8 @@ onUnmounted(() => {
     0 3px 6px rgba(0, 0, 0, 0.1);
 }
 
-/* 리듬 가이드 */
-.rhythm-guide {
+/* 드래그 가이드 */
+.drag-guide {
   margin-top: 24px;
   background: 
     radial-gradient(circle at 30% 30%, rgba(255, 228, 196, 0.8), transparent 60%),
@@ -1239,6 +1165,7 @@ onUnmounted(() => {
   box-shadow: 
     0 8px 20px rgba(0, 0, 0, 0.06),
     inset 0 2px 4px rgba(255, 255, 255, 0.8);
+  text-align: center;
 }
 
 .rhythm-guide h4 {
@@ -1535,5 +1462,60 @@ onUnmounted(() => {
   .violin-string:active {
     transform: scale(1.2);
   }
+}
+
+.drag-guide h4 {
+  margin-bottom: 12px;
+  color: #5d4037;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.drag-instruction {
+  margin-bottom: 16px;
+  color: #6d4c41;
+  font-size: 0.95rem;
+  line-height: 1.4;
+  background: rgba(255, 255, 255, 0.5);
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 152, 0, 0.2);
+}
+
+.song-progress {
+  margin-bottom: 16px;
+}
+
+.current-note {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  background: 
+    linear-gradient(135deg, #e8f5e8, #c8e6c9);
+  border: 2px solid rgba(76, 175, 80, 0.3);
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.note-label {
+  font-size: 0.9rem;
+  color: #2e7d32;
+  font-weight: 500;
+}
+
+.note-display {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1b5e20;
+  background: 
+    linear-gradient(135deg, #a5d6a7, #81c784);
+  padding: 8px 16px;
+  border-radius: 12px;
+  border: 2px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  min-width: 60px;
+  text-align: center;
 }
 </style>

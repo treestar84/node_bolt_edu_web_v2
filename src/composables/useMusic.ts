@@ -28,7 +28,7 @@ export function useMusic() {
   /**
    * Web Audio API 초기화
    */
-  const initializeAudio = () => {
+  const initializeAudio = async () => {
     if (!audioContext.value) {
       const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
       if (AudioContext) {
@@ -36,20 +36,32 @@ export function useMusic() {
         console.log('🎵 Audio Context initialized');
       } else {
         console.error('❌ Web Audio API not supported');
+        return null;
       }
     }
+    
+    // AudioContext가 suspended 상태이면 resume 시도
+    if (audioContext.value && audioContext.value.state === 'suspended') {
+      try {
+        await audioContext.value.resume();
+        console.log('🎵 Audio Context resumed');
+      } catch (error) {
+        console.error('❌ Failed to resume audio context:', error);
+      }
+    }
+    
     return audioContext.value;
   };
 
   /**
    * 악기 선택
    */
-  const selectInstrument = (instrument: InstrumentItem) => {
+  const selectInstrument = async (instrument: InstrumentItem) => {
     selectedInstrument.value = instrument;
     gameState.value = instrument.id as MusicGameState;
     
     // 오디오 컨텍스트 초기화
-    initializeAudio();
+    await initializeAudio();
     
     console.log('🎵 Selected instrument:', instrument.name);
   };
@@ -83,8 +95,8 @@ export function useMusic() {
   /**
    * 기본 오실레이터 생성 (공통 함수)
    */
-  const createOscillator = (frequency: number, type: OscillatorType = 'sine', duration: number = 0.5) => {
-    const ctx = initializeAudio();
+  const createOscillator = async (frequency: number, type: OscillatorType = 'sine', duration: number = 0.5) => {
+    const ctx = await initializeAudio();
     if (!ctx) return null;
 
     const oscillator = ctx.createOscillator();
@@ -104,48 +116,92 @@ export function useMusic() {
   };
 
   /**
+   * 사용자 인터랙션 후 오디오 활성화
+   */
+  const ensureAudioActive = async () => {
+    const ctx = await initializeAudio();
+    if (ctx && ctx.state === 'suspended') {
+      try {
+        await ctx.resume();
+        console.log('🎵 Audio activated by user interaction');
+      } catch (error) {
+        console.error('❌ Failed to activate audio:', error);
+      }
+    }
+  };
+
+  /**
    * 피아노 음 재생
    */
-  const playPianoNote = (note: string, octave: number = 4) => {
+  const playPianoNote = async (noteWithOctave: string, octave?: number) => {
     const noteFrequencies: { [key: string]: number } = {
       'C': 261.63, 'C#': 277.18, 'D': 293.66, 'D#': 311.13,
       'E': 329.63, 'F': 349.23, 'F#': 369.99, 'G': 392.00,
       'G#': 415.30, 'A': 440.00, 'A#': 466.16, 'B': 493.88
     };
 
-    const baseFreq = noteFrequencies[note];
-    if (!baseFreq) return;
+    // 'C3', 'D#4' 같은 형태에서 음표와 옥타브 분리
+    let noteName: string;
+    let noteOctave: number;
+    
+    if (octave !== undefined) {
+      // 별도로 옥타브가 제공된 경우
+      noteName = noteWithOctave;
+      noteOctave = octave;
+    } else {
+      // 'C3', 'D#4' 형태에서 파싱
+      const match = noteWithOctave.match(/^([A-G]#?)(\d+)$/);
+      if (!match) {
+        console.error('❌ Invalid note format:', noteWithOctave);
+        return;
+      }
+      noteName = match[1];
+      noteOctave = parseInt(match[2]);
+    }
+
+    const baseFreq = noteFrequencies[noteName];
+    if (!baseFreq) {
+      console.error('❌ Unknown note:', noteName);
+      return;
+    }
 
     // 옥타브 조정
-    const frequency = baseFreq * Math.pow(2, octave - 4);
-    const noteKey = `${note}${octave}`;
+    const frequency = baseFreq * Math.pow(2, noteOctave - 4);
+    const noteKey = `${noteName}${noteOctave}`;
 
     // 이미 재생 중인 음이면 중복 방지
     if (playingNotes.value.has(noteKey)) return;
 
-    const result = createOscillator(frequency, 'triangle', 1.0);
-    if (!result) return;
+    try {
+      // 사용자 인터랙션으로 오디오 활성화
+      await ensureAudioActive();
+      
+      const result = await createOscillator(frequency, 'triangle', 1.0);
+      if (!result) return;
 
-    const { oscillator, gainNode } = result;
-    
-    playingNotes.value.add(noteKey);
-    playHistory.value.push({ note: noteKey, timestamp: Date.now() });
+      const { oscillator, gainNode } = result;
+      
+      playingNotes.value.add(noteKey);
+      playHistory.value.push({ note: noteKey, timestamp: Date.now() });
 
-    oscillator.start();
-    oscillator.stop(audioContext.value!.currentTime + 1.0);
+      oscillator.start();
+      oscillator.stop(audioContext.value!.currentTime + 1.0);
 
-    // 정리
-    oscillator.addEventListener('ended', () => {
-      playingNotes.value.delete(noteKey);
-    });
+      // 정리
+      oscillator.addEventListener('ended', () => {
+        playingNotes.value.delete(noteKey);
+      });
 
-    console.log('🎹 Playing piano note:', noteKey);
+      console.log('🎹 Playing piano note:', noteKey);
+    } catch (error) {
+      console.error('❌ Failed to play piano note:', error);
+    }
   };
 
   /**
    * 바이올린 음 재생 (현실적인 바이올린 사운드)
    */
-  const playViolinNote = (stringName: string, duration: number = 1.0) => {
+  const playViolinNote = async (stringName: string, duration: number = 1.0) => {
     const stringFrequencies: { [key: string]: number } = {
       'G': 196.00,  // G3 - 가장 굵고 낮은 현
       'D': 293.66,  // D4 - 중간 낮은 현  
@@ -156,7 +212,7 @@ export function useMusic() {
     const frequency = stringFrequencies[stringName];
     if (!frequency) return;
 
-    const ctx = initializeAudio();
+    const ctx = await initializeAudio();
     if (!ctx) return;
 
     // 바이올린의 복잡한 음향 구조 시뮬레이션
@@ -293,9 +349,13 @@ export function useMusic() {
   /**
    * 드럼 소리 재생 (확장된 드럼세트)
    */
-  const playDrumSound = (drumType: 'kick' | 'snare' | 'hihat' | 'cymbal' | 'tom1' | 'tom2' | 'floor-tom' | 'ride') => {
-    const ctx = initializeAudio();
-    if (!ctx) return;
+  const playDrumSound = async (drumType: 'kick' | 'snare' | 'hihat' | 'cymbal' | 'tom1' | 'tom2' | 'floor-tom' | 'ride') => {
+    try {
+      // 사용자 인터랙션으로 오디오 활성화
+      await ensureAudioActive();
+      
+      const ctx = await initializeAudio();
+      if (!ctx) return;
 
     switch (drumType) {
       case 'kick':
@@ -490,6 +550,9 @@ export function useMusic() {
 
     playHistory.value.push({ note: `drum_${drumType}`, timestamp: Date.now() });
     console.log('🥁 Playing drum:', drumType);
+    } catch (error) {
+      console.error('❌ Failed to play drum sound:', error);
+    }
   };
 
   return {
@@ -518,6 +581,7 @@ export function useMusic() {
 
     // 오디오 관리
     initializeAudio,
-    createOscillator
+    createOscillator,
+    ensureAudioActive
   };
 }

@@ -3,24 +3,37 @@
     <!-- 가이드 모드 표시 -->
     <div v-if="playMode === 'guide'" class="guide-display">
       <div class="guide-info">
-        <h3 class="guide-title">🌟 반짝반짝 작은별</h3>
+        <h3 class="guide-title">{{ selectedSong?.title }}</h3>
         <p class="guide-instruction">
-          <span v-if="!isPlaying">{{ guideStep + 1 }}/{{ guideSequence.length }} 번째 음을 눌러보세요!</span>
-          <span v-else>잘했어요! 다음 음을 눌러보세요.</span>
+          <span v-if="!isAutoPlaying">{{ guideStep + 1 }}/{{ selectedSong?.notes.length }} 번째 음을 눌러보세요!</span>
+          <span v-else>자동 연주 중...</span>
         </p>
         <div class="guide-progress">
-          <div class="progress-bar">
+          <div 
+            class="progress-bar"
+          >
             <div 
               class="progress-fill" 
-              :style="{ width: (guideStep / guideSequence.length * 100) + '%' }"
+              :style="{ width: (guideStep / (selectedSong?.notes.length || 1) * 100) + '%' }"
             ></div>
           </div>
-          <span class="progress-text">{{ guideStep }}/{{ guideSequence.length }}</span>
+          <span class="progress-text">{{ guideStep }}/{{ selectedSong?.notes.length }}</span>
         </div>
       </div>
-      <button @click="resetGuide" class="guide-reset-btn">
-        🔄 처음부터
-      </button>
+      <div class="guide-controls">
+        <select v-model="selectedSong" class="song-select">
+          <option v-for="song in songs" :key="song.id" :value="song">{{ song.title }}</option>
+        </select>
+        <button @click="startAutoPlay" :disabled="isAutoPlaying" class="guide-btn auto-play-btn">
+          자동 연주
+        </button>
+        <button @click="stopAutoPlay" :disabled="!isAutoPlaying" class="guide-btn stop-auto-play-btn">
+          정지
+        </button>
+        <button @click="resetGuide" class="guide-btn reset-btn">
+          처음부터
+        </button>
+      </div>
     </div>
 
     <!-- 피아노 키보드 -->
@@ -41,7 +54,7 @@
             highlight: shouldHighlightKey(key.note),
             guide: isGuideKey(key.note)
           }"
-          :style="{ left: key.position + '%' }"
+          :style="{ left: key.position + '%', width: WHITE_KEY_WIDTH_PERCENT + '%' }"
         >
           <span class="key-label">{{ key.label }}</span>
           <div v-if="isGuideKey(key.note)" class="guide-glow"></div>
@@ -64,7 +77,7 @@
             highlight: shouldHighlightKey(key.note),
             guide: isGuideKey(key.note)
           }"
-          :style="{ left: key.position + '%' }"
+          :style="{ left: key.position + '%', width: BLACK_KEY_WIDTH_PERCENT + '%' }"
         >
           <span class="key-label">{{ key.label }}</span>
           <div v-if="isGuideKey(key.note)" class="guide-glow"></div>
@@ -91,7 +104,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
 import { useMusic } from '@/composables/useMusic';
 
 interface PianoKey {
@@ -99,6 +112,7 @@ interface PianoKey {
   label: string;
   position: number;
   isBlack: boolean;
+  octave: number;
 }
 
 const props = defineProps<{
@@ -109,30 +123,105 @@ const music = useMusic();
 const pressedKeys = ref<Set<string>>(new Set());
 const pianoKeyboard = ref<HTMLElement>();
 
-// 반짝반짝 작은별 가이드 시퀀스 (C4 기준)
-const guideSequence = ref(['C', 'C', 'G', 'G', 'A', 'A', 'G', 'F', 'F', 'E', 'E', 'D', 'D', 'C']);
 const guideStep = ref(0);
 const isPlaying = ref(false);
+const autoPlayIndex = ref(0);
+const autoPlayTimer = ref<NodeJS.Timeout | null>(null);
+const isAutoPlaying = ref(false);
 
-// 흰 건반 정의 (C4~B4)
+const WHITE_KEY_WIDTH_PERCENT = 100 / 12;
+const BLACK_KEY_WIDTH_PERCENT = WHITE_KEY_WIDTH_PERCENT * 0.6; // 검은 건반 너비 조정
+const BLACK_KEY_OFFSET_PERCENT = WHITE_KEY_WIDTH_PERCENT * 0.65; // 검은 건반 위치 조정
+
+// 흰 건반 정의 (C3~G4, 총 12개)
 const whiteKeys: PianoKey[] = [
-  { note: 'C', label: '도', position: 0, isBlack: false },
-  { note: 'D', label: '레', position: 14.3, isBlack: false },
-  { note: 'E', label: '미', position: 28.6, isBlack: false },
-  { note: 'F', label: '파', position: 42.9, isBlack: false },
-  { note: 'G', label: '솔', position: 57.1, isBlack: false },
-  { note: 'A', label: '라', position: 71.4, isBlack: false },
-  { note: 'B', label: '시', position: 85.7, isBlack: false }
+  { note: 'C3', label: '도', position: 0 * WHITE_KEY_WIDTH_PERCENT, isBlack: false, octave: 3 },
+  { note: 'D3', label: '레', position: 1 * WHITE_KEY_WIDTH_PERCENT, isBlack: false, octave: 3 },
+  { note: 'E3', label: '미', position: 2 * WHITE_KEY_WIDTH_PERCENT, isBlack: false, octave: 3 },
+  { note: 'F3', label: '파', position: 3 * WHITE_KEY_WIDTH_PERCENT, isBlack: false, octave: 3 },
+  { note: 'G3', label: '솔', position: 4 * WHITE_KEY_WIDTH_PERCENT, isBlack: false, octave: 3 },
+  { note: 'A3', label: '라', position: 5 * WHITE_KEY_WIDTH_PERCENT, isBlack: false, octave: 3 },
+  { note: 'B3', label: '시', position: 6 * WHITE_KEY_WIDTH_PERCENT, isBlack: false, octave: 3 },
+  { note: 'C4', label: '도', position: 7 * WHITE_KEY_WIDTH_PERCENT, isBlack: false, octave: 4 },
+  { note: 'D4', label: '레', position: 8 * WHITE_KEY_WIDTH_PERCENT, isBlack: false, octave: 4 },
+  { note: 'E4', label: '미', position: 9 * WHITE_KEY_WIDTH_PERCENT, isBlack: false, octave: 4 },
+  { note: 'F4', label: '파', position: 10 * WHITE_KEY_WIDTH_PERCENT, isBlack: false, octave: 4 },
+  { note: 'G4', label: '솔', position: 11 * WHITE_KEY_WIDTH_PERCENT, isBlack: false, octave: 4 },
 ];
 
-// 검은 건반 정의
+// 검은 건반 정의 (총 9개)
 const blackKeys: PianoKey[] = [
-  { note: 'C#', label: '도#', position: 10.2, isBlack: true },
-  { note: 'D#', label: '레#', position: 21.4, isBlack: true },
-  { note: 'F#', label: '파#', position: 50, isBlack: true },
-  { note: 'G#', label: '솔#', position: 64.3, isBlack: true },
-  { note: 'A#', label: '라#', position: 78.6, isBlack: true }
+  { note: 'C#3', label: '도#', position: 0 * WHITE_KEY_WIDTH_PERCENT + BLACK_KEY_OFFSET_PERCENT, isBlack: true, octave: 3 },
+  { note: 'D#3', label: '레#', position: 1 * WHITE_KEY_WIDTH_PERCENT + BLACK_KEY_OFFSET_PERCENT, isBlack: true, octave: 3 },
+  { note: 'F#3', label: '파#', position: 3 * WHITE_KEY_WIDTH_PERCENT + BLACK_KEY_OFFSET_PERCENT, isBlack: true, octave: 3 },
+  { note: 'G#3', label: '솔#', position: 4 * WHITE_KEY_WIDTH_PERCENT + BLACK_KEY_OFFSET_PERCENT, isBlack: true, octave: 3 },
+  { note: 'A#3', label: '라#', position: 5 * WHITE_KEY_WIDTH_PERCENT + BLACK_KEY_OFFSET_PERCENT, isBlack: true, octave: 3 },
+
+  { note: 'C#4', label: '도#', position: 7 * WHITE_KEY_WIDTH_PERCENT + BLACK_KEY_OFFSET_PERCENT, isBlack: true, octave: 4 },
+  { note: 'D#4', label: '레#', position: 8 * WHITE_KEY_WIDTH_PERCENT + BLACK_KEY_OFFSET_PERCENT, isBlack: true, octave: 4 },
+  { note: 'F#4', label: '파#', position: 10 * WHITE_KEY_WIDTH_PERCENT + BLACK_KEY_OFFSET_PERCENT, isBlack: true, octave: 4 },
+  { note: 'G#4', label: '솔#', position: 11 * WHITE_KEY_WIDTH_PERCENT + BLACK_KEY_OFFSET_PERCENT, isBlack: true, octave: 4 },
 ];
+
+interface Song {
+  id: string;
+  title: string;
+  notes: string[];
+  bpm: number; // Beats per minute for auto-play speed
+}
+
+const songs: Song[] = [
+  {
+    id: 'twinkle',
+    title: '반짝반짝 작은별',
+    notes: ['C4', 'C4', 'G4', 'G4', 'A4', 'A4', 'G4', 'F4', 'F4', 'E4', 'E4', 'D4', 'D4', 'C4'],
+    bpm: 120
+  },
+  {
+    id: 'mary',
+    title: '메리에게 작은 양이 있었네',
+    notes: ['E4', 'D4', 'C4', 'D4', 'E4', 'E4', 'E4', 'D4', 'D4', 'D4', 'E4', 'G4', 'G4', 'E4', 'D4', 'C4', 'D4', 'E4', 'E4', 'E4', 'E4', 'D4', 'D4', 'E4', 'D4', 'C4'],
+    bpm: 100
+  },
+  {
+    id: 'oldmacdonald',
+    title: '올드 맥도날드',
+    notes: ['C4', 'C4', 'C4', 'G3', 'A3', 'A3', 'G3', 'E4', 'E4', 'D4', 'D4', 'C4'],
+    bpm: 110
+  },
+  {
+    id: 'alphabet',
+    title: '알파벳 노래',
+    notes: ['C4', 'G3', 'G3', 'A3', 'A3', 'G3', 'F4', 'F4', 'E4', 'E4', 'D4', 'D4', 'C4'],
+    bpm: 100
+  },
+  {
+    id: 'rowrow',
+    title: 'Row, Row, Row Your Boat',
+    notes: ['C4', 'C4', 'C4', 'D4', 'E4', 'E4', 'D4', 'E4', 'F4', 'G4', 'C4', 'G3', 'E3', 'C3'],
+    bpm: 130
+  },
+  {
+    id: 'happpybirthday',
+    title: '생일 축하합니다',
+    notes: ['C4', 'C4', 'D4', 'C4', 'F4', 'E4', 'C4', 'C4', 'D4', 'C4', 'G4', 'F4', 'C4', 'C4', 'C5', 'A4', 'F4', 'E4', 'D4', 'A#4', 'A#4', 'A4', 'F4', 'G4', 'F4'],
+    bpm: 90
+  },
+  {
+    id: 'jinglebells',
+    title: '징글벨',
+    notes: ['E4', 'E4', 'E4', 'E4', 'E4', 'E4', 'E4', 'G4', 'C4', 'D4', 'E4', 'F4', 'F4', 'F4', 'F4', 'F4', 'E4', 'E4', 'E4', 'E4', 'D4', 'D4', 'E4', 'D4', 'G4'],
+    bpm: 120
+  },
+  {
+    id: 'londonbridge',
+    title: '런던 다리',
+    notes: ['G4', 'A4', 'G4', 'F4', 'E4', 'F4', 'G4', 'D4', 'E4', 'F4', 'E4', 'F4', 'G4', 'G4', 'D4', 'E4', 'F4', 'E4', 'F4', 'G4'],
+    bpm: 110
+  }
+];
+
+const selectedSong = ref<Song | null>(songs[0]); // Default to the first song
 
 // 연주 통계
 const playStats = computed(() => music.getPlayStats.value);
@@ -140,14 +229,22 @@ const playStats = computed(() => music.getPlayStats.value);
 /**
  * 건반 눌림 처리
  */
-const handleKeyPress = (key: PianoKey) => {
+const handleKeyPress = async (key: PianoKey) => {
   if (pressedKeys.value.has(key.note)) return;
   
   pressedKeys.value.add(key.note);
-  music.playPianoNote(key.note, 4);
+  
+  try {
+    // 오디오 활성화 및 음 재생
+    await music.ensureAudioActive();
+    await music.playPianoNote(key.note); // key.note는 이미 'C3', 'D4' 형태
+    console.log('🎹 Successfully played note:', key.note, key.label);
+  } catch (error) {
+    console.error('❌ Failed to play piano note:', error);
+  }
   
   // 가이드 모드 처리
-  if (props.playMode === 'guide') {
+  if (props.playMode === 'guide' && !isAutoPlaying.value) {
     handleGuideMode(key.note);
   }
   
@@ -165,20 +262,20 @@ const handleKeyRelease = (key: PianoKey) => {
 };
 
 /**
- * 가이드 모드 처리
+ * 가이드 모드 처리 (수동 연주)
  */
 const handleGuideMode = (pressedNote: string) => {
-  const expectedNote = guideSequence.value[guideStep.value];
+  if (!selectedSong.value) return;
+
+  const expectedNote = selectedSong.value.notes[guideStep.value];
   
   if (pressedNote === expectedNote) {
-    // 올바른 음을 눌렀을 때
     isPlaying.value = true;
     guideStep.value++;
     
-    // 완주했을 때
-    if (guideStep.value >= guideSequence.value.length) {
+    if (guideStep.value >= selectedSong.value.notes.length) {
       setTimeout(() => {
-        alert('🌟 축하합니다! 반짝반짝 작은별을 완주했어요!');
+        alert('🌟 축하합니다! 곡을 완주했어요!');
         resetGuide();
       }, 500);
     }
@@ -187,7 +284,6 @@ const handleGuideMode = (pressedNote: string) => {
       isPlaying.value = false;
     }, 800);
   } else {
-    // 틀린 음을 눌렀을 때
     console.log('❌ Wrong note! Expected:', expectedNote, 'Got:', pressedNote);
   }
 };
@@ -198,14 +294,15 @@ const handleGuideMode = (pressedNote: string) => {
 const resetGuide = () => {
   guideStep.value = 0;
   isPlaying.value = false;
+  stopAutoPlay();
 };
 
 /**
  * 현재 가이드에서 눌러야 할 키인지 확인
  */
 const isGuideKey = (note: string): boolean => {
-  if (props.playMode !== 'guide') return false;
-  return guideSequence.value[guideStep.value] === note;
+  if (props.playMode !== 'guide' || !selectedSong.value || isAutoPlaying.value) return false;
+  return selectedSong.value.notes[guideStep.value] === note;
 };
 
 /**
@@ -220,16 +317,72 @@ const shouldHighlightKey = (note: string): boolean => {
  */
 const animateKeyPress = (note: string) => {
   // 파티클 효과나 추가 애니메이션을 여기에 추가할 수 있음
-  console.log('✨ Animating key:', note);
+  // console.log('✨ Animating key:', note);
+};
+
+/**
+ * 자동 연주 시작
+ */
+const startAutoPlay = () => {
+  if (!selectedSong.value || isAutoPlaying.value) return;
+  
+  isAutoPlaying.value = true;
+  autoPlayIndex.value = 0;
+  guideStep.value = 0; // Reset guide step for auto-play
+  
+  const noteDuration = 60000 / selectedSong.value.bpm; // Milliseconds per beat
+  
+  autoPlayTimer.value = setInterval(async () => {
+    if (autoPlayIndex.value < selectedSong.value!.notes.length) {
+      const noteToPlay = selectedSong.value!.notes[autoPlayIndex.value];
+      const key = [...whiteKeys, ...blackKeys].find(k => k.note === noteToPlay);
+      if (key) {
+        // Simulate key press
+        pressedKeys.value.add(key.note);
+        try {
+          await music.ensureAudioActive();
+          await music.playPianoNote(key.note); // key.note는 이미 'C3', 'D4' 형태
+        } catch (error) {
+          console.error('❌ Auto-play failed:', error);
+        }
+        animateKeyPress(key.note);
+        
+        // Simulate key release after a short delay
+        setTimeout(() => {
+          pressedKeys.value.delete(key.note);
+        }, noteDuration * 0.8); // Key held for 80% of duration
+      }
+      autoPlayIndex.value++;
+    } else {
+      stopAutoPlay();
+      alert('🎶 자동 연주가 완료되었습니다!');
+    }
+  }, noteDuration);
+};
+
+/**
+ * 자동 연주 중지
+ */
+const stopAutoPlay = () => {
+  if (autoPlayTimer.value) {
+    clearInterval(autoPlayTimer.value);
+    autoPlayTimer.value = null;
+  }
+  isAutoPlaying.value = false;
+  pressedKeys.value.clear(); // Clear any lingering pressed states
 };
 
 /**
  * 키보드 이벤트 처리 (물리 키보드)
  */
 const handleKeyboardEvent = (event: KeyboardEvent) => {
+  if (isAutoPlaying.value) return; // Disable manual input during auto-play
+
   const keyMap: { [key: string]: string } = {
-    'a': 'C', 's': 'D', 'd': 'E', 'f': 'F', 'g': 'G', 'h': 'A', 'j': 'B',
-    'w': 'C#', 'e': 'D#', 't': 'F#', 'y': 'G#', 'u': 'A#'
+    'a': 'C3', 's': 'D3', 'd': 'E3', 'f': 'F3', 'g': 'G3', 'h': 'A3', 'j': 'B3',
+    'k': 'C4', 'l': 'D4', ';': 'E4', '\'': 'F4', 'z': 'G4',
+    'w': 'C#3', 'e': 'D#3', 't': 'F#3', 'y': 'G#3', 'u': 'A#3',
+    'o': 'C#4', 'p': 'D#4', '[': 'F#4', ']': 'G#4',
   };
   
   const note = keyMap[event.key.toLowerCase()];
@@ -242,9 +395,13 @@ const handleKeyboardEvent = (event: KeyboardEvent) => {
 };
 
 const handleKeyboardUp = (event: KeyboardEvent) => {
+  if (isAutoPlaying.value) return; // Disable manual input during auto-play
+
   const keyMap: { [key: string]: string } = {
-    'a': 'C', 's': 'D', 'd': 'E', 'f': 'F', 'g': 'G', 'h': 'A', 'j': 'B',
-    'w': 'C#', 'e': 'D#', 't': 'F#', 'y': 'G#', 'u': 'A#'
+    'a': 'C3', 's': 'D3', 'd': 'E3', 'f': 'F3', 'g': 'G3', 'h': 'A3', 'j': 'B3',
+    'k': 'C4', 'l': 'D4', ';': 'E4', '\'': 'F4', 'z': 'G4',
+    'w': 'C#3', 'e': 'D#3', 't': 'F#3', 'y': 'G#3', 'u': 'A#3',
+    'o': 'C#4', 'p': 'D#4', '[': 'F#4', ']': 'G#4',
   };
   
   const note = keyMap[event.key.toLowerCase()];
@@ -257,16 +414,20 @@ const handleKeyboardUp = (event: KeyboardEvent) => {
 };
 
 onMounted(() => {
-  // 키보드 이벤트 리스너 추가
   window.addEventListener('keydown', handleKeyboardEvent);
   window.addEventListener('keyup', handleKeyboardUp);
 });
 
 onUnmounted(() => {
-  // 키보드 이벤트 리스너 제거
   window.removeEventListener('keydown', handleKeyboardEvent);
   window.removeEventListener('keyup', handleKeyboardUp);
+  stopAutoPlay(); // Ensure auto-play stops when component is unmounted
 });
+
+watch(selectedSong, () => {
+  resetGuide(); // Reset guide when song changes
+});
+
 </script>
 
 <style scoped>
@@ -282,10 +443,10 @@ onUnmounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: linear-gradient(135deg, #ffeaa7, #fdcb6e);
+  background: var(--color-bg-card);
   border-radius: 16px;
   padding: 20px;
-  box-shadow: 0 6px 20px rgba(253, 203, 110, 0.3);
+  box-shadow: var(--shadow-card);
 }
 
 .guide-info {
@@ -295,13 +456,13 @@ onUnmounted(() => {
 .guide-title {
   font-size: 1.3rem;
   font-weight: 700;
-  color: #2d3436;
+  color: var(--color-text-primary);
   margin-bottom: 8px;
 }
 
 .guide-instruction {
   font-size: 1rem;
-  color: #636e72;
+  color: var(--color-text-secondary);
   margin-bottom: 12px;
 }
 
@@ -314,14 +475,14 @@ onUnmounted(() => {
 .progress-bar {
   flex: 1;
   height: 8px;
-  background: rgba(255, 255, 255, 0.5);
+  background: var(--color-bg-secondary);
   border-radius: 4px;
   overflow: hidden;
 }
 
 .progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, #00b894, #00cec9);
+  background: var(--color-primary);
   border-radius: 4px;
   transition: width 0.5s ease;
 }
@@ -329,25 +490,80 @@ onUnmounted(() => {
 .progress-text {
   font-size: 0.9rem;
   font-weight: 600;
-  color: #2d3436;
+  color: var(--color-text-primary);
   min-width: 40px;
 }
 
-.guide-reset-btn {
-  padding: 12px 20px;
-  background: rgba(255, 255, 255, 0.9);
-  border: 2px solid transparent;
-  border-radius: 12px;
-  color: #2d3436;
-  font-weight: 600;
+.guide-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.song-select {
+  padding: 8px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-bg-secondary);
+  color: var(--color-text-primary);
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.guide-btn {
+  padding: 8px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-bg-secondary);
+  color: var(--color-text-primary);
+  font-size: 0.9rem;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
-.guide-reset-btn:hover {
-  background: white;
-  border-color: #fdcb6e;
-  transform: translateY(-2px);
+.guide-btn:hover:not(:disabled) {
+  background: var(--color-bg-hover);
+  border-color: var(--color-primary);
+}
+
+.guide-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.auto-play-btn {
+  background: var(--color-primary);
+  color: white;
+  border-color: var(--color-primary);
+}
+
+.auto-play-btn:hover:not(:disabled) {
+  background: var(--color-primary-dark);
+  border-color: var(--color-primary-dark);
+}
+
+.stop-auto-play-btn {
+  background: var(--color-danger);
+  color: white;
+  border-color: var(--color-danger);
+}
+
+.stop-auto-play-btn:hover:not(:disabled) {
+  background: var(--color-danger-dark);
+  border-color: var(--color-danger-dark);
+}
+
+.reset-btn {
+  background: var(--color-info);
+  color: white;
+  border-color: var(--color-info);
+}
+
+.reset-btn:hover:not(:disabled) {
+  background: var(--color-info-dark);
+  border-color: var(--color-info-dark);
 }
 
 /* 피아노 키보드 */
@@ -355,10 +571,10 @@ onUnmounted(() => {
   position: relative;
   width: 100%;
   height: 200px;
-  background: linear-gradient(180deg, #2d3436, #636e72);
+  background: var(--color-bg-secondary);
   border-radius: 12px;
   padding: 12px;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+  box-shadow: var(--shadow-lg);
 }
 
 /* 흰 건반 */
@@ -370,10 +586,9 @@ onUnmounted(() => {
 
 .white-key {
   position: absolute;
-  width: 13.5%;
   height: 100%;
-  background: linear-gradient(180deg, #ffffff, #f8f9fa);
-  border: 2px solid #dee2e6;
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
   border-radius: 0 0 8px 8px;
   cursor: pointer;
   transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
@@ -382,20 +597,20 @@ onUnmounted(() => {
   justify-content: flex-end;
   align-items: center;
   padding-bottom: 16px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-md);
 }
 
 .white-key:hover {
-  background: linear-gradient(180deg, #f8f9fa, #e9ecef);
+  background: var(--color-bg-hover);
   transform: translateY(-2px);
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--shadow-lg);
 }
 
 .white-key.active {
-  background: linear-gradient(180deg, #74b9ff, #0984e3);
+  background: var(--color-primary);
   color: white;
   transform: translateY(4px);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-active);
 }
 
 .white-key.guide {
@@ -404,10 +619,10 @@ onUnmounted(() => {
 
 @keyframes guidePulse {
   0%, 100% { 
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow-md);
   }
   50% { 
-    box-shadow: 0 0 0 4px rgba(116, 185, 255, 0.6), 0 4px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 0 0 4px var(--color-primary-light), var(--shadow-md);
   }
 }
 
@@ -423,10 +638,9 @@ onUnmounted(() => {
 
 .black-key {
   position: absolute;
-  width: 8%;
   height: 100%;
-  background: linear-gradient(180deg, #2d3436, #000000);
-  border: 1px solid #000000;
+  background: var(--color-text-primary);
+  border: 1px solid var(--color-text-primary);
   border-radius: 0 0 6px 6px;
   cursor: pointer;
   transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
@@ -435,21 +649,21 @@ onUnmounted(() => {
   justify-content: flex-end;
   align-items: center;
   padding-bottom: 12px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+  box-shadow: var(--shadow-dark);
   pointer-events: auto;
   z-index: 2;
 }
 
 .black-key:hover {
-  background: linear-gradient(180deg, #636e72, #2d3436);
+  background: var(--color-text-secondary);
   transform: translateY(-2px);
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.5);
+  box-shadow: var(--shadow-dark-hover);
 }
 
 .black-key.active {
-  background: linear-gradient(180deg, #fd79a8, #e84393);
+  background: var(--color-accent);
   transform: translateY(2px);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+  box-shadow: var(--shadow-dark-active);
 }
 
 .black-key.guide {
@@ -458,10 +672,10 @@ onUnmounted(() => {
 
 @keyframes guideBlackPulse {
   0%, 100% { 
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+    box-shadow: var(--shadow-dark);
   }
   50% { 
-    box-shadow: 0 0 0 4px rgba(253, 121, 168, 0.8), 0 4px 8px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 0 0 4px var(--color-accent-light), var(--shadow-dark);
   }
 }
 
@@ -469,12 +683,12 @@ onUnmounted(() => {
 .key-label {
   font-size: 0.9rem;
   font-weight: 600;
-  color: #636e72;
+  color: var(--color-text-secondary);
   text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.8);
 }
 
 .black-key .key-label {
-  color: #ddd;
+  color: var(--color-bg-card);
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
 }
 
@@ -491,14 +705,14 @@ onUnmounted(() => {
   left: -4px;
   right: -4px;
   bottom: -4px;
-  background: radial-gradient(circle, rgba(116, 185, 255, 0.4), transparent);
+  background: radial-gradient(circle, var(--color-primary-light), transparent);
   border-radius: inherit;
   animation: glowPulse 1.5s ease-in-out infinite;
   pointer-events: none;
 }
 
 .black-key .guide-glow {
-  background: radial-gradient(circle, rgba(253, 121, 168, 0.6), transparent);
+  background: radial-gradient(circle, var(--color-accent-light), transparent);
 }
 
 @keyframes glowPulse {
@@ -511,10 +725,10 @@ onUnmounted(() => {
   display: flex;
   justify-content: center;
   gap: 32px;
-  background: rgba(255, 255, 255, 0.9);
+  background: var(--color-bg-card);
   border-radius: 12px;
   padding: 16px;
-  backdrop-filter: blur(10px);
+  box-shadow: var(--shadow-card);
 }
 
 .stat-item {
@@ -526,14 +740,14 @@ onUnmounted(() => {
 
 .stat-label {
   font-size: 0.9rem;
-  color: #636e72;
+  color: var(--color-text-secondary);
   font-weight: 500;
 }
 
 .stat-value {
   font-size: 1.2rem;
   font-weight: 700;
-  color: #2d3436;
+  color: var(--color-text-primary);
 }
 
 /* 반응형 디자인 */
@@ -577,11 +791,6 @@ onUnmounted(() => {
   
   .piano-stats {
     flex-direction: column;
-    gap: 12px;
-  }
-  
-  .stat-item {
-    flex-direction: row;
     justify-content: space-between;
   }
 }

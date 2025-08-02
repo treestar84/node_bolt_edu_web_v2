@@ -25,11 +25,11 @@
                 <span class="icon">{{ instrument.icon }}</span>
               </div>
               <div class="instrument-info">
-                <h3 class="instrument-name">{{ instrument.name }}</h3>
-                <p class="instrument-description">{{ instrument.description }}</p>
+                <h3 class="instrument-name">{{ $t(instrument.name) }}</h3>
+                <p class="instrument-description">{{ $t(instrument.description) }}</p>
               </div>
               <div class="play-overlay">
-                <span class="play-icon">🎵</span>
+                <span class="play-icon"></span>
                 <span class="play-text">{{$t('music.play')}}</span>
               </div>
             </div>
@@ -40,29 +40,29 @@
         <div v-else-if="music.gameState.value === 'piano'" class="piano-game">
           <div class="game-header">
             <button @click="music.goBack" class="btn btn-secondary back-btn">
-              ← {{$t('music.back')}}
+              {{$t('music.back')}}
             </button>
             <div class="header-center">
-              <h2 class="instrument-title">🎹 피아노</h2>
+              <h2 class="instrument-title">{{$t('music.piano.name')}}</h2>
               <div class="mode-toggle">
                 <button 
                   @click="music.setMode('free')"
                   class="mode-btn"
                   :class="{ active: music.playMode.value === 'free' }"
                 >
-                  자유 연주
+                  {{$t('music.freePlay')}}
                 </button>
                 <button 
                   @click="music.setMode('guide')"
                   class="mode-btn"
                   :class="{ active: music.playMode.value === 'guide' }"
                 >
-                  가이드 모드
+                  {{$t('music.guideMode')}}
                 </button>
               </div>
             </div>
             <button @click="music.stopAllSounds" class="btn btn-secondary stop-btn">
-              🔇 정지
+              {{$t('music.stop')}}
             </button>
           </div>
 
@@ -76,13 +76,13 @@
         <div v-else-if="music.gameState.value === 'car-sounds'" class="drum-game">
           <div class="game-header">
             <button @click="music.goBack" class="btn btn-secondary back-btn">
-              ← {{$t('music.back')}}
+              {{$t('music.back')}}
             </button>
             <div class="header-center">
-              <h2 class="instrument-title">🥁 드럼킷 & 재미있는 소리</h2>
+              <h2 class="instrument-title">{{$t('music.drums.name')}}</h2>
             </div>
             <button @click="music.stopAllSounds" class="btn btn-secondary stop-btn">
-              🔇 정지
+              {{$t('music.stop')}}
             </button>
           </div>
 
@@ -96,13 +96,13 @@
         <div v-else-if="music.gameState.value === 'violin'" class="violin-game">
           <div class="game-header">
             <button @click="music.goBack" class="btn btn-secondary back-btn">
-              ← {{$t('music.back')}}
+              {{$t('music.back')}}
             </button>
             <div class="header-center">
-              <h2 class="instrument-title">🎻 바이올린</h2>
+              <h2 class="instrument-title">{{$t('music.violin.name')}}</h2>
             </div>
             <button @click="music.stopAllSounds" class="btn btn-secondary stop-btn">
-              🔇 정지
+              {{$t('music.stop')}}
             </button>
           </div>
 
@@ -152,7 +152,7 @@ const instruments = computed(() => [
 <style scoped>
 .music-view {
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: var(--color-bg-primary);
 }
 
 .main-content {
@@ -168,13 +168,12 @@ const instruments = computed(() => [
   font-size: 2.5rem;
   font-weight: 700;
   margin-bottom: 16px;
-  color: white;
-  text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+  color: var(--color-text-primary);
 }
 
 .page-description {
   font-size: 1.1rem;
-  color: rgba(255, 255, 255, 0.9);
+  color: var(--color-text-secondary);
   max-width: 600px;
   margin: 0 auto;
   line-height: 1.6;
@@ -189,20 +188,21 @@ const instruments = computed(() => [
 }
 
 .instrument-card {
-  background: rgba(255, 255, 255, 0.95);
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
   border-radius: 20px;
   padding: 32px;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-  backdrop-filter: blur(10px);
+  box-shadow: var(--shadow-card);
 }
 
 .instrument-card:hover {
   transform: translateY(-8px);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--color-border-dark);
 }
 
 .instrument-icon {
@@ -229,13 +229,13 @@ const instruments = computed(() => [
 .instrument-name {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #2d3436;
+  color: var(--color-text-primary);
   margin-bottom: 12px;
 }
 
 .instrument-description {
   font-size: 1rem;
-  color: #636e72;
+  color: var(--color-text-secondary);
   line-height: 1.5;
 }
 
@@ -244,7 +244,7 @@ const instruments = computed(() => [
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background: linear-gradient(135deg, #00b894, #00cec9);
+  background: var(--color-primary);
   border-radius: 16px;
   padding: 16px 24px;
   display: flex;
@@ -252,7 +252,7 @@ const instruments = computed(() => [
   gap: 12px;
   opacity: 0;
   transition: all 0.3s ease;
-  box-shadow: 0 8px 25px rgba(0, 184, 148, 0.4);
+  box-shadow: var(--shadow-md);
 }
 
 .instrument-card:hover .play-overlay {
@@ -265,7 +265,7 @@ const instruments = computed(() => [
 }
 
 .play-text {
-  color: white;
+  color: var(--color-bg-primary);
   font-weight: 600;
   font-size: 1rem;
 }
@@ -276,11 +276,11 @@ const instruments = computed(() => [
   justify-content: space-between;
   align-items: center;
   margin-bottom: 32px;
-  background: rgba(255, 255, 255, 0.9);
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
   border-radius: 16px;
   padding: 20px;
-  backdrop-filter: blur(10px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-card);
 }
 
 .header-center {
@@ -292,7 +292,7 @@ const instruments = computed(() => [
 .instrument-title {
   font-size: 1.8rem;
   font-weight: 700;
-  color: #2d3436;
+  color: var(--color-text-primary);
   margin-bottom: 16px;
 }
 
@@ -304,35 +304,35 @@ const instruments = computed(() => [
 
 .mode-btn {
   padding: 8px 16px;
-  border: 2px solid #ddd;
+  border: 2px solid var(--color-border);
   border-radius: 20px;
-  background: white;
-  color: #636e72;
+  background: var(--color-bg-secondary);
+  color: var(--color-text-secondary);
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .mode-btn.active {
-  background: linear-gradient(135deg, #667eea, #764ba2);
-  color: white;
+  background: var(--color-primary);
+  color: var(--color-bg-primary);
   border-color: transparent;
 }
 
 .mode-btn:hover:not(.active) {
-  border-color: #667eea;
-  color: #667eea;
+  border-color: var(--color-primary);
+  color: var(--color-primary);
 }
 
 /* 악기 컨테이너들 */
 .piano-container,
 .drum-container,
 .violin-container {
-  background: rgba(255, 255, 255, 0.9);
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
   border-radius: 20px;
   padding: 40px;
-  backdrop-filter: blur(10px);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-card);
 }
 
 .piano-placeholder,
@@ -340,9 +340,9 @@ const instruments = computed(() => [
 .violin-placeholder {
   text-align: center;
   padding: 60px 20px;
-  color: #636e72;
+  color: var(--color-text-secondary);
   font-size: 1.2rem;
-  border: 2px dashed #ddd;
+  border: 2px dashed var(--color-border);
   border-radius: 12px;
 }
 

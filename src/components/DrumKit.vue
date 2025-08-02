@@ -307,11 +307,19 @@ const playStats = computed(() => music.getPlayStats.value);
 /**
  * 기본 드럼 패드 눌림 처리
  */
-const handleDrumPress = (drum: DrumPad) => {
+const handleDrumPress = async (drum: DrumPad) => {
   if (pressedPads.value.has(drum.id)) return;
   
   pressedPads.value.add(drum.id);
-  music.playDrumSound(drum.type);
+  
+  try {
+    // 오디오 활성화 및 드럼 소리 재생
+    await music.ensureAudioActive();
+    await music.playDrumSound(drum.type);
+    console.log('🥁 Successfully played drum:', drum.name);
+  } catch (error) {
+    console.error('❌ Failed to play drum sound:', error);
+  }
   
   // 진동 효과 (지원하는 기기에서)
   if (navigator.vibrate) {
@@ -320,8 +328,6 @@ const handleDrumPress = (drum: DrumPad) => {
   
   // 패드 애니메이션
   animatePad(drum.id);
-  
-  console.log('🥁 Drum pad pressed:', drum.name);
 };
 
 /**
@@ -334,14 +340,21 @@ const handleDrumRelease = (drum: DrumPad) => {
 /**
  * 재미있는 효과음 패드 눌림 처리
  */
-const handleFunSoundPress = (sound: FunSound) => {
+const handleFunSoundPress = async (sound: FunSound) => {
   if (pressedPads.value.has(sound.id)) return;
   
   pressedPads.value.add(sound.id);
   
-  const audioContext = music.initializeAudio();
-  if (audioContext) {
-    playFunSound(sound.id, audioContext);
+  try {
+    // 오디오 활성화 및 효과음 재생
+    await music.ensureAudioActive();
+    const audioContext = await music.initializeAudio();
+    if (audioContext) {
+      playFunSound(sound.id, audioContext);
+      console.log('🎪 Successfully played fun sound:', sound.name);
+    }
+  } catch (error) {
+    console.error('❌ Failed to play fun sound:', error);
   }
   
   // 진동 효과 (더 길게)
@@ -351,8 +364,6 @@ const handleFunSoundPress = (sound: FunSound) => {
   
   // 패드 애니메이션
   animatePad(sound.id);
-  
-  console.log('🎪 Fun sound pressed:', sound.name);
 };
 
 /**
