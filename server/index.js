@@ -37,33 +37,8 @@ app.use(helmet({
   contentSecurityPolicy: false, // CSP 완전 비활성화 (업로드 방해 방지)
 }));
 
-// Rate limiting - 개발 환경에서는 더 관대하게 설정
-const isDevelopment = process.env.NODE_ENV !== 'production';
-
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: isDevelopment ? 1000 : 100, // 개발: 1000, 프로덕션: 100 requests per windowMs
-  message: {
-    error: 'Too many requests from this IP, please try again later.'
-  }
-});
-
-const apiLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: isDevelopment ? 500 : 50, // 개발: 500, 프로덕션: 50 API requests per windowMs
-  message: {
-    error: 'Too many API requests from this IP, please try again later.'
-  }
-});
-
-// Rate limiting 완전 비활성화 (임시)
-console.log('🔧 Rate limiting completely disabled for testing');
-// if (!isDevelopment) {
-//   app.use(limiter);
-//   app.use('/api', apiLimiter);
-// } else {
-//   console.log('🔧 Development mode: Rate limiting disabled');
-// }
+// Rate limiting 완전 비활성화
+console.log('🔧 Rate limiting completely disabled for GCP deployment');
 
 // CORS configuration - 환경에 관계없이 ALLOWED_ORIGINS 우선 사용
 const allowedOrigins = process.env.ALLOWED_ORIGINS 
@@ -251,10 +226,10 @@ const initializeServer = async () => {
     }
 
     // Start server
-    app.listen(PORT, () => {
+    app.listen(PORT, '0.0.0.0', () => {
       console.log(`🚀 API Server running on port ${PORT}`);
-      console.log(`📚 API Documentation: http://localhost:${PORT}/api/docs`);
-      console.log(`🏥 Health Check: http://localhost:${PORT}/health`);
+      console.log(`📚 API Documentation: http://0.0.0.0:${PORT}/api/docs`);
+      console.log(`🏥 Health Check: http://0.0.0.0:${PORT}/health`);
     });
   } catch (error) {
     console.error('Failed to initialize server:', error);

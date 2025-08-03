@@ -47,7 +47,6 @@ export default defineConfig({
     host: '0.0.0.0',
     port: 4173,
     strictPort: true,
-    open: true,
     allowedHosts: ['duck-edu-word.duckdns.org']
   },
   build: {
