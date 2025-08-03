@@ -34,23 +34,6 @@ module.exports = {
       out_file: '~/.pm2/logs/front-out.log',
       log_file: '~/.pm2/logs/front-combined.log',
       merge_logs: true
-    },
-    {
-      name: 'webhook',
-      script: 'webhook.js',
-      env: {
-        NODE_ENV: 'production',
-        PORT: 8080
-      },
-      instances: 1,
-      exec_mode: 'fork',
-      autorestart: true,
-      watch: false,
-      max_memory_restart: '256M',
-      error_file: '~/.pm2/logs/webhook-error.log',
-      out_file: '~/.pm2/logs/webhook-out.log',
-      log_file: '~/.pm2/logs/webhook-combined.log',
-      merge_logs: true
     }
   ]
 };
