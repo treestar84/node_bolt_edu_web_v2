@@ -308,7 +308,7 @@ const handleSaveArtwork = async () => {
   }
 };
 
-// 색칠 가능한 단어들 (직접 업로드된 이미지만)
+// 색칠 가능한 단어들 (이미지가 있는 모든 단어)
 const coloringWords = computed(() => {
   console.log('🎨 [ColoringView] 전체 단어 수:', store.currentWords.length);
   console.log('🎨 [ColoringView] 전체 단어들:', store.currentWords.map(w => ({
@@ -316,20 +316,22 @@ const coloringWords = computed(() => {
     name: w.name,
     imageUrl: w.imageUrl,
     hasImage: !!w.imageUrl,
-    isUploadedImage: w.imageUrl?.startsWith('/uploads/')
+    isUploadedImage: w.imageUrl?.startsWith('/uploads/'),
+    isExternalImage: w.imageUrl && !w.imageUrl.startsWith('/uploads/')
   })));
   
   const filtered = store.currentWords.filter(word => {
-    // imageUrl이 있고, /uploads/로 시작하는 것만 (직접 업로드된 파일)
-    const hasUploadedImage = word.imageUrl && word.imageUrl.startsWith('/uploads/');
-    if (hasUploadedImage) {
+    // imageUrl이 있는 모든 단어 (업로드된 파일 + 외부 URL)
+    const hasImage = !!word.imageUrl;
+    if (hasImage) {
       console.log('✅ [ColoringView] 색칠 가능한 단어 발견:', {
         id: word.id,
         name: word.name,
-        imageUrl: word.imageUrl
+        imageUrl: word.imageUrl,
+        type: word.imageUrl.startsWith('/uploads/') ? 'uploaded' : 'external'
       });
     }
-    return hasUploadedImage;
+    return hasImage;
   });
   
   console.log('🎨 [ColoringView] 필터링된 색칠 가능한 단어 수:', filtered.length);
@@ -714,24 +716,23 @@ const getFireworkStyle = (index: number) => {
   align-items: start;
 }
 
-/* 색상 팔레트 - 3-4세 유아 친화적 디자인 */
+/* 색상 팔레트 - 다크모드/화이트모드 적응형 */
 .color-palette {
-  background: linear-gradient(135deg, #ffeaa7 0%, #fab1a0 100%);
-  border: 3px solid #fdcb6e;
-  border-radius: 20px;
+  background: var(--color-bg-card);
+  border: 2px solid var(--color-border);
+  border-radius: 16px;
   padding: 24px;
   position: sticky;
   top: 20px;
-  box-shadow: 0 8px 25px rgba(253, 203, 110, 0.3);
+  box-shadow: var(--shadow-lg);
 }
 
 .palette-title {
   font-size: 1.25rem;
   font-weight: 700;
-  color: #2d3436;
+  color: var(--color-text-primary);
   margin-bottom: 20px;
   text-align: center;
-  text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.8);
 }
 
 .color-grid {
@@ -758,23 +759,23 @@ const getFireworkStyle = (index: number) => {
 
 .color-item:hover {
   transform: scale(1.15);
-  border-color: #fdcb6e;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-md);
 }
 
 .color-item.active {
   transform: scale(1.1);
-  border-color: #e17055;
-  box-shadow: 0 0 0 4px rgba(225, 112, 85, 0.4);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.4);
   animation: colorPulse 1.5s ease-in-out infinite;
 }
 
 @keyframes colorPulse {
   0%, 100% { 
-    box-shadow: 0 0 0 4px rgba(225, 112, 85, 0.4);
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.4);
   }
   50% { 
-    box-shadow: 0 0 0 8px rgba(225, 112, 85, 0.2);
+    box-shadow: 0 0 0 8px rgba(59, 130, 246, 0.2);
   }
 }
 
@@ -792,14 +793,13 @@ const getFireworkStyle = (index: number) => {
   100% { transform: scale(1); }
 }
 
-/* 브러쉬 크기 - 유아 친화적 디자인 */
+/* 브러쉬 크기 - 다크모드/화이트모드 적응형 */
 .brush-size h4 {
   font-size: 1.1rem;
   font-weight: 700;
-  color: #2d3436;
+  color: var(--color-text-primary);
   margin-bottom: 16px;
   text-align: center;
-  text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.8);
 }
 
 .brush-options {
@@ -813,33 +813,33 @@ const getFireworkStyle = (index: number) => {
   align-items: center;
   gap: 12px;
   padding: 12px 16px;
-  border: 3px solid rgba(255, 255, 255, 0.6);
+  border: 2px solid var(--color-border);
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.3);
+  background: var(--color-bg-secondary);
+  color: var(--color-text-primary);
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  backdrop-filter: blur(10px);
 }
 
 .brush-btn:hover {
-  border-color: #fdcb6e;
-  background: rgba(255, 255, 255, 0.5);
+  border-color: var(--color-primary);
+  background: var(--color-bg-tertiary);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(253, 203, 110, 0.3);
+  box-shadow: var(--shadow-md);
 }
 
 .brush-btn.active {
-  border-color: #e17055;
-  background: rgba(225, 112, 85, 0.2);
+  border-color: var(--color-primary);
+  background: rgba(59, 130, 246, 0.1);
   transform: scale(1.05);
-  box-shadow: 0 4px 16px rgba(225, 112, 85, 0.4);
+  box-shadow: var(--shadow-lg);
 }
 
 .brush-preview {
-  background: linear-gradient(135deg, #2d3436, #636e72);
+  background: var(--color-text-primary);
   border-radius: 50%;
   flex-shrink: 0;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  box-shadow: var(--shadow-sm);
 }
 
 /* 캔버스 영역 - 밝고 친근한 디자인 */

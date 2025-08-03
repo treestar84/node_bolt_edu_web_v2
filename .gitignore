@@ -40,6 +40,13 @@ server/data/
 # Security sensitive files
 server/data/
 server/uploads/
+*.key
+*.pem
+*.p12
+*.jks
+apiKeys.json
+secrets.json
+config/production.json
 
 # Build files
 *.tsbuildinfo

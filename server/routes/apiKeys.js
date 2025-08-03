@@ -1,6 +1,8 @@
 import express from 'express';
 import { authenticateAdmin } from '../middleware/auth.js';
-import { getApiKeys, addApiKey, deleteApiKey } from '../data/store.js';
+import { getApiKeys, addApiKey, deleteApiKey } from '../data/hybridApiKeyManager.js';
+import { migrateFromJsonToDb } from '../data/dbApiKeyManager.js';
+import { getApiKeys as getJsonApiKeys } from '../data/store.js';
 
 const router = express.Router();
 
@@ -9,22 +11,11 @@ router.get('/', authenticateAdmin, async (req, res) => {
   try {
     const apiKeys = await getApiKeys();
     
-    // Don't expose the actual key values in the list
-    const safeKeys = apiKeys.map(key => ({
-      id: key.id,
-      name: key.name,
-      description: key.description,
-      active: key.active,
-      createdAt: key.createdAt,
-      lastUsed: key.lastUsed,
-      usageCount: key.usageCount,
-      keyPreview: `${key.key.substring(0, 8)}...${key.key.substring(key.key.length - 4)}`
-    }));
-    
+    // API keys are already safe (no actual key values exposed)
     res.json({
       success: true,
-      data: safeKeys,
-      count: safeKeys.length
+      data: apiKeys,
+      count: apiKeys.length
     });
   } catch (error) {
     res.status(500).json({
@@ -82,6 +73,46 @@ router.delete('/:id', authenticateAdmin, async (req, res) => {
       message: 'API key deleted successfully'
     });
   } catch (error) {
+    res.status(500).json({
+      error: 'Internal server error',
+      message: error.message
+    });
+  }
+});
+
+// Migrate API keys from JSON to DB (admin only)
+router.post('/migrate', authenticateAdmin, async (req, res) => {
+  try {
+    console.log('🔄 Starting API keys migration...');
+    
+    // JSON 파일에서 기존 키들 읽기
+    const jsonApiKeys = await getJsonApiKeys();
+    
+    if (jsonApiKeys.length === 0) {
+      return res.json({
+        success: true,
+        message: 'No API keys found in JSON file to migrate',
+        migrated: 0
+      });
+    }
+
+    // DB로 마이그레이션
+    const success = await migrateFromJsonToDb(jsonApiKeys);
+    
+    if (success) {
+      res.json({
+        success: true,
+        message: `Successfully migrated ${jsonApiKeys.length} API keys to database`,
+        migrated: jsonApiKeys.length
+      });
+    } else {
+      res.status(500).json({
+        error: 'Migration failed',
+        message: 'Failed to migrate API keys to database'
+      });
+    }
+  } catch (error) {
+    console.error('❌ Migration error:', error);
     res.status(500).json({
       error: 'Internal server error',
       message: error.message

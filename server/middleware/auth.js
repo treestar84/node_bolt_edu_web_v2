@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-import { getApiKeys } from '../data/store.js';
+import { getApiKeyForAuth } from '../data/hybridApiKeyManager.js';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-in-production';
 
@@ -40,8 +40,7 @@ export const authenticateApiKey = async (req, res, next) => {
   }
   
   try {
-    const apiKeys = await getApiKeys();
-    const keyData = apiKeys.find(key => key.key === apiKey && key.active);
+    const keyData = await getApiKeyForAuth(apiKey);
     
     if (!keyData) {
       return res.status(401).json({

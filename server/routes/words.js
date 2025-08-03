@@ -39,7 +39,7 @@ const router = express.Router();
  *               $ref: '#/components/schemas/ErrorResponse'
  */
 // Get all words (public endpoint)
-router.get('/', async (req, res) => {
+router.get('/', authenticateApiKey, async (req, res) => {
   try {
     const words = await getWords();
     res.json({
@@ -98,7 +98,7 @@ router.get('/', async (req, res) => {
  *               $ref: '#/components/schemas/ErrorResponse'
  */
 // Get word by ID (public endpoint)
-router.get('/:id', async (req, res) => {
+router.get('/:id', authenticateApiKey, async (req, res) => {
   try {
     const words = await getWords();
     const word = words.find(w => w.id === req.params.id);
