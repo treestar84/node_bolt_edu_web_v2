@@ -4,6 +4,40 @@ import { getWords, addWord, updateWord, deleteWord } from '../data/store.js';
 
 const router = express.Router();
 
+/**
+ * @swagger
+ * /words:
+ *   get:
+ *     summary: Get all words
+ *     description: Retrieve all words in the database. No authentication required.
+ *     tags: [Words]
+ *     security: []
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved all words
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Word'
+ *                 count:
+ *                   type: integer
+ *                   description: Total number of words
+ *                   example: 25
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
 // Get all words (public endpoint)
 router.get('/', async (req, res) => {
   try {
@@ -21,6 +55,48 @@ router.get('/', async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /words/{id}:
+ *   get:
+ *     summary: Get word by ID
+ *     description: Retrieve a specific word by its ID. No authentication required.
+ *     tags: [Words]
+ *     security: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Word ID
+ *         example: word-123
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved the word
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   $ref: '#/components/schemas/Word'
+ *       404:
+ *         description: Word not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
 // Get word by ID (public endpoint)
 router.get('/:id', async (req, res) => {
   try {
@@ -46,6 +122,82 @@ router.get('/:id', async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /words:
+ *   post:
+ *     summary: Create new word
+ *     description: Create a new word. Requires API key authentication.
+ *     tags: [Words]
+ *     security:
+ *       - ApiKeyAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [name, nameEn, imageUrl, audioKo, audioEn, category]
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 description: Korean name of the word
+ *                 example: 고양이
+ *               nameEn:
+ *                 type: string
+ *                 description: English name of the word
+ *                 example: cat
+ *               imageUrl:
+ *                 type: string
+ *                 description: URL path to the word image
+ *                 example: /uploads/images/cat.png
+ *               audioKo:
+ *                 type: string
+ *                 description: URL path to Korean audio file
+ *                 example: /uploads/audio/cat-ko.mp3
+ *               audioEn:
+ *                 type: string
+ *                 description: URL path to English audio file
+ *                 example: /uploads/audio/cat-en.mp3
+ *               category:
+ *                 type: string
+ *                 description: Category of the word
+ *                 example: 동물
+ *     responses:
+ *       201:
+ *         description: Word created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   $ref: '#/components/schemas/Word'
+ *                 message:
+ *                   type: string
+ *                   example: Word created successfully
+ *       400:
+ *         description: Bad request - validation error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       401:
+ *         description: Unauthorized - invalid or missing API key
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
 // Create new word (requires API key)
 router.post('/', authenticateApiKey, async (req, res) => {
   try {
@@ -83,6 +235,61 @@ router.post('/', authenticateApiKey, async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /words/batch:
+ *   post:
+ *     summary: Create multiple words (batch operation)
+ *     description: Create multiple words in a single request. Requires API key authentication. Partial success is allowed - some words may succeed while others fail.
+ *     tags: [Words]
+ *     security:
+ *       - ApiKeyAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/BatchWordRequest'
+ *           example:
+ *             words:
+ *               - name: 고양이
+ *                 nameEn: cat
+ *                 imageUrl: /uploads/images/cat.png
+ *                 audioKo: /uploads/audio/cat-ko.mp3
+ *                 audioEn: /uploads/audio/cat-en.mp3
+ *                 category: 동물
+ *               - name: 개
+ *                 nameEn: dog
+ *                 imageUrl: /uploads/images/dog.png
+ *                 audioKo: /uploads/audio/dog-ko.mp3
+ *                 audioEn: /uploads/audio/dog-en.mp3
+ *                 category: 동물
+ *     responses:
+ *       201:
+ *         description: Batch operation completed (may include partial failures)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/BatchWordResponse'
+ *       400:
+ *         description: Bad request - invalid input format
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       401:
+ *         description: Unauthorized - invalid or missing API key
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
 // Create multiple words (batch creation)
 router.post('/batch', authenticateApiKey, async (req, res) => {
   try {
@@ -152,6 +359,83 @@ router.post('/batch', authenticateApiKey, async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /words/{id}:
+ *   put:
+ *     summary: Update word
+ *     description: Update an existing word by ID. Requires API key authentication.
+ *     tags: [Words]
+ *     security:
+ *       - ApiKeyAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Word ID
+ *         example: word-123
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 description: Korean name of the word
+ *               nameEn:
+ *                 type: string
+ *                 description: English name of the word
+ *               imageUrl:
+ *                 type: string
+ *                 description: URL path to the word image
+ *               audioKo:
+ *                 type: string
+ *                 description: URL path to Korean audio file
+ *               audioEn:
+ *                 type: string
+ *                 description: URL path to English audio file
+ *               category:
+ *                 type: string
+ *                 description: Category of the word
+ *           example:
+ *             name: 새로운 고양이
+ *             category: 애완동물
+ *     responses:
+ *       200:
+ *         description: Word updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/SuccessResponse'
+ *       400:
+ *         description: Bad request - no fields provided for update
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       401:
+ *         description: Unauthorized - invalid or missing API key
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       404:
+ *         description: Word not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
 // Update word (requires API key)
 router.put('/:id', authenticateApiKey, async (req, res) => {
   try {
@@ -194,6 +478,56 @@ router.put('/:id', authenticateApiKey, async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /words/{id}:
+ *   delete:
+ *     summary: Delete word
+ *     description: Delete an existing word by ID. Requires API key authentication.
+ *     tags: [Words]
+ *     security:
+ *       - ApiKeyAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Word ID
+ *         example: word-123
+ *     responses:
+ *       200:
+ *         description: Word deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Word deleted successfully
+ *       401:
+ *         description: Unauthorized - invalid or missing API key
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       404:
+ *         description: Word not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
 // Delete word (requires API key)
 router.delete('/:id', authenticateApiKey, async (req, res) => {
   try {

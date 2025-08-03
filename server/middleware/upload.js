@@ -38,11 +38,15 @@ const fileFilter = (req, file, cb) => {
       cb(new Error('Only audio files are allowed for audio uploads'), false);
     }
   } else if (file.fieldname === 'video') {
-    // Accept video files
-    if (file.mimetype.startsWith('video/')) {
+    // Accept video files - check both MIME type and file extension
+    const allowedVideoTypes = ['video/mp4', 'video/avi', 'video/mov', 'video/mkv', 'video/webm'];
+    const allowedExtensions = ['.mp4', '.avi', '.mov', '.mkv', '.webm'];
+    const fileExtension = extname(file.originalname).toLowerCase();
+    
+    if (file.mimetype.startsWith('video/') || allowedVideoTypes.includes(file.mimetype) || allowedExtensions.includes(fileExtension)) {
       cb(null, true);
     } else {
-      cb(new Error('Only video files are allowed for video uploads'), false);
+      cb(new Error('Only video files are allowed for video uploads. Supported formats: MP4, AVI, MOV, MKV, WEBM'), false);
     }
   } else {
     cb(new Error('Invalid field name'), false);

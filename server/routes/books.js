@@ -6,6 +6,40 @@ import { v4 as uuidv4 } from 'uuid';
 
 const router = express.Router();
 
+/**
+ * @swagger
+ * /books:
+ *   get:
+ *     summary: Get all books
+ *     description: Retrieve all storybooks in the database. No authentication required.
+ *     tags: [Books]
+ *     security: []
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved all books
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Book'
+ *                 count:
+ *                   type: integer
+ *                   description: Total number of books
+ *                   example: 15
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
 // Get all books (public endpoint)
 router.get('/', async (req, res) => {
   try {
@@ -23,6 +57,48 @@ router.get('/', async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /books/{id}:
+ *   get:
+ *     summary: Get book by ID
+ *     description: Retrieve a specific storybook by its ID. No authentication required.
+ *     tags: [Books]
+ *     security: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Book ID
+ *         example: book-123
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved the book
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   $ref: '#/components/schemas/Book'
+ *       404:
+ *         description: Book not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
 // Get book by ID (public endpoint)
 router.get('/:id', async (req, res) => {
   try {
@@ -48,6 +124,92 @@ router.get('/:id', async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /books:
+ *   post:
+ *     summary: Create new storybook
+ *     description: Create a new storybook (traditional or video mode). Requires API key authentication.
+ *     tags: [Books]
+ *     security:
+ *       - ApiKeyAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             oneOf:
+ *               - type: object
+ *                 title: Traditional Book
+ *                 required: [title, coverImage, pages]
+ *                 properties:
+ *                   title:
+ *                     type: string
+ *                     example: 아기 동물들의 하루
+ *                   coverImage:
+ *                     type: string
+ *                     example: /uploads/images/cover.png
+ *                   isVideoMode:
+ *                     type: boolean
+ *                     example: false
+ *                   pages:
+ *                     type: array
+ *                     items:
+ *                       $ref: '#/components/schemas/BookPage'
+ *                   minAge:
+ *                     type: integer
+ *                     example: 3
+ *                   maxAge:
+ *                     type: integer
+ *                     example: 7
+ *               - type: object
+ *                 title: Video Book
+ *                 required: [title, videoUrl]
+ *                 properties:
+ *                   title:
+ *                     type: string
+ *                     example: 비디오 동화책
+ *                   coverImage:
+ *                     type: string
+ *                     example: /uploads/images/video-cover.png
+ *                   isVideoMode:
+ *                     type: boolean
+ *                     example: true
+ *                   videoUrl:
+ *                     type: string
+ *                     example: /uploads/videos/story.mp4
+ *                   minAge:
+ *                     type: integer
+ *                     example: 3
+ *                   maxAge:
+ *                     type: integer
+ *                     example: 7
+ *     responses:
+ *       201:
+ *         description: Book created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/SuccessResponse'
+ *       400:
+ *         description: Bad request - validation error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       401:
+ *         description: Unauthorized - invalid or missing API key
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
 // Create new book (requires API key)
 router.post('/', authenticateApiKey, async (req, res) => {
   try {
@@ -139,6 +301,113 @@ router.post('/', authenticateApiKey, async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /books/video-upload:
+ *   post:
+ *     summary: Upload video and create storybook
+ *     description: |
+ *       Upload video file and optional cover image, then create a video storybook in one step. Requires API key authentication.
+ *       
+ *       **curl Example:**
+ *       ```bash
+ *       curl -X POST \
+ *         -H "X-API-Key: YOUR_API_KEY" \
+ *         -F "title=My Story" \
+ *         -F "minAge=3" \
+ *         -F "maxAge=7" \
+ *         -F "video=@/path/to/video.mp4;type=video/mp4" \
+ *         -F "coverImage=@/path/to/cover.png;type=image/png" \
+ *         http://localhost:3001/api/books/video-upload
+ *       ```
+ *     tags: [Books]
+ *     security:
+ *       - ApiKeyAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             required: [title, video]
+ *             properties:
+ *               title:
+ *                 type: string
+ *                 description: Title of the video storybook
+ *                 example: 새로운 비디오 동화
+ *               video:
+ *                 type: string
+ *                 format: binary
+ *                 description: Video file (MP4, AVI, MOV, etc.)
+ *               coverImage:
+ *                 type: string
+ *                 format: binary
+ *                 description: Optional cover image (PNG, JPG, etc.)
+ *               minAge:
+ *                 type: integer
+ *                 description: Minimum recommended age
+ *                 example: 3
+ *               maxAge:
+ *                 type: integer
+ *                 description: Maximum recommended age
+ *                 example: 7
+ *     responses:
+ *       201:
+ *         description: Video storybook created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   allOf:
+ *                     - $ref: '#/components/schemas/Book'
+ *                     - type: object
+ *                       properties:
+ *                         uploadedFiles:
+ *                           type: object
+ *                           properties:
+ *                             video:
+ *                               type: object
+ *                               properties:
+ *                                 filename:
+ *                                   type: string
+ *                                 originalName:
+ *                                   type: string
+ *                                 size:
+ *                                   type: integer
+ *                                 mimetype:
+ *                                   type: string
+ *                                 url:
+ *                                   type: string
+ *                             coverImage:
+ *                               type: object
+ *                               nullable: true
+ *                 message:
+ *                   type: string
+ *                   example: Video storybook created successfully
+ *       400:
+ *         description: Bad request - missing required fields or files
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       401:
+ *         description: Unauthorized - invalid or missing API key
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
 // Upload video and create storybook in one step (requires API key)
 router.post('/video-upload', authenticateApiKey, upload.fields([
   { name: 'video', maxCount: 1 },
@@ -214,6 +483,91 @@ router.post('/video-upload', authenticateApiKey, upload.fields([
   }
 });
 
+/**
+ * @swagger
+ * /books/complete:
+ *   post:
+ *     summary: Create complete book with all 4 pages
+ *     description: Create a complete traditional storybook with exactly 4 pages in a single request. Requires API key authentication.
+ *     tags: [Books]
+ *     security:
+ *       - ApiKeyAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [title, coverImage, page1Image, page1Audio, page2Image, page2Audio, page3Image, page3Audio, page4Image, page4Audio]
+ *             properties:
+ *               title:
+ *                 type: string
+ *                 example: 완전한 동화책
+ *               coverImage:
+ *                 type: string
+ *                 example: /uploads/images/cover.png
+ *               page1Image:
+ *                 type: string
+ *                 example: /uploads/images/page1.png
+ *               page1Audio:
+ *                 type: string
+ *                 example: /uploads/audio/page1.mp3
+ *               page1Text:
+ *                 type: string
+ *                 example: 첫 번째 페이지 내용
+ *               page2Image:
+ *                 type: string
+ *                 example: /uploads/images/page2.png
+ *               page2Audio:
+ *                 type: string
+ *                 example: /uploads/audio/page2.mp3
+ *               page2Text:
+ *                 type: string
+ *                 example: 두 번째 페이지 내용
+ *               page3Image:
+ *                 type: string
+ *                 example: /uploads/images/page3.png
+ *               page3Audio:
+ *                 type: string
+ *                 example: /uploads/audio/page3.mp3
+ *               page3Text:
+ *                 type: string
+ *                 example: 세 번째 페이지 내용
+ *               page4Image:
+ *                 type: string
+ *                 example: /uploads/images/page4.png
+ *               page4Audio:
+ *                 type: string
+ *                 example: /uploads/audio/page4.mp3
+ *               page4Text:
+ *                 type: string
+ *                 example: 네 번째 페이지 내용
+ *     responses:
+ *       201:
+ *         description: Complete book created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/SuccessResponse'
+ *       400:
+ *         description: Bad request - missing required fields
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       401:
+ *         description: Unauthorized - invalid or missing API key
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
 // Create complete book with all content (one-shot API)
 router.post('/complete', authenticateApiKey, async (req, res) => {
   try {
@@ -284,6 +638,82 @@ router.post('/complete', authenticateApiKey, async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /books/{id}:
+ *   put:
+ *     summary: Update book
+ *     description: Update an existing storybook by ID. Requires API key authentication.
+ *     tags: [Books]
+ *     security:
+ *       - ApiKeyAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Book ID
+ *         example: book-123
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               title:
+ *                 type: string
+ *                 description: Title of the book
+ *               coverImage:
+ *                 type: string
+ *                 description: URL path to cover image
+ *               isVideoMode:
+ *                 type: boolean
+ *                 description: Whether this is a video-based book
+ *               videoUrl:
+ *                 type: string
+ *                 description: URL path to video file (for video mode)
+ *               pages:
+ *                 type: array
+ *                 description: Array of book pages (exactly 4 for traditional books)
+ *                 items:
+ *                   $ref: '#/components/schemas/BookPage'
+ *           example:
+ *             title: 수정된 동화책 제목
+ *             coverImage: /uploads/images/new-cover.png
+ *     responses:
+ *       200:
+ *         description: Book updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/SuccessResponse'
+ *       400:
+ *         description: Bad request - validation error or no fields provided
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       401:
+ *         description: Unauthorized - invalid or missing API key
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       404:
+ *         description: Book not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
 // Update book (requires API key)
 router.put('/:id', authenticateApiKey, async (req, res) => {
   try {
@@ -340,6 +770,56 @@ router.put('/:id', authenticateApiKey, async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /books/{id}:
+ *   delete:
+ *     summary: Delete book
+ *     description: Delete an existing storybook by ID. Requires API key authentication.
+ *     tags: [Books]
+ *     security:
+ *       - ApiKeyAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Book ID
+ *         example: book-123
+ *     responses:
+ *       200:
+ *         description: Book deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Book deleted successfully
+ *       401:
+ *         description: Unauthorized - invalid or missing API key
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       404:
+ *         description: Book not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
 // Delete book (requires API key)
 router.delete('/:id', authenticateApiKey, async (req, res) => {
   try {
