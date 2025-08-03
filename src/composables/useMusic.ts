@@ -179,7 +179,7 @@ export function useMusic() {
       const result = await createOscillator(frequency, 'triangle', 1.0);
       if (!result) return;
 
-      const { oscillator, gainNode } = result;
+      const { oscillator } = result;
       
       playingNotes.value.add(noteKey);
       playHistory.value.push({ note: noteKey, timestamp: Date.now() });

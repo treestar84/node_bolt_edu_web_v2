@@ -79,11 +79,12 @@ const getAriaLabel = () => {
 };
 
 const getContentTypeName = (type: ContentType): string => {
-  const typeNames = {
+  const typeNames: Record<ContentType, string> = {
     word: '단어',
     book: '그림책',
     quiz: '퀴즈',
-    puzzle: '퍼즐'
+    puzzle: '퍼즐',
+    coloring: '컬러링'
   };
   return typeNames[type] || type;
 };

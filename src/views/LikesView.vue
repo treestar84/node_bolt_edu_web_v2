@@ -314,11 +314,12 @@ const getImageUrl = (url: string): string => {
 };
 
 const getContentTypeIcon = (type: ContentType): string => {
-  const icons = {
+  const icons: Record<ContentType, string> = {
     word: '📖',
     book: '📚',
     quiz: '🧩',
-    puzzle: '🧩'
+    puzzle: '🧩',
+    coloring: '🎨'
   };
   return icons[type] || '📄';
 };

@@ -376,7 +376,7 @@ const handleFunSoundRelease = (sound: FunSound) => {
 /**
  * 패드 애니메이션
  */
-const animatePad = (padId: string) => {
+const animatePad = (_padId: string) => {
   // 리플 효과나 추가 애니메이션을 여기에 추가할 수 있음
   setTimeout(() => {
     // 추가 시각적 효과

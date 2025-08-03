@@ -172,55 +172,7 @@ export function useCanvas() {
     });
   };
 
-  /**
-   * 윤곽선 효과 생성 (Edge Detection)
-   */
-  const createOutlineEffect = (imageData: ImageData): ImageData => {
-    const { data, width, height } = imageData;
-    const result = new ImageData(width, height);
-    const resultData = result.data;
-    
-    // Sobel 필터를 사용한 엣지 검출
-    const sobelX = [
-      [-1, 0, 1],
-      [-2, 0, 2], 
-      [-1, 0, 1]
-    ];
-    
-    const sobelY = [
-      [-1, -2, -1],
-      [0, 0, 0],
-      [1, 2, 1]
-    ];
-    
-    for (let y = 1; y < height - 1; y++) {
-      for (let x = 1; x < width - 1; x++) {
-        let gx = 0, gy = 0;
-        
-        // 3x3 영역에서 Sobel 필터 적용
-        for (let ky = -1; ky <= 1; ky++) {
-          for (let kx = -1; kx <= 1; kx++) {
-            const idx = ((y + ky) * width + (x + kx)) * 4;
-            const gray = (data[idx] + data[idx + 1] + data[idx + 2]) / 3;
-            
-            gx += gray * sobelX[ky + 1][kx + 1];
-            gy += gray * sobelY[ky + 1][kx + 1];
-          }
-        }
-        
-        const magnitude = Math.sqrt(gx * gx + gy * gy);
-        const edge = magnitude > 30 ? 255 : 0; // 임계값 조정 가능
-        
-        const idx = (y * width + x) * 4;
-        resultData[idx] = edge > 0 ? 0 : 255;     // R - 검은색 윤곽선
-        resultData[idx + 1] = edge > 0 ? 0 : 255; // G
-        resultData[idx + 2] = edge > 0 ? 0 : 255; // B
-        resultData[idx + 3] = edge > 0 ? 255 : 50; // A - 윤곽선은 불투명, 나머지는 반투명
-      }
-    }
-    
-    return result;
-  };
+  // 윤곽선 효과 함수는 현재 사용되지 않아 제거됨
 
   /**
    * 그리기 시작

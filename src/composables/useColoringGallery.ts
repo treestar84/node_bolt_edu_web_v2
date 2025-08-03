@@ -1,7 +1,7 @@
 import { ref, computed } from 'vue';
 import { useAuthStore } from '@/stores/auth';
 import { useSupabase } from './useSupabase';
-import type { ColoringArtwork, ColoringGalleryResponse, ColoringStats } from '@/types';
+import type { ColoringArtwork, ColoringStats } from '@/types';
 
 export function useColoringGallery() {
   const { supabase } = useSupabase();

@@ -314,7 +314,7 @@ const shouldHighlightKey = (note: string): boolean => {
 /**
  * 키 눌림 애니메이션
  */
-const animateKeyPress = (note: string) => {
+const animateKeyPress = (_note: string) => {
   // 파티클 효과나 추가 애니메이션을 여기에 추가할 수 있음
   // console.log('✨ Animating key:', note);
 };

@@ -110,7 +110,7 @@
             <!-- 현 라벨 (더 크고 명확하게) -->
             <div class="string-labels">
               <div 
-                v-for="(string, index) in violinStrings"
+                v-for="string in violinStrings"
                 :key="`label-${string.note}`"
                 class="string-name"
               >
@@ -334,7 +334,7 @@ const playNextNote = async () => {
     isPlayingNote.value = false;
     
     // 곡이 완료되었는지 확인
-    if (currentNoteIndex.value >= currentSong.value.rhythm.length) {
+    if (currentSong.value && currentNoteIndex.value >= currentSong.value.rhythm.length) {
       console.log(`🎉 "${currentSong.value?.name}" 연주 완료!`);
       resetSongProgress();
     }
@@ -500,7 +500,25 @@ const stopBowDrag = () => {
   console.log('🎻 Stopped bow dragging');
 };
 
+/**
+ * 활 시작 (키보드용)
+ */
+const startBowing = (string: ViolinString, _event: any) => {
+  if (activeStrings.value.has(string.note)) return;
+  
+  activeStrings.value.add(string.note);
+  // playNote 함수 호출 제거 (현재 미구현)
+  
+  console.log('🎻 Started bowing:', string.note);
+};
 
+/**
+ * 활 정지 (키보드용)
+ */
+const stopBowing = (string: ViolinString) => {
+  activeStrings.value.delete(string.note);
+  console.log('🎻 Stopped bowing:', string.note);
+};
 
 /**
  * 키보드 이벤트 처리

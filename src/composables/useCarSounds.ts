@@ -35,7 +35,7 @@ export function useCarSounds() {
    * 경찰차 사이렌 (위이잉~ 위이잉~)
    */
   const playPoliceSound = (audioContext: AudioContext) => {
-    const duration = 2.0;
+    // const _duration = 2.0;
     
     // 두 개의 주파수를 번갈아가며 재생
     for (let i = 0; i < 4; i++) {
@@ -66,7 +66,7 @@ export function useCarSounds() {
    * 구급차 사이렌 (삐뽀삐뽀~)
    */
   const playAmbulanceSound = (audioContext: AudioContext) => {
-    const duration = 2.0;
+    // const _duration = 2.0;
     
     for (let i = 0; i < 6; i++) {
       const oscillator = audioContext.createOscillator();

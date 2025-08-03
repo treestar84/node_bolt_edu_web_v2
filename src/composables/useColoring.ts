@@ -20,7 +20,7 @@ export type ColoringGameState = 'selection' | 'coloring' | 'completed';
 
 export function useColoring() {
   const canvas = useCanvas();
-  const { playSuccessSound, playColoringSound, playColoringCompletionSound } = useGameSounds();
+  const { playColoringSound, playColoringCompletionSound } = useGameSounds();
   
   // 외부에서 캔버스 레퍼런스를 설정할 수 있는 함수
   const setCanvasRefs = (bgCanvas: HTMLCanvasElement, drawCanvas: HTMLCanvasElement) => {
