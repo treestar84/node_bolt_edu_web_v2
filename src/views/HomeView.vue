@@ -83,22 +83,18 @@
           
           <div class="stats-grid">
             <div class="stat-card">
-              <div class="stat-icon">📖</div>
               <div class="stat-value">{{ contentStore.words.length }}</div>
               <div class="stat-label">학습 단어</div>
             </div>
             <div class="stat-card">
-              <div class="stat-icon">📚</div>
               <div class="stat-value">{{ contentStore.books.length }}</div>
               <div class="stat-label">그림책</div>
             </div>
             <div class="stat-card">
-              <div class="stat-icon">🎯</div>
               <div class="stat-value">{{ authStore.userProgress.quizScore }}</div>
               <div class="stat-label">퀴즈 점수</div>
             </div>
             <div class="stat-card">
-              <div class="stat-icon">🧩</div>
               <div class="stat-value">{{ authStore.userProgress.puzzleCompletions }}</div>
               <div class="stat-label">퍼즐 완성</div>
             </div>

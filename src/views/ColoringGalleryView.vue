@@ -6,7 +6,7 @@
       <div class="container">
         <!-- 페이지 헤더 -->
         <div class="page-header">
-          <h1 class="page-title">🎨 나의 색칠 갤러리</h1>
+          <h1 class="page-title">나의 색칠 갤러리</h1>
           <p class="page-description">
             내가 색칠한 예쁜 작품들을 구경해보세요!
           </p>
@@ -14,7 +14,6 @@
 
         <!-- 로그인 필요 메시지 -->
         <div v-if="!gallery.isAuthenticated.value" class="auth-required">
-          <div class="auth-icon">🔐</div>
           <h3>로그인이 필요해요</h3>
           <p>색칠한 작품을 저장하고 보려면 먼저 로그인해주세요.</p>
           <router-link to="/auth/login" class="btn btn-primary">
@@ -28,7 +27,6 @@
           <div v-if="gallery.stats.value" class="stats-section">
             <div class="stats-grid">
               <div class="stat-card">
-                <div class="stat-icon">🖼️</div>
                 <div class="stat-info">
                   <div class="stat-number">{{ gallery.stats.value.totalArtworks }}</div>
                   <div class="stat-label">총 작품 수</div>
@@ -36,7 +34,6 @@
               </div>
               
               <div class="stat-card">
-                <div class="stat-icon">🎯</div>
                 <div class="stat-info">
                   <div class="stat-number">{{ gallery.stats.value.avgCompletionRate }}%</div>
                   <div class="stat-label">평균 완성도</div>
@@ -44,7 +41,6 @@
               </div>
               
               <div class="stat-card">
-                <div class="stat-icon">🎨</div>
                 <div class="stat-info">
                   <div class="stat-number">{{ gallery.stats.value.uniqueWordsColored }}</div>
                   <div class="stat-label">색칠한 단어</div>
@@ -52,7 +48,6 @@
               </div>
               
               <div class="stat-card">
-                <div class="stat-icon">💾</div>
                 <div class="stat-info">
                   <div class="stat-number">{{ gallery.remainingSlots.value }}/10</div>
                   <div class="stat-label">저장 가능</div>
@@ -71,7 +66,6 @@
 
             <!-- 에러 상태 -->
             <div v-else-if="gallery.error.value" class="error-state">
-              <div class="error-icon">⚠️</div>
               <h3>오류가 발생했어요</h3>
               <p>{{ gallery.error.value }}</p>
               <button @click="gallery.refresh()" class="btn btn-secondary">
@@ -81,7 +75,6 @@
 
             <!-- 빈 상태 -->
             <div v-else-if="gallery.isEmpty.value" class="empty-state">
-              <div class="empty-icon">🎨</div>
               <h3>아직 색칠한 작품이 없어요</h3>
               <p>색칠공부를 시작해서 예쁜 작품을 만들어보세요!</p>
               <router-link to="/coloring" class="btn btn-primary">
@@ -105,7 +98,7 @@
                   />
                   <div class="artwork-overlay">
                     <button @click.stop="deleteArtwork(artwork)" class="delete-btn">
-                      🗑️
+                      삭제
                     </button>
                   </div>
                 </div>
@@ -122,13 +115,13 @@
                   </div>
                   <div class="artwork-stats">
                     <span class="stat-item">
-                      🎨 {{ artwork.colorsUsed.length }}색
+                      {{ artwork.colorsUsed.length }}색
                     </span>
                     <span class="stat-item">
-                      🖌️ {{ artwork.brushStrokes }}획
+                      {{ artwork.brushStrokes }}획
                     </span>
                     <span class="stat-item">
-                      ⏰ {{ formatTime(artwork.timeSpentSeconds) }}
+                      {{ formatTime(artwork.timeSpentSeconds) }}
                     </span>
                   </div>
                 </div>

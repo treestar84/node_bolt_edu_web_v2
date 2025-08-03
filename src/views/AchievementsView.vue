@@ -37,7 +37,7 @@
 
             <!-- 에러 상태 -->
             <div v-else-if="contentStore.error" class="error-state">
-              <div class="error-icon">⚠️</div>
+              <div class="error-icon">오류</div>
               <h3>{{$t('achievements.errorTitle')}}</h3>
               <p>{{ contentStore.error }}</p>
               <button @click="reloadContent" class="btn btn-primary">{{$t('achievements.retry')}}</button>
@@ -76,7 +76,6 @@
 
             <!-- 뱃지가 없는 경우 -->
             <div v-if="displayedBadges.length === 0" class="no-badges">
-              <div class="no-badges-icon">🎯</div>
               <h3>{{$t('achievements.noBadges')}}</h3>
               <p>{{$t('achievements.startLearning')}}</p>
               <div class="quick-actions">
@@ -125,7 +124,6 @@
             
             <div class="stats-grid" v-if="authStore.userProgress">
               <div class="stat-card quiz">
-                <div class="stat-icon">🧩</div>
                 <div class="stat-content">
                   <div class="stat-value">{{ authStore.userProgress.quizScore }}</div>
                   <div class="stat-label">퀴즈 점수</div>
@@ -134,7 +132,6 @@
               </div>
 
               <div class="stat-card puzzle">
-                <div class="stat-icon">🧩</div>
                 <div class="stat-content">
                   <div class="stat-value">{{ authStore.userProgress.puzzleCompletions }}</div>
                   <div class="stat-label">퍼즐 완성</div>
@@ -142,7 +139,6 @@
               </div>
 
               <div class="stat-card words">
-                <div class="stat-icon">📚</div>
                 <div class="stat-content">
                   <div class="stat-value">{{ authStore.userProgress.wordsLearned }}</div>
                   <div class="stat-label">학습한 단어</div>
@@ -151,7 +147,6 @@
               </div>
 
               <div class="stat-card books">
-                <div class="stat-icon">📖</div>
                 <div class="stat-content">
                   <div class="stat-value">{{ authStore.userProgress.booksRead }}</div>
                   <div class="stat-label">읽은 책</div>
@@ -163,7 +158,7 @@
 
           <!-- 전체 진행률 섹션 - 컴팩트하게 -->
           <section class="progress-section">
-            <h2 class="section-title">📈 전체 진행률</h2>
+            <h2 class="section-title">전체 진행률</h2>
             
             <div class="progress-cards">
               <div class="progress-card">
@@ -228,7 +223,7 @@
 
           <!-- 디버그 정보 (개발용) -->
           <section v-if="showDebugInfo" class="debug-section">
-            <h2 class="section-title">🔧 디버그 정보</h2>
+            <h2 class="section-title">디버그 정보</h2>
             <div class="debug-content">
               <p><strong>사용자 진행도:</strong></p>
               <pre>{{ JSON.stringify(authStore.userProgress, null, 2) }}</pre>
@@ -264,7 +259,7 @@
           class="debug-toggle"
           style="position: fixed; bottom: 20px; right: 20px; z-index: 1000;"
         >
-          {{ showDebugInfo ? '디버그 숨기기' : '🔧' }}
+          {{ showDebugInfo ? '디버그 숨기기' : '디버그' }}
         </button>
       </div>
     </main>

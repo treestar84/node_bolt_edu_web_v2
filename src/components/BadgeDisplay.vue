@@ -1,6 +1,6 @@
 <template>
   <div class="badge-display">
-    <h3 class="badge-title">🏆 획득한 뱃지</h3>
+    <h3 class="badge-title">획득한 뱃지</h3>
     
     <div v-if="store.availableBadges.length > 0" class="badges-grid">
       <div 
@@ -18,7 +18,6 @@
     </div>
 
     <div v-else class="no-badges">
-      <div class="no-badges-icon">🎯</div>
       <p>아직 획득한 뱃지가 없습니다</p>
       <p class="hint">퀴즈를 풀어서 첫 번째 뱃지를 획득해보세요!</p>
     </div>
@@ -145,10 +144,6 @@ onMounted(() => {
   color: var(--color-text-secondary);
 }
 
-.no-badges-icon {
-  font-size: 3rem;
-  margin-bottom: var(--spacing-md);
-}
 
 .hint {
   font-size: 0.875rem;

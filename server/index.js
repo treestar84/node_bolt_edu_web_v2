@@ -79,14 +79,52 @@ app.use(express.json({ limit: '500mb' }));
 app.use(express.urlencoded({ extended: true, limit: '500mb' }));
 // Raw parser는 특정 라우트에서만 사용하도록 제거
 
-// Static file serving for uploads
+// Static file serving for uploads with smart caching
 app.use('/uploads', cors({
   origin: '*',
   methods: ['GET', 'HEAD'],
   allowedHeaders: ['Content-Type', 'Range'],
   exposedHeaders: ['Content-Range', 'Accept-Ranges', 'Content-Length'],
   credentials: false
-}), express.static(join(__dirname, 'uploads')));
+}), express.static(join(__dirname, 'uploads'), {
+  // 기본 캐싱 설정
+  etag: true,
+  lastModified: true,
+  
+  // 파일 크기 및 타입별 스마트 캐싱
+  setHeaders: (res, path, stat) => {
+    const fileSizeKB = stat.size / 1024;
+    const ext = path.split('.').pop()?.toLowerCase();
+    
+    // 크기별 캐싱 전략
+    if (fileSizeKB < 100) { 
+      // 100KB 미만 = 작은 파일 (적극 캐싱)
+      res.setHeader('Cache-Control', 'public, max-age=2592000, immutable'); // 30일
+    } else if (fileSizeKB < 500) { 
+      // 500KB 미만 = 중간 파일 (일반 캐싱)
+      res.setHeader('Cache-Control', 'public, max-age=86400'); // 1일
+    } else if (fileSizeKB < 2000) { 
+      // 2MB 미만 = 큰 파일 (단기 캐싱)
+      res.setHeader('Cache-Control', 'public, max-age=3600'); // 1시간
+    } else { 
+      // 2MB 이상 = 매우 큰 파일 (스트리밍 우선, 최소 캐싱)
+      res.setHeader('Cache-Control', 'public, max-age=300'); // 5분
+    }
+    
+    // 파일 타입별 추가 최적화
+    if (['jpg', 'jpeg', 'png', 'webp', 'gif'].includes(ext)) {
+      // 이미지 압축 힌트
+      res.setHeader('Vary', 'Accept-Encoding');
+      if (fileSizeKB > 1000) {
+        console.log(`⚠️  Large image detected: ${path} (${Math.round(fileSizeKB)}KB)`);
+      }
+    } else if (['mp4', 'webm', 'avi'].includes(ext)) {
+      // 비디오 스트리밍 지원
+      res.setHeader('Accept-Ranges', 'bytes');
+      res.setHeader('Content-Type', 'video/' + ext);
+    }
+  }
+}));
 
 // Health check endpoint
 app.get('/health', (req, res) => {

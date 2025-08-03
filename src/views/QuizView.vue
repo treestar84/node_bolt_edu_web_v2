@@ -19,12 +19,15 @@
         </div>
 
         <div v-else-if="currentQuiz" class="quiz-game">
-          <!-- 퀴즈 질문 패널을 최상단으로 이동 -->
-          <div class="quiz-question">
-            <h2>{{$t('quiz.findAnswer')}}</h2>
-            <button @click="playQuizAudio" class="audio-button" :class="{ playing: isPlaying }">
-              <span class="audio-text">{{$t('quiz.listen')}}</span>
-            </button>
+          <!-- 콤팩트한 퀴즈 질문 패널 -->
+          <div class="quiz-question-compact">
+            <div class="question-content">
+              <h2>{{$t('quiz.findAnswer')}}</h2>
+              <button @click="playQuizAudio" class="audio-button-compact" :class="{ playing: isPlaying }">
+                <span class="audio-icon">🔊</span>
+                <span class="audio-text">{{$t('quiz.listen')}}</span>
+              </button>
+            </div>
           </div>
 
           <!-- 퀴즈 옵션들 -->
@@ -338,43 +341,41 @@ onMounted(() => {
 .quiz-stats {
   display: flex;
   justify-content: center;
-  gap: var(--spacing-xl);
+  gap: 20px;
   width: 100%;
 }
 
 .stat {
   flex: 1;
   text-align: center;
-  background: var(--color-bg-secondary);
-  padding: var(--spacing-md) var(--spacing-lg);
-  border-radius: var(--radius-md);
-  border: 1px solid var(--color-border);
+  background: #2a2a2a;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .quiz-footer-stats {
-  background: var(--color-bg-card);
-  border-top: 1px solid var(--color-border);
-  padding: var(--spacing-md);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--spacing-md);
-  margin-top: var(--spacing-xl); /* Add margin to separate from content above */
+  background: #1a1a1a;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  padding: 12px;
+  margin-top: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .stat-label {
   display: block;
-  font-size: 0.875rem;
-  color: var(--color-text-primary);
-  margin-bottom: var(--spacing-xs);
-  font-weight: 600;
+  font-size: 0.75rem;
+  color: #cccccc;
+  margin-bottom: 4px;
+  font-weight: 500;
 }
 
 .stat-value {
   display: block;
-  font-size: 1.5rem;
-  font-weight: 800;
-  color: var(--color-text-primary);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #ffffff;
 }
 
 .game-start {
@@ -414,61 +415,85 @@ onMounted(() => {
   margin-top: 0;
 }
 
-.quiz-question {
-  text-align: center;
-  margin-bottom: var(--spacing-xl); /* 하단 마진 줄임 */
-  background: var(--color-bg-card);
-  padding: var(--spacing-xl);
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--color-border);
-  /* 최상단 배치를 위한 order 설정 */
-  order: -1;
-  /* 네비게이션과 더 가깝게 배치 */
-  margin-top: var(--spacing-md);
+.quiz-question-compact {
+  background: #1a1a1a;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
-.quiz-question h2 {
-  font-size: 1.5rem;
-  margin-bottom: var(--spacing-lg);
-  color: var(--color-text-primary);
+.question-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.question-content h2 {
+  font-size: 1.25rem;
+  margin: 0;
+  color: #ffffff;
   font-weight: 700;
+  flex: 1;
 }
 
-.audio-button {
+.audio-button-compact {
   display: inline-flex;
   align-items: center;
-  gap: var(--spacing-sm);
-  padding: var(--spacing-lg) var(--spacing-xl);
-  background: var(--color-primary);
-  color: var(--color-bg-primary);
+  gap: 8px;
+  padding: 8px 16px;
+  background: #007bff;
+  color: white;
   border: none;
-  border-radius: var(--radius-md);
-  font-size: 1.125rem;
-  font-weight: 700;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
+  white-space: nowrap;
 }
 
-.audio-button:hover {
-  background: var(--color-primary-dark);
-  transform: translateY(-2px);
+.audio-button-compact:hover {
+  background: #0056b3;
+  transform: translateY(-1px);
 }
 
-.audio-button.playing {
+.audio-button-compact.playing {
   animation: pulse 1s infinite;
 }
 
+.audio-icon {
+  font-size: 1rem;
+}
+
+@media (max-width: 768px) {
+  .question-content {
+    flex-direction: column;
+    text-align: center;
+    gap: 12px;
+  }
+  
+  .question-content h2 {
+    font-size: 1.1rem;
+  }
+  
+  .audio-button-compact {
+    align-self: center;
+  }
+}
+
 .audio-text {
-  color: var(--color-bg-primary);
-  font-weight: 700;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  color: white;
+  font-weight: 600;
 }
 
 .quiz-options {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: var(--spacing-lg);
-  margin-bottom: var(--spacing-xl); /* 하단 마진 줄임 */
+  gap: 16px;
+  margin-bottom: 20px;
 }
 
 @media (max-width: 768px) {
@@ -484,69 +509,73 @@ onMounted(() => {
 }
 
 .quiz-option {
-  background: var(--color-bg-card);
-  border: 2px solid var(--color-border);
-  border-radius: var(--radius-lg);
+  background: #2a2a2a;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
   overflow: hidden;
   cursor: pointer;
   transition: all 0.3s ease;
   text-align: center;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
 .quiz-option:hover {
-  transform: translateY(-4px);
-  border-color: var(--color-primary);
-  box-shadow: var(--shadow-lg);
+  transform: translateY(-2px);
+  border-color: #007bff;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
 }
 
 .quiz-option.selected {
-  border-color: var(--color-primary);
-  box-shadow: var(--shadow-lg);
+  border-color: #007bff;
+  box-shadow: 0 6px 12px rgba(0, 123, 255, 0.3);
 }
 
 .quiz-option.correct {
-  border-color: var(--color-success);
-  background: rgba(16, 185, 129, 0.1);
+  border-color: #28a745;
+  background: rgba(40, 167, 69, 0.1);
   animation: correctAnswer 0.6s ease;
 }
 
 .quiz-option.incorrect {
-  border-color: var(--color-danger);
-  background: rgba(239, 68, 68, 0.1);
+  border-color: #dc3545;
+  background: rgba(220, 53, 69, 0.1);
   animation: incorrectAnswer 0.6s ease;
 }
 
 .quiz-option img {
   width: 100%;
-  aspect-ratio: 1;
+  height: 80px;
   object-fit: cover;
 }
 
 .option-name {
-  padding: var(--spacing-md);
-  font-weight: 700;
-  color: var(--color-text-primary);
-  font-size: 1.125rem;
+  padding: 8px 12px;
+  font-weight: 600;
+  color: #ffffff;
+  font-size: 0.85rem;
+  line-height: 1.2;
 }
 
 .quiz-result {
   text-align: center;
-  background: var(--color-bg-card);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  padding: var(--spacing-xl); /* 패딩 줄임 */
+  background: #1a1a1a;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .celebration-container {
   position: relative;
-  margin-bottom: var(--spacing-lg);
+  margin-bottom: 12px;
 }
 
 .celebration-text {
-  font-size: 4rem;
+  font-size: 2.5rem;
   animation: celebration 1s ease;
-  color: var(--color-text-primary);
-  font-weight: 800;
+  color: #ffffff;
+  font-weight: 700;
 }
 
 .confetti {
@@ -557,17 +586,17 @@ onMounted(() => {
 }
 
 .result-correct h3 {
-  color: var(--color-success);
-  font-size: 1.75rem;
-  margin-bottom: var(--spacing-lg);
-  font-weight: 800;
+  color: #28a745;
+  font-size: 1.25rem;
+  margin-bottom: 12px;
+  font-weight: 700;
 }
 
 .result-incorrect h3 {
-  color: var(--color-text-primary);
-  font-size: 1.75rem;
-  margin-bottom: var(--spacing-lg);
-  font-weight: 800;
+  color: #dc3545;
+  font-size: 1.25rem;
+  margin-bottom: 12px;
+  font-weight: 700;
 }
 
 .new-badge-notification {

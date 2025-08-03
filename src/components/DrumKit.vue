@@ -476,11 +476,11 @@ onUnmounted(() => {
   display: flex;
   justify-content: center;
   gap: 32px;
-  background: linear-gradient(135deg, #667eea, #764ba2);
+  background: #000000;
   border-radius: 16px;
   padding: 20px;
   color: white;
-  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
 }
 
 .stat-item {
@@ -514,12 +514,16 @@ onUnmounted(() => {
   font-weight: 600;
   text-align: center;
   margin-bottom: 24px;
-  color: #5d4037;
+  color: white;
+  background: #000000;
+  padding: 12px 20px;
+  border-radius: 12px;
   text-shadow: 
-    1px 1px 3px rgba(255, 255, 255, 0.9),
-    0 0 6px rgba(255, 255, 255, 0.6);
+    1px 1px 3px rgba(0, 0, 0, 0.8),
+    0 0 6px rgba(0, 0, 0, 0.5);
   font-family: 'Comic Sans MS', cursive, sans-serif;
   letter-spacing: 1px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 /* 실제 드럼세트 컨테이너 */
@@ -530,33 +534,40 @@ onUnmounted(() => {
   align-items: start;
 }
 
-/* 지브리 감성 드럼 스테이지 */
+/* 사실적인 드럼 스테이지 */
 .drum-stage {
   position: relative;
   background: 
-    /* 수채화 배경 효과 */
-    radial-gradient(ellipse 400px 200px at 20% 30%, rgba(255, 182, 193, 0.3), transparent 60%),
-    radial-gradient(ellipse 300px 150px at 80% 70%, rgba(173, 216, 230, 0.3), transparent 60%),
-    radial-gradient(ellipse 350px 180px at 50% 80%, rgba(255, 228, 196, 0.3), transparent 60%),
-    /* 기본 그라데이션 */
+    /* 나무 바닥 질감 */
+    repeating-linear-gradient(
+      90deg,
+      #8d6e63 0px,
+      #795548 2px,
+      #6d4c41 4px,
+      #5d4037 6px,
+      #6d4c41 8px,
+      #795548 10px
+    ),
+    /* 기본 나무 색상 */
     linear-gradient(135deg, 
-      rgba(250, 248, 246, 0.95), 
-      rgba(248, 243, 237, 0.95), 
-      rgba(245, 237, 225, 0.95)
+      #d7ccc8, 
+      #bcaaa4, 
+      #a1887f, 
+      #8d6e63
     );
-  border-radius: 30px;
-  padding: 60px;
+  border-radius: 20px;
+  padding: 50px;
   box-shadow: 
-    0 20px 40px rgba(0, 0, 0, 0.1),
-    0 8px 20px rgba(0, 0, 0, 0.05),
-    inset 0 2px 4px rgba(255, 255, 255, 0.8);
+    0 25px 50px rgba(0, 0, 0, 0.2),
+    0 10px 25px rgba(0, 0, 0, 0.1),
+    inset 0 3px 6px rgba(255, 255, 255, 0.3);
   overflow: visible;
-  min-height: 450px;
-  border: 3px solid rgba(255, 255, 255, 0.7);
+  min-height: 480px;
+  border: 4px solid #8d6e63;
   position: relative;
 }
 
-/* 수채화 질감 오버레이 */
+/* 나무 질감 오버레이 */
 .drum-stage::before {
   content: '';
   position: absolute;
@@ -565,19 +576,23 @@ onUnmounted(() => {
   right: 0;
   bottom: 0;
   background: 
-    /* 드럼 세트 실루엣 */
-    url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300"><g fill="none" stroke="%23d4d4aa" stroke-width="2" stroke-opacity="0.3"><circle cx="200" cy="180" r="60" /><circle cx="150" cy="120" r="25" /><circle cx="250" cy="120" r="25" /><circle cx="320" cy="200" r="35" /><circle cx="100" cy="80" r="30" /><rect x="180" y="50" width="40" height="15" rx="7" /></g></svg>') no-repeat center center,
-    /* 고사리 패턴 */
+    /* 나무 결 패턴 */
     repeating-linear-gradient(
-      45deg,
+      0deg,
       transparent,
-      transparent 20px,
-      rgba(0, 0, 0, 0.02) 20px,
-      rgba(0, 0, 0, 0.02) 21px
+      transparent 8px,
+      rgba(0, 0, 0, 0.03) 8px,
+      rgba(0, 0, 0, 0.03) 9px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 120px,
+      rgba(0, 0, 0, 0.02) 120px,
+      rgba(0, 0, 0, 0.02) 122px
     );
-  background-size: 80% 80%, 15px 15px;
-  border-radius: 30px;
-  opacity: 0.7;
+  border-radius: 20px;
+  opacity: 0.8;
   pointer-events: none;
 }
 
@@ -600,25 +615,25 @@ onUnmounted(() => {
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 15px;
   position: relative;
 }
 
 .back-row {
   justify-content: space-around;
-  margin-bottom: 30px;
+  margin-bottom: 25px;
   gap: 20px;
 }
 
 .middle-row {
   justify-content: space-around;
-  margin-bottom: 40px;
-  gap: 30px;
+  margin-bottom: 30px;
+  gap: 25px;
 }
 
 .front-row {
   justify-content: space-around;
-  gap: 40px;
+  gap: 35px;
   align-items: flex-end;
 }
 
@@ -656,34 +671,35 @@ onUnmounted(() => {
   letter-spacing: 0.5px;
 }
 
-/* 지브리 스타일 심벌 */
+/* 사실적인 크래시 심벌 */
 .cymbal {
-  width: 80px;
-  height: 80px;
-  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.15));
+  width: 100px;
+  height: 100px;
+  filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.25));
 }
 
 .cymbal-surface {
   position: relative;
-  width: 80px;
-  height: 80px;
+  width: 100px;
+  height: 100px;
   background: 
-    /* 수채화 하이라이트 */
-    radial-gradient(ellipse 25px 15px at 30% 25%, rgba(255, 255, 255, 0.8), transparent 60%),
-    radial-gradient(ellipse 15px 8px at 70% 35%, rgba(255, 255, 255, 0.5), transparent 50%),
-    /* 메인 색상 (따뜻한 금색) */
+    /* 금속 반사광 */
+    radial-gradient(ellipse 35px 20px at 25% 20%, rgba(255, 255, 255, 0.9), transparent 50%),
+    radial-gradient(ellipse 20px 12px at 70% 30%, rgba(255, 255, 255, 0.6), transparent 40%),
+    /* 심벌 금속 색상 (더 사실적인 브론즈) */
     linear-gradient(135deg, 
-      #ffcc70, 
-      #ffd89b, 
-      #ffb347, 
-      #ffa726
+      #cd853f, 
+      #daa520, 
+      #b8860b, 
+      #8b7355,
+      #cd853f
     );
   border-radius: 50%;
   box-shadow: 
-    inset 0 3px 8px rgba(0, 0, 0, 0.1),
-    inset 0 -2px 4px rgba(255, 255, 255, 0.3),
-    0 6px 20px rgba(255, 179, 71, 0.3);
-  border: 2px solid rgba(255, 255, 255, 0.4);
+    inset 0 4px 12px rgba(0, 0, 0, 0.2),
+    inset 0 -3px 6px rgba(255, 255, 255, 0.4),
+    0 8px 25px rgba(205, 133, 63, 0.4);
+  border: 3px solid rgba(139, 115, 85, 0.8);
 }
 
 .cymbal-center {
@@ -739,44 +755,44 @@ onUnmounted(() => {
     inset 0 1px 2px rgba(255, 255, 255, 0.2);
 }
 
-/* 지브리 스타일 하이햇 */
+/* 사실적인 하이햇 */
 .hihat {
-  width: 60px;
-  height: 60px;
-  filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.12));
+  width: 80px;
+  height: 80px;
+  filter: drop-shadow(0 5px 12px rgba(0, 0, 0, 0.2));
 }
 
 .hihat-top {
-  width: 60px;
-  height: 60px;
+  width: 80px;
+  height: 80px;
   background: 
-    /* 수채화 하이라이트 */
-    radial-gradient(ellipse 20px 12px at 30% 25%, rgba(255, 255, 255, 0.9), transparent 60%),
-    /* 따뜻한 실버 */
-    linear-gradient(135deg, #f5f5f5, #e0e0e0, #bdbdbd, #9e9e9e);
+    /* 금속 반사광 */
+    radial-gradient(ellipse 25px 15px at 30% 25%, rgba(255, 255, 255, 0.95), transparent 60%),
+    /* 사실적인 실버/크롬 */
+    linear-gradient(135deg, #c0c0c0, #a8a8a8, #909090, #808080, #696969);
   border-radius: 50%;
   box-shadow: 
-    inset 0 2px 6px rgba(0, 0, 0, 0.06),
-    inset 0 -1px 3px rgba(255, 255, 255, 0.5),
-    0 4px 12px rgba(149, 165, 166, 0.2);
+    inset 0 3px 8px rgba(0, 0, 0, 0.1),
+    inset 0 -2px 4px rgba(255, 255, 255, 0.6),
+    0 6px 16px rgba(128, 128, 128, 0.3);
   position: relative;
   z-index: 2;
-  border: 2px solid rgba(255, 255, 255, 0.5);
+  border: 3px solid rgba(105, 105, 105, 0.8);
 }
 
 .hihat-bottom {
   position: absolute;
   top: 6px;
-  left: 3px;
-  width: 54px;
-  height: 54px;
+  left: 4px;
+  width: 72px;
+  height: 72px;
   background: 
-    linear-gradient(135deg, #8d6e63, #6d4c41, #5d4037);
+    linear-gradient(135deg, #696969, #505050, #404040, #303030);
   border-radius: 50%;
   box-shadow: 
-    inset 0 2px 4px rgba(0, 0, 0, 0.2),
-    0 2px 6px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+    inset 0 3px 6px rgba(0, 0, 0, 0.3),
+    0 3px 8px rgba(0, 0, 0, 0.15);
+  border: 2px solid rgba(48, 48, 48, 0.8);
 }
 
 .hihat-stand {
@@ -790,48 +806,48 @@ onUnmounted(() => {
   border-radius: 2px;
 }
 
-/* 지브리 스타일 스네어 */
+/* 사실적인 스네어 드럼 */
 .snare {
-  width: 100px;
-  height: 100px;
-  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.15));
+  width: 120px;
+  height: 120px;
+  filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.2));
 }
 
 .snare-surface {
   position: relative;
-  width: 100px;
-  height: 100px;
+  width: 120px;
+  height: 120px;
   background: 
-    /* 수채화 하이라이트 */
-    radial-gradient(ellipse 30px 20px at 30% 25%, rgba(255, 255, 255, 0.9), transparent 60%),
-    radial-gradient(ellipse 20px 12px at 70% 35%, rgba(255, 255, 255, 0.6), transparent 50%),
-    /* 메인 색상 (아이보리/크림) */
+    /* 드럼헤드 반사광 */
+    radial-gradient(ellipse 40px 25px at 30% 25%, rgba(255, 255, 255, 0.95), transparent 60%),
+    radial-gradient(ellipse 25px 15px at 70% 35%, rgba(255, 255, 255, 0.7), transparent 50%),
+    /* 사실적인 화이트 드럼헤드 색상 */
     linear-gradient(135deg, 
-      #fff3e0, 
-      #fce4ec, 
-      #f3e5f5, 
-      #e8f5e8
+      #f8f8f8, 
+      #f0f0f0, 
+      #e8e8e8, 
+      #e0e0e0
     );
   border-radius: 50%;
   box-shadow: 
-    inset 0 3px 8px rgba(0, 0, 0, 0.08),
-    inset 0 -2px 4px rgba(255, 255, 255, 0.5),
-    0 6px 20px rgba(189, 195, 199, 0.2);
-  border: 3px solid rgba(255, 255, 255, 0.6);
+    inset 0 4px 12px rgba(0, 0, 0, 0.1),
+    inset 0 -3px 6px rgba(255, 255, 255, 0.6),
+    0 8px 25px rgba(32, 32, 32, 0.3);
+  border: 4px solid rgba(224, 224, 224, 0.9);
 }
 
 .snare-rim {
   position: absolute;
-  top: -4px;
-  left: -4px;
-  width: 108px;
-  height: 108px;
+  top: -6px;
+  left: -6px;
+  width: 132px;
+  height: 132px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #8d6e63, #6d4c41, #5d4037);
+  background: linear-gradient(135deg, #2c2c2c, #1a1a1a, #0d0d0d, #000000);
   z-index: -1;
   box-shadow: 
-    0 4px 12px rgba(0, 0, 0, 0.1),
-    inset 0 2px 4px rgba(255, 255, 255, 0.2);
+    0 6px 16px rgba(0, 0, 0, 0.2),
+    inset 0 3px 6px rgba(68, 68, 68, 0.4);
 }
 
 .snare-head {
@@ -880,49 +896,49 @@ onUnmounted(() => {
     inset 0 1px 2px rgba(255, 255, 255, 0.2);
 }
 
-/* 지브리 스타일 톰들 */
+/* 사실적인 톰들 */
 .tom {
-  width: 80px;
-  height: 80px;
-  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.12));
+  width: 95px;
+  height: 95px;
+  filter: drop-shadow(0 5px 15px rgba(0, 0, 0, 0.18));
 }
 
 .tom-surface {
   position: relative;
-  width: 80px;
-  height: 80px;
+  width: 95px;
+  height: 95px;
   border-radius: 50%;
   box-shadow: 
-    inset 0 3px 8px rgba(0, 0, 0, 0.08),
-    inset 0 -2px 4px rgba(255, 255, 255, 0.4),
-    0 6px 16px rgba(0, 0, 0, 0.1);
-  border: 2px solid rgba(255, 255, 255, 0.5);
+    inset 0 4px 10px rgba(0, 0, 0, 0.12),
+    inset 0 -3px 6px rgba(255, 255, 255, 0.5),
+    0 8px 20px rgba(0, 0, 0, 0.15);
+  border: 3px solid rgba(255, 255, 255, 0.6);
 }
 
 .high-tom {
   background: 
-    /* 수채화 하이라이트 */
-    radial-gradient(ellipse 25px 15px at 30% 25%, rgba(255, 255, 255, 0.8), transparent 60%),
-    /* 따뜻한 오렌지 */
-    linear-gradient(135deg, #ffcc80, #ffb74d, #ffa726, #ff9800);
+    /* 드럼헤드 반사광 */
+    radial-gradient(ellipse 30px 20px at 30% 25%, rgba(255, 255, 255, 0.9), transparent 60%),
+    /* 사실적인 레드 톰 */
+    linear-gradient(135deg, #c62828, #d32f2f, #f44336, #ef5350);
 }
 
 .mid-tom {
   background: 
-    /* 수채화 하이라이트 */
-    radial-gradient(ellipse 25px 15px at 30% 25%, rgba(255, 255, 255, 0.8), transparent 60%),
-    /* 따뜻한 노랍 */
-    linear-gradient(135deg, #fff176, #ffee58, #ffeb3b, #fdd835);
+    /* 드럼헤드 반사광 */
+    radial-gradient(ellipse 30px 20px at 30% 25%, rgba(255, 255, 255, 0.9), transparent 60%),
+    /* 사실적인 블루 톰 */
+    linear-gradient(135deg, #1565c0, #1976d2, #2196f3, #42a5f5);
 }
 
 .tom-rim {
   position: absolute;
-  top: -4px;
-  left: -4px;
-  width: 88px;
-  height: 88px;
+  top: -6px;
+  left: -6px;
+  width: 107px;
+  height: 107px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #34495e, #2c3e50);
+  background: linear-gradient(135deg, #2c2c2c, #1a1a1a, #0d0d0d);
   z-index: -1;
 }
 
@@ -948,38 +964,38 @@ onUnmounted(() => {
   border-radius: 3px;
 }
 
-/* 지브리 스타일 플로어톰 */
+/* 사실적인 플로어톰 */
 .floor-tom {
-  width: 100px;
-  height: 100px;
-  filter: drop-shadow(0 5px 14px rgba(0, 0, 0, 0.15));
+  width: 110px;
+  height: 110px;
+  filter: drop-shadow(0 6px 18px rgba(0, 0, 0, 0.2));
 }
 
 .floor-tom-surface {
   position: relative;
-  width: 100px;
-  height: 100px;
+  width: 110px;
+  height: 110px;
   background: 
-    /* 수채화 하이라이트 */
-    radial-gradient(ellipse 30px 18px at 30% 25%, rgba(255, 255, 255, 0.8), transparent 60%),
-    /* 따뜻한 초록 */
-    linear-gradient(135deg, #c8e6c9, #a5d6a7, #81c784, #66bb6a);
+    /* 드럼헤드 반사광 */
+    radial-gradient(ellipse 35px 22px at 30% 25%, rgba(255, 255, 255, 0.9), transparent 60%),
+    /* 사실적인 블랙 플로어톰 */
+    linear-gradient(135deg, #424242, #616161, #757575, #9e9e9e);
   border-radius: 50%;
   box-shadow: 
-    inset 0 4px 10px rgba(0, 0, 0, 0.1),
-    inset 0 -3px 6px rgba(255, 255, 255, 0.4),
-    0 8px 20px rgba(39, 174, 96, 0.2);
-  border: 3px solid rgba(255, 255, 255, 0.5);
+    inset 0 5px 12px rgba(0, 0, 0, 0.15),
+    inset 0 -4px 8px rgba(255, 255, 255, 0.5),
+    0 10px 25px rgba(66, 66, 66, 0.3);
+  border: 4px solid rgba(255, 255, 255, 0.6);
 }
 
 .floor-tom-rim {
   position: absolute;
-  top: -5px;
-  left: -5px;
-  width: 110px;
-  height: 110px;
+  top: -7px;
+  left: -7px;
+  width: 124px;
+  height: 124px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #34495e, #2c3e50);
+  background: linear-gradient(135deg, #1a1a1a, #0d0d0d, #000000);
   z-index: -1;
 }
 
@@ -1026,28 +1042,28 @@ onUnmounted(() => {
   border-radius: 3px;
 }
 
-/* 지브리 스타일 라이드 */
+/* 사실적인 라이드 심벌 */
 .ride {
-  width: 90px;
-  height: 90px;
-  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.15));
+  width: 105px;
+  height: 105px;
+  filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.2));
 }
 
 .ride-surface {
   position: relative;
-  width: 90px;
-  height: 90px;
+  width: 105px;
+  height: 105px;
   background: 
-    /* 수채화 하이라이트 */
-    radial-gradient(ellipse 28px 16px at 30% 25%, rgba(255, 255, 255, 0.9), transparent 60%),
-    /* 따뜻한 실버 */
-    linear-gradient(135deg, #e1f5fe, #b3e5fc, #81d4fa, #4fc3f7);
+    /* 금속 반사광 */
+    radial-gradient(ellipse 35px 20px at 30% 25%, rgba(255, 255, 255, 0.95), transparent 60%),
+    /* 사실적인 브론즈 라이드 */
+    linear-gradient(135deg, #a0522d, #cd853f, #daa520, #b8860b, #8b7355);
   border-radius: 50%;
   box-shadow: 
-    inset 0 3px 8px rgba(0, 0, 0, 0.08),
-    inset 0 -2px 4px rgba(255, 255, 255, 0.5),
-    0 6px 16px rgba(149, 165, 166, 0.2);
-  border: 2px solid rgba(255, 255, 255, 0.6);
+    inset 0 4px 10px rgba(0, 0, 0, 0.12),
+    inset 0 -3px 6px rgba(255, 255, 255, 0.6),
+    0 8px 20px rgba(160, 82, 45, 0.3);
+  border: 3px solid rgba(139, 115, 85, 0.8);
 }
 
 .ride-center {
@@ -1107,11 +1123,11 @@ onUnmounted(() => {
   border-radius: 2px;
 }
 
-/* 지브리 스타일 킥드럼 */
+/* 사실적인 킥드럼 */
 .kick {
-  width: 140px;
-  height: 140px;
-  filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.15));
+  width: 160px;
+  height: 160px;
+  filter: drop-shadow(0 8px 20px rgba(0, 0, 0, 0.25));
 }
 
 .kick-drum {
@@ -1119,42 +1135,42 @@ onUnmounted(() => {
 }
 
 .kick-surface {
-  width: 140px;
-  height: 140px;
+  width: 160px;
+  height: 160px;
   background: 
-    /* 수채화 하이라이트 */
-    radial-gradient(ellipse 40px 25px at 25% 25%, rgba(255, 255, 255, 0.8), transparent 60%),
-    radial-gradient(ellipse 25px 15px at 75% 35%, rgba(255, 255, 255, 0.5), transparent 50%),
-    /* 메인 색상 (따뜻한 빨간) */
+    /* 드럼헤드 반사광 */
+    radial-gradient(ellipse 50px 30px at 25% 25%, rgba(255, 255, 255, 0.9), transparent 60%),
+    radial-gradient(ellipse 30px 18px at 75% 35%, rgba(255, 255, 255, 0.6), transparent 50%),
+    /* 사실적인 킥드럼 색상 (블랙/화이트) */
     linear-gradient(135deg, 
-      #ffcdd2, 
-      #f8bbd9, 
-      #f48fb1, 
-      #e1bee7
+      #f5f5f5, 
+      #e8e8e8, 
+      #d0d0d0, 
+      #b8b8b8
     );
   border-radius: 50%;
   box-shadow: 
-    inset 0 4px 12px rgba(0, 0, 0, 0.1),
-    inset 0 -3px 6px rgba(255, 255, 255, 0.4),
-    0 8px 24px rgba(231, 76, 60, 0.2);
+    inset 0 6px 16px rgba(0, 0, 0, 0.15),
+    inset 0 -4px 8px rgba(255, 255, 255, 0.5),
+    0 12px 30px rgba(0, 0, 0, 0.3);
   position: relative;
-  border: 4px solid rgba(255, 255, 255, 0.5);
+  border: 5px solid rgba(184, 184, 184, 0.8);
 }
 
 .kick-hole {
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 40px;
-  height: 40px;
+  width: 50px;
+  height: 50px;
   background: 
-    radial-gradient(circle at 30% 30%, #4e342e, #3e2723, #2e1a17);
+    radial-gradient(circle at 30% 30%, #1a1a1a, #0d0d0d, #000000);
   border-radius: 50%;
   transform: translate(-50%, -50%);
   box-shadow: 
-    inset 0 4px 8px rgba(0, 0, 0, 0.4),
-    0 0 0 2px rgba(255, 255, 255, 0.2);
-  border: 2px solid rgba(139, 69, 19, 0.6);
+    inset 0 6px 12px rgba(0, 0, 0, 0.6),
+    0 0 0 3px rgba(26, 26, 26, 0.8);
+  border: 3px solid rgba(0, 0, 0, 0.9);
 }
 
 .kick-legs {
@@ -1293,26 +1309,24 @@ onUnmounted(() => {
   }
 }
 
-/* 지브리 스타일 재미있는 소리 패널 */
+/* 블랙&화이트 재미있는 소리 패널 */
 .fun-sounds-panel {
   background: 
-    /* 수채화 배경 */
-    radial-gradient(circle at 20% 20%, rgba(255, 228, 196, 0.8), transparent 50%),
-    radial-gradient(circle at 80% 80%, rgba(255, 182, 193, 0.6), transparent 50%),
+    /* 블랙 그라데이션 */
     linear-gradient(135deg, 
-      rgba(255, 248, 225, 0.95), 
-      rgba(255, 245, 238, 0.95), 
-      rgba(250, 240, 230, 0.95)
+      #1a1a1a, 
+      #2d2d2d, 
+      #1a1a1a
     );
   border-radius: 25px;
   padding: 28px;
   backdrop-filter: blur(10px);
   box-shadow: 
-    0 12px 30px rgba(0, 0, 0, 0.08),
-    0 4px 15px rgba(0, 0, 0, 0.05),
-    inset 0 2px 4px rgba(255, 255, 255, 0.8);
+    0 12px 30px rgba(0, 0, 0, 0.5),
+    0 4px 15px rgba(0, 0, 0, 0.3),
+    inset 0 2px 4px rgba(255, 255, 255, 0.1);
   height: fit-content;
-  border: 3px solid rgba(255, 255, 255, 0.6);
+  border: 3px solid rgba(255, 255, 255, 0.2);
 }
 
 .fun-sound-board {
@@ -1339,13 +1353,15 @@ onUnmounted(() => {
   align-items: center;
   justify-content: center;
   gap: 6px;
+  background: linear-gradient(135deg, #2a2a2a, #1a1a1a, #0d0d0d) !important;
   box-shadow: 
-    0 4px 12px rgba(0, 0, 0, 0.08),
-    inset 0 2px 4px rgba(255, 255, 255, 0.4);
+    0 6px 20px rgba(0, 0, 0, 0.4),
+    inset 0 2px 4px rgba(255, 255, 255, 0.15),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.3);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   z-index: 2;
-  border: 2px solid rgba(255, 255, 255, 0.5);
+  border: 2px solid rgba(255, 255, 255, 0.3);
 }
 
 .fun-button-shadow {
@@ -1363,7 +1379,11 @@ onUnmounted(() => {
 
 .fun-button:hover .fun-button-face {
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+  box-shadow: 
+    0 8px 25px rgba(0, 0, 0, 0.6),
+    inset 0 3px 6px rgba(255, 255, 255, 0.2),
+    inset 0 -3px 6px rgba(0, 0, 0, 0.4);
+  border-color: rgba(255, 255, 255, 0.5);
 }
 
 .fun-button:hover .fun-button-shadow {
@@ -1374,7 +1394,11 @@ onUnmounted(() => {
 .fun-button:active .fun-button-face,
 .fun-button.active .fun-button-face {
   transform: translateY(2px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: 
+    0 2px 8px rgba(0, 0, 0, 0.4),
+    inset 0 2px 6px rgba(0, 0, 0, 0.5),
+    inset 0 -1px 3px rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.4);
 }
 
 .fun-button:active .fun-button-shadow,
@@ -1385,14 +1409,18 @@ onUnmounted(() => {
 
 .fun-icon {
   font-size: 1.8rem;
-  filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.3));
+  filter: drop-shadow(0 1px 3px rgba(255, 255, 255, 0.3));
+  color: #ffffff;
 }
 
 .fun-name {
   font-size: 0.7rem;
   font-weight: 700;
-  color: white;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
+  color: #ffffff;
+  text-shadow: 
+    0 1px 2px rgba(0, 0, 0, 0.8),
+    0 0 4px rgba(255, 255, 255, 0.3);
+  letter-spacing: 0.5px;
 }
 
 /* 반짝임 효과 */
@@ -1433,31 +1461,34 @@ onUnmounted(() => {
   }
 }
 
-/* 지브리 스타일 키보드 가이드 */
+/* 다크모드 키보드 가이드 */
 .keyboard-guide {
   background: 
-    radial-gradient(circle at 30% 30%, rgba(255, 248, 225, 0.9), transparent 60%),
     linear-gradient(135deg, 
-      rgba(255, 252, 240, 0.95), 
-      rgba(255, 248, 225, 0.95)
+      #1a1a1a, 
+      #2d2d2d, 
+      #1a1a1a
     );
   border-radius: 20px;
   padding: 24px;
   text-align: center;
   backdrop-filter: blur(10px);
   box-shadow: 
-    0 6px 20px rgba(0, 0, 0, 0.06),
-    inset 0 2px 4px rgba(255, 255, 255, 0.7);
-  border: 2px solid rgba(255, 255, 255, 0.5);
+    0 8px 25px rgba(0, 0, 0, 0.4),
+    0 4px 15px rgba(0, 0, 0, 0.3),
+    inset 0 2px 4px rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.2);
 }
 
 .keyboard-guide h4 {
   margin-bottom: 18px;
-  color: #5d4037;
+  color: #ffffff;
   font-size: 1.05rem;
   font-weight: 600;
   font-family: 'Comic Sans MS', cursive, sans-serif;
-  text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.8);
+  text-shadow: 
+    0 1px 2px rgba(0, 0, 0, 0.8),
+    0 0 4px rgba(255, 255, 255, 0.3);
 }
 
 .key-mappings {
@@ -1475,24 +1506,31 @@ onUnmounted(() => {
 
 .key-title {
   font-weight: 600;
-  color: #6d4c41;
+  color: #ffffff;
   font-size: 0.85rem;
   font-family: 'Comic Sans MS', cursive, sans-serif;
+  text-shadow: 
+    0 1px 2px rgba(0, 0, 0, 0.7),
+    0 0 3px rgba(255, 255, 255, 0.2);
 }
 
 .key-item {
   background: 
-    linear-gradient(135deg, #fff8e1, #ffecb3);
-  border: 2px solid rgba(255, 255, 255, 0.6);
+    linear-gradient(135deg, #2a2a2a, #1a1a1a, #0d0d0d);
+  border: 2px solid rgba(255, 255, 255, 0.3);
   border-radius: 12px;
   padding: 6px 12px;
   font-size: 0.75rem;
-  color: #5d4037;
+  color: #ffffff;
   font-family: 'Comic Sans MS', cursive, sans-serif;
   font-weight: 500;
   box-shadow: 
-    0 2px 6px rgba(0, 0, 0, 0.05),
-    inset 0 1px 2px rgba(255, 255, 255, 0.7);
+    0 4px 8px rgba(0, 0, 0, 0.3),
+    inset 0 2px 4px rgba(255, 255, 255, 0.1),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.2);
+  text-shadow: 
+    0 1px 2px rgba(0, 0, 0, 0.8),
+    0 0 3px rgba(255, 255, 255, 0.2);
 }
 
 /* 반응형 디자인 */

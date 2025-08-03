@@ -205,11 +205,6 @@
             </div>
             
             <div class="celebration-container">
-              <div class="celebration-icons">
-                <div class="celebration-icon bounce">🎉</div>
-                <div class="celebration-icon bounce delay-1">🎨</div>
-                <div class="celebration-icon bounce delay-2">✨</div>
-              </div>
               <div class="completion-badge">
                 <div class="badge-circle">
                   <div class="badge-text">완성!</div>
@@ -223,9 +218,12 @@
             
             <div class="completed-artwork animate-in delay-2">
               <div class="artwork-frame">
-                <canvas ref="completedCanvas" class="completed-canvas"></canvas>
+                <canvas ref="completedCanvas" class="completed-canvas" @click="copyCompletedArtwork"></canvas>
                 <div class="artwork-shine"></div>
               </div>
+              <p style="margin-top: 10px; font-size: 0.9rem; color: #666;">
+                작품이 보이지 않으면 위 프레임을 클릭해보세요
+              </p>
             </div>
 
             <div class="completion-actions animate-in delay-3">
@@ -249,10 +247,21 @@
         <!-- 빈 상태 -->
         <div v-if="coloringWords.length === 0" class="empty-state">
           <div class="empty-icon">🎨</div>
-          <h3>{{$t('coloring.noImages')}}</h3>
-          <p>{{$t('coloring.addWords')}}</p>
+          <h3>색칠할 수 있는 이미지가 없습니다</h3>
+          <p>직접 업로드한 이미지가 있는 단어만 색칠하기가 가능합니다.</p>
+          <div class="debug-info" style="margin: 20px 0; padding: 15px; background: #f0f0f0; border-radius: 8px; font-size: 0.9rem; text-align: left;">
+            <div><strong>전체 단어 수:</strong> {{ store.currentWords.length }}</div>
+            <div><strong>업로드된 이미지가 있는 단어:</strong> {{ store.currentWords.filter(w => w.imageUrl?.startsWith('/uploads/')).length }}</div>
+            <div v-if="store.currentWords.length > 0"><strong>단어들의 이미지 URL 샘플:</strong></div>
+            <div v-for="(word, index) in store.currentWords.slice(0, 5)" :key="word.id" style="margin-left: 10px; font-size: 0.8rem;">
+              {{ index + 1 }}. {{ word.name }}: {{ word.imageUrl || '없음' }}
+            </div>
+            <div v-if="store.currentWords.length > 5" style="margin-left: 10px; font-size: 0.8rem;">
+              ... 그리고 {{ store.currentWords.length - 5 }}개 더
+            </div>
+          </div>
           <router-link to="/admin/words" class="btn btn-primary">
-            {{$t('coloring.addWordsBtn')}}
+            관리자에서 이미지 추가하기
           </router-link>
         </div>
       </div>
@@ -289,7 +298,6 @@ const handleSaveArtwork = async () => {
     const success = await coloring.saveArtwork();
     
     if (success) {
-      // 성공 시 추가 UI 피드백을 원한다면 여기에 추가
       console.log('✅ Artwork saved successfully with UI feedback');
     }
   } catch (error) {
@@ -302,10 +310,30 @@ const handleSaveArtwork = async () => {
 
 // 색칠 가능한 단어들 (직접 업로드된 이미지만)
 const coloringWords = computed(() => {
-  return store.currentWords.filter(word => {
+  console.log('🎨 [ColoringView] 전체 단어 수:', store.currentWords.length);
+  console.log('🎨 [ColoringView] 전체 단어들:', store.currentWords.map(w => ({
+    id: w.id,
+    name: w.name,
+    imageUrl: w.imageUrl,
+    hasImage: !!w.imageUrl,
+    isUploadedImage: w.imageUrl?.startsWith('/uploads/')
+  })));
+  
+  const filtered = store.currentWords.filter(word => {
     // imageUrl이 있고, /uploads/로 시작하는 것만 (직접 업로드된 파일)
-    return word.imageUrl && word.imageUrl.startsWith('/uploads/');
+    const hasUploadedImage = word.imageUrl && word.imageUrl.startsWith('/uploads/');
+    if (hasUploadedImage) {
+      console.log('✅ [ColoringView] 색칠 가능한 단어 발견:', {
+        id: word.id,
+        name: word.name,
+        imageUrl: word.imageUrl
+      });
+    }
+    return hasUploadedImage;
   });
+  
+  console.log('🎨 [ColoringView] 필터링된 색칠 가능한 단어 수:', filtered.length);
+  return filtered;
 });
 
 const getImageUrl = (url: string): string => {
@@ -323,6 +351,7 @@ const getCurrentName = (word: any): string => {
 // 캔버스 레퍼런스
 const backgroundCanvas = ref<HTMLCanvasElement>();
 const drawingCanvas = ref<HTMLCanvasElement>();
+const completedCanvas = ref<HTMLCanvasElement>();
 
 // 캔버스 초기화
 const initializeCanvasElements = () => {
@@ -360,8 +389,15 @@ const initializeCanvasElements = () => {
   }
 };
 
-onMounted(() => {
+onMounted(async () => {
   console.log('🏗️ ColoringView mounted');
+  
+  // 단어 데이터가 로드되지 않았다면 먼저 로드
+  if (store.currentWords.length === 0) {
+    console.log('📚 Loading words for coloring...');
+    await store.loadWords();
+  }
+  
   setTimeout(() => {
     console.log('🕐 Delayed canvas initialization attempt');
     initializeCanvasElements();
@@ -376,8 +412,118 @@ watch(() => coloring.gameState.value, (newState) => {
       console.log('🕐 Delayed canvas initialization for coloring state');
       initializeCanvasElements();
     }, 200);
+  } else if (newState === 'completed') {
+    // 완성 화면으로 전환될 때 완성된 작품을 completedCanvas에 복사
+    nextTick(() => {
+      setTimeout(() => {
+        copyCompletedArtwork();
+        // 혹시 실패했다면 다시 시도
+        setTimeout(() => {
+          if (completedCanvas.value && completedCanvas.value.width === 0) {
+            console.log('🔄 Retrying artwork copy...');
+            copyCompletedArtwork();
+          }
+        }, 500);
+      }, 200);
+    });
   }
 });
+
+// 완성된 작품을 completedCanvas에 복사하는 함수
+const copyCompletedArtwork = async () => {
+  console.log('🖼️ Copying completed artwork to display canvas');
+  
+  if (!completedCanvas.value) {
+    console.error('❌ Completed canvas element not found');
+    return;
+  }
+
+  try {
+    // useCanvas의 getArtworkAsImage 메서드를 사용하여 완성된 작품 가져오기
+    const artworkDataUrl = coloring.canvas.getArtworkAsImage();
+    
+    if (artworkDataUrl) {
+      console.log('✅ Got artwork data URL, loading as image...');
+      
+      // 데이터 URL을 이미지로 로드
+      const img = new Image();
+      
+      img.onload = () => {
+        console.log('🖼️ Image loaded, drawing to completed canvas');
+        
+        const ctx = completedCanvas.value!.getContext('2d');
+        if (ctx) {
+          // 캔버스 크기를 이미지 크기에 맞게 설정
+          completedCanvas.value!.width = img.width;
+          completedCanvas.value!.height = img.height;
+          
+          console.log('🎨 Setting completed canvas size:', {
+            width: img.width,
+            height: img.height
+          });
+          
+          // 이미지 그리기
+          ctx.drawImage(img, 0, 0);
+          console.log('✅ Completed artwork copied successfully from data URL');
+        }
+      };
+      
+      img.onerror = (error) => {
+        console.error('❌ Error loading artwork image:', error);
+        fallbackCopyMethod();
+      };
+      
+      img.src = artworkDataUrl;
+    } else {
+      console.warn('⚠️ No artwork data URL, trying fallback method');
+      fallbackCopyMethod();
+    }
+  } catch (error) {
+    console.error('❌ Error getting artwork as image:', error);
+    fallbackCopyMethod();
+  }
+};
+
+// 폴백 복사 방법 (직접 캔버스에서 복사)
+const fallbackCopyMethod = () => {
+  console.log('🔄 Using fallback copy method');
+  
+  const bgCanvas = coloring.canvas.backgroundCanvas.value;
+  const drawCanvas = coloring.canvas.drawingCanvas.value;
+  
+  if (bgCanvas && drawCanvas && completedCanvas.value) {
+    const ctx = completedCanvas.value.getContext('2d');
+    if (ctx) {
+      // 캔버스 크기 설정
+      completedCanvas.value.width = bgCanvas.width || 600;
+      completedCanvas.value.height = bgCanvas.height || 400;
+      
+      // 흰색 배경 먼저 설정
+      ctx.fillStyle = 'white';
+      ctx.fillRect(0, 0, completedCanvas.value.width, completedCanvas.value.height);
+      
+      // 배경 이미지 먼저 그리기
+      try {
+        ctx.drawImage(bgCanvas, 0, 0);
+        console.log('✅ Background image drawn (fallback)');
+      } catch (error) {
+        console.error('❌ Error drawing background (fallback):', error);
+      }
+      
+      // 그 위에 사용자가 그린 내용 그리기
+      try {
+        ctx.drawImage(drawCanvas, 0, 0);
+        console.log('✅ Drawing canvas drawn (fallback)');
+      } catch (error) {
+        console.error('❌ Error drawing user artwork (fallback):', error);
+      }
+      
+      console.log('✅ Completed artwork copied successfully (fallback method)');
+    }
+  } else {
+    console.error('❌ Fallback method also failed - canvas elements not available');
+  }
+};
 
 // 축하 애니메이션용 컨페티
 const getConfettiStyle = (index: number) => {
@@ -831,25 +977,6 @@ const getFireworkStyle = (index: number) => {
   z-index: 3;
 }
 
-.celebration-icons {
-  display: flex;
-  justify-content: center;
-  gap: 20px;
-  margin-bottom: 20px;
-}
-
-.celebration-icon {
-  font-size: 4rem;
-  animation: bounce 1.5s ease infinite;
-}
-
-.celebration-icon.delay-1 {
-  animation-delay: 0.2s;
-}
-
-.celebration-icon.delay-2 {
-  animation-delay: 0.4s;
-}
 
 /* 완성 배지 */
 .completion-badge {
@@ -951,6 +1078,11 @@ const getFireworkStyle = (index: number) => {
 .completed-canvas {
   display: block;
   border-radius: 8px;
+  max-width: 400px;
+  max-height: 300px;
+  width: auto;
+  height: auto;
+  background: white;
 }
 
 .artwork-shine {

@@ -550,6 +550,59 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
+/* 다크 모드 호환 CSS 변수 정의 */
+:root {
+  /* 라이트 모드 */
+  --color-bg-card: linear-gradient(135deg, #faf9f7, #f8f6f2);
+  --color-bg-button: linear-gradient(135deg, #fff8e1, #ffecb3);
+  --color-bg-accent: linear-gradient(135deg, #a1887f, #8d6e63);
+  --color-bg-elevated: rgba(255, 255, 255, 0.8);
+  --color-text-primary: #5d4037;
+  --color-text-secondary: #6d4c41;
+  --color-text-accent: #ffffff;
+  --color-text-shadow-soft: rgba(255, 255, 255, 0.8);
+  --color-border-soft: rgba(255, 255, 255, 0.6);
+  --color-border-accent: rgba(255, 255, 255, 0.8);
+  --color-border-hover: #8d6e63;
+  --color-shadow-soft: rgba(0, 0, 0, 0.08);
+  --color-shadow-medium: rgba(0, 0, 0, 0.15);
+  --color-violin-wood: linear-gradient(135deg, #d7ccc8, #bcaaa4, #a1887f);
+  --color-violin-accent: #5d4037;
+  --color-violin-fingerboard: linear-gradient(180deg, #424242, #2e2e2e);
+  --color-violin-bridge: linear-gradient(135deg, #f5f5f5, #e0e0e0);
+  --color-string-g: linear-gradient(135deg, #ffcdd2, #f8bbd9);
+  --color-string-d: linear-gradient(135deg, #fff176, #ffee58);
+  --color-string-a: linear-gradient(135deg, #c8e6c9, #a5d6a7);
+  --color-string-e: linear-gradient(135deg, #bbdefb, #90caf9);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* 다크 모드 */
+    --color-bg-card: linear-gradient(135deg, #2d2d2d, #1e1e1e);
+    --color-bg-button: linear-gradient(135deg, #3d3d3d, #2d2d2d);
+    --color-bg-accent: linear-gradient(135deg, #6d4c41, #5d4037);
+    --color-bg-elevated: rgba(255, 255, 255, 0.1);
+    --color-text-primary: #e8e8e8;
+    --color-text-secondary: #b8b8b8;
+    --color-text-accent: #ffffff;
+    --color-text-shadow-soft: rgba(0, 0, 0, 0.8);
+    --color-border-soft: rgba(255, 255, 255, 0.2);
+    --color-border-accent: rgba(255, 255, 255, 0.3);
+    --color-border-hover: #8d6e63;
+    --color-shadow-soft: rgba(0, 0, 0, 0.25);
+    --color-shadow-medium: rgba(0, 0, 0, 0.35);
+    --color-violin-wood: linear-gradient(135deg, #8d6e63, #6d4c41, #5d4037);
+    --color-violin-accent: #a1887f;
+    --color-violin-fingerboard: linear-gradient(180deg, #1a1a1a, #000000);
+    --color-violin-bridge: linear-gradient(135deg, #e0e0e0, #d0d0d0);
+    --color-string-g: linear-gradient(135deg, #f48fb1, #ec407a);
+    --color-string-d: linear-gradient(135deg, #ffeb3b, #ffc107);
+    --color-string-a: linear-gradient(135deg, #81c784, #66bb6a);
+    --color-string-e: linear-gradient(135deg, #64b5f6, #42a5f5);
+  }
+}
+
 .violin-instrument {
   display: flex;
   flex-direction: column;
@@ -563,15 +616,11 @@ onUnmounted(() => {
   display: flex;
   justify-content: center;
   gap: 32px;
-  background: 
-    radial-gradient(circle at 30% 30%, rgba(255, 248, 225, 0.9), transparent 60%),
-    linear-gradient(135deg, #fff8e1, #fff3e0, #fce4ec);
+  background: white;
   border-radius: 20px;
   padding: 20px;
-  box-shadow: 
-    0 8px 25px rgba(0, 0, 0, 0.08),
-    inset 0 2px 4px rgba(255, 255, 255, 0.8);
-  border: 2px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border: 2px solid #ddd;
 }
 
 .stat-item {
@@ -583,15 +632,15 @@ onUnmounted(() => {
 
 .stat-label {
   font-size: 0.9rem;
-  color: #6d4c41;
+  color: #666;
   font-weight: 600;
 }
 
 .stat-value {
   font-size: 1.4rem;
   font-weight: 700;
-  color: #5d4037;
-  text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.8);
+  color: #333;
+  text-shadow: none;
 }
 
 /* 연습 모드 선택 */
@@ -603,52 +652,45 @@ onUnmounted(() => {
 
 .mode-btn {
   padding: 12px 24px;
-  border: 3px solid rgba(255, 255, 255, 0.6);
+  border: 2px solid #ddd;
   border-radius: 20px;
-  background: linear-gradient(135deg, #fff8e1, #ffecb3);
-  color: #5d4037;
+  background: white;
+  color: #333;
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
   font-family: 'Comic Sans MS', cursive, sans-serif;
-  box-shadow: 
-    0 4px 12px rgba(0, 0, 0, 0.08),
-    inset 0 2px 4px rgba(255, 255, 255, 0.7);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .mode-btn.active {
-  background: linear-gradient(135deg, #a1887f, #8d6e63);
+  background: #007bff;
   color: white;
-  border-color: rgba(255, 255, 255, 0.8);
+  border-color: #007bff;
   transform: translateY(-2px);
-  box-shadow: 
-    0 6px 16px rgba(0, 0, 0, 0.15),
-    inset 0 2px 4px rgba(255, 255, 255, 0.3);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 .mode-btn:hover:not(.active) {
   transform: translateY(-1px);
-  border-color: #8d6e63;
+  border-color: #007bff;
+  background: #f8f9fa;
 }
 
 /* 리듬 연습곡 */
 .rhythm-songs {
-  background: 
-    radial-gradient(circle at 20% 20%, rgba(255, 228, 196, 0.8), transparent 50%),
-    linear-gradient(135deg, rgba(255, 248, 225, 0.95), rgba(255, 245, 238, 0.95));
+  background: white;
   border-radius: 25px;
   padding: 24px;
-  border: 3px solid rgba(255, 255, 255, 0.6);
-  box-shadow: 
-    0 8px 25px rgba(0, 0, 0, 0.08),
-    inset 0 2px 4px rgba(255, 255, 255, 0.8);
+  border: 2px solid #ddd;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .rhythm-songs h4 {
   text-align: center;
   margin-bottom: 20px;
-  color: #5d4037;
+  color: #333;
   font-size: 1.1rem;
   font-weight: 600;
 }
@@ -664,27 +706,27 @@ onUnmounted(() => {
   align-items: center;
   gap: 12px;
   padding: 16px;
-  border: 2px solid rgba(255, 255, 255, 0.6);
+  border: 2px solid #ddd;
   border-radius: 16px;
-  background: linear-gradient(135deg, #fff8e1, #ffecb3);
+  background: white;
+  color: #333;
   cursor: pointer;
   transition: all 0.3s ease;
   font-family: 'Comic Sans MS', cursive, sans-serif;
-  box-shadow: 
-    0 4px 12px rgba(0, 0, 0, 0.06),
-    inset 0 2px 4px rgba(255, 255, 255, 0.7);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .song-btn.active {
-  background: linear-gradient(135deg, #8d6e63, #6d4c41);
+  background: #007bff;
   color: white;
-  border-color: rgba(255, 255, 255, 0.8);
+  border-color: #007bff;
   transform: translateY(-2px);
 }
 
 .song-btn:hover:not(.active) {
   transform: translateY(-1px);
-  border-color: #8d6e63;
+  border-color: #007bff;
+  background: #f8f9fa;
 }
 
 .song-icon {
@@ -906,9 +948,9 @@ onUnmounted(() => {
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 
-    0 4px 12px rgba(0, 0, 0, 0.25),
-    inset 0 2px 4px rgba(255, 255, 255, 0.4);
-  border: 2px solid rgba(255, 255, 255, 0.4);
+    0 4px 12px var(--color-shadow-soft),
+    inset 0 2px 4px var(--color-bg-elevated);
+  border: 2px solid var(--color-border-soft);
   z-index: 15;
   flex-shrink: 0;
 }
@@ -969,13 +1011,13 @@ onUnmounted(() => {
   transform: translateX(-50%);
   font-size: 1.1rem;
   font-weight: 700;
-  color: #5d4037;
-  text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.9);
+  color: var(--color-text-primary);
+  text-shadow: 2px 2px 4px var(--color-text-shadow-soft);
   white-space: nowrap;
-  background: rgba(255, 255, 255, 0.8);
+  background: var(--color-bg-elevated);
   padding: 4px 8px;
   border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.6);
+  border: 1px solid var(--color-border-soft);
 }
 
 .string-glow {
@@ -1020,13 +1062,13 @@ onUnmounted(() => {
 .string-name {
   font-size: 0.85rem;
   font-weight: 600;
-  color: #5d4037;
-  text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.8);
+  color: var(--color-text-primary);
+  text-shadow: 1px 1px 2px var(--color-text-shadow-soft);
   white-space: nowrap;
-  background: rgba(255, 255, 255, 0.8);
+  background: var(--color-bg-elevated);
   padding: 4px 8px;
   border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.6);
+  border: 1px solid var(--color-border-soft);
   text-align: center;
   flex-shrink: 0;
 }
@@ -1156,22 +1198,20 @@ onUnmounted(() => {
 /* 드래그 가이드 */
 .drag-guide {
   margin-top: 24px;
-  background: 
-    radial-gradient(circle at 30% 30%, rgba(255, 228, 196, 0.8), transparent 60%),
-    linear-gradient(135deg, rgba(255, 248, 225, 0.95), rgba(255, 245, 238, 0.95));
+  background: var(--color-bg-card);
   border-radius: 20px;
   padding: 24px;
-  border: 2px solid rgba(255, 255, 255, 0.6);
+  border: 2px solid var(--color-border-soft);
   box-shadow: 
-    0 8px 20px rgba(0, 0, 0, 0.06),
-    inset 0 2px 4px rgba(255, 255, 255, 0.8);
+    0 8px 20px var(--color-shadow-soft),
+    inset 0 2px 4px var(--color-bg-elevated);
   text-align: center;
 }
 
 .rhythm-guide h4 {
   text-align: center;
   margin-bottom: 16px;
-  color: #5d4037;
+  color: var(--color-text-primary);
   font-size: 1.1rem;
   font-weight: 600;
 }
@@ -1186,10 +1226,10 @@ onUnmounted(() => {
 
 .rhythm-note {
   padding: 12px 16px;
-  border: 2px solid rgba(255, 255, 255, 0.6);
+  border: 2px solid var(--color-border-soft);
   border-radius: 12px;
-  background: linear-gradient(135deg, #fff8e1, #ffecb3);
-  color: #5d4037;
+  background: var(--color-bg-button);
+  color: var(--color-text-primary);
   font-weight: 600;
   font-size: 1.1rem;
   transition: all 0.3s ease;
@@ -1198,15 +1238,15 @@ onUnmounted(() => {
 }
 
 .rhythm-note.active {
-  background: linear-gradient(135deg, #8d6e63, #6d4c41);
-  color: white;
+  background: var(--color-bg-accent);
+  color: var(--color-text-accent);
   transform: scale(1.1);
   animation: noteHighlight 0.5s ease;
 }
 
 .rhythm-note.completed {
-  background: linear-gradient(135deg, #c8e6c9, #a5d6a7);
-  border-color: #66bb6a;
+  background: var(--color-string-a);
+  border-color: var(--color-border-hover);
 }
 
 @keyframes noteHighlight {
@@ -1223,27 +1263,27 @@ onUnmounted(() => {
 
 .rhythm-btn {
   padding: 12px 20px;
-  border: 2px solid rgba(255, 255, 255, 0.6);
+  border: 2px solid #ddd;
   border-radius: 12px;
-  background: linear-gradient(135deg, #fff8e1, #ffecb3);
-  color: #5d4037;
+  background: white;
+  color: #333;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
   font-family: 'Comic Sans MS', cursive, sans-serif;
-  box-shadow: 
-    0 4px 8px rgba(0, 0, 0, 0.08),
-    inset 0 2px 4px rgba(255, 255, 255, 0.7);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .rhythm-btn:hover {
   transform: translateY(-2px);
-  border-color: #8d6e63;
+  border-color: #007bff;
+  background: #f8f9fa;
 }
 
 .rhythm-btn.start {
-  background: linear-gradient(135deg, #c8e6c9, #a5d6a7);
-  border-color: #66bb6a;
+  background: #28a745;
+  color: white;
+  border-color: #28a745;
 }
 
 .rhythm-progress {
@@ -1253,23 +1293,23 @@ onUnmounted(() => {
 .progress-bar {
   width: 100%;
   height: 8px;
-  background: rgba(255, 255, 255, 0.6);
+  background: var(--color-border-soft);
   border-radius: 4px;
   margin-bottom: 8px;
   overflow: hidden;
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: inset 0 2px 4px var(--color-shadow-soft);
 }
 
 .progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, #8d6e63, #a1887f);
+  background: var(--color-bg-accent);
   border-radius: 4px;
   transition: width 0.3s ease;
 }
 
 .progress-text {
   font-size: 0.9rem;
-  color: #5d4037;
+  color: var(--color-text-primary);
   font-weight: 600;
 }
 
@@ -1362,17 +1402,17 @@ onUnmounted(() => {
 }
 
 .guide-text {
-  background: linear-gradient(135deg, #fff8e1, #ffecb3);
-  color: #5d4037;
+  background: var(--color-bg-button);
+  color: var(--color-text-primary);
   padding: 8px 16px;
   border-radius: 12px;
   font-size: 1rem;
   font-weight: 600;
   font-family: 'Comic Sans MS', cursive, sans-serif;
-  border: 2px solid rgba(255, 255, 255, 0.6);
+  border: 2px solid var(--color-border-soft);
   box-shadow: 
-    0 4px 12px rgba(0, 0, 0, 0.1),
-    inset 0 2px 4px rgba(255, 255, 255, 0.7);
+    0 4px 12px var(--color-shadow-soft),
+    inset 0 2px 4px var(--color-bg-elevated);
   animation: guideFloat 2s ease-in-out infinite;
   white-space: nowrap;
 }
@@ -1466,20 +1506,20 @@ onUnmounted(() => {
 
 .drag-guide h4 {
   margin-bottom: 12px;
-  color: #5d4037;
+  color: var(--color-text-primary);
   font-size: 1.2rem;
   font-weight: 600;
 }
 
 .drag-instruction {
   margin-bottom: 16px;
-  color: #6d4c41;
+  color: var(--color-text-secondary);
   font-size: 0.95rem;
   line-height: 1.4;
-  background: rgba(255, 255, 255, 0.5);
+  background: var(--color-bg-elevated);
   padding: 12px;
   border-radius: 12px;
-  border: 1px solid rgba(255, 152, 0, 0.2);
+  border: 1px solid var(--color-border-soft);
 }
 
 .song-progress {
@@ -1491,30 +1531,28 @@ onUnmounted(() => {
   justify-content: center;
   align-items: center;
   gap: 12px;
-  background: 
-    linear-gradient(135deg, #e8f5e8, #c8e6c9);
-  border: 2px solid rgba(76, 175, 80, 0.3);
+  background: var(--color-string-a);
+  border: 2px solid var(--color-border-soft);
   border-radius: 16px;
   padding: 16px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 8px var(--color-shadow-soft);
 }
 
 .note-label {
   font-size: 0.9rem;
-  color: #2e7d32;
+  color: var(--color-text-secondary);
   font-weight: 500;
 }
 
 .note-display {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #1b5e20;
-  background: 
-    linear-gradient(135deg, #a5d6a7, #81c784);
+  color: var(--color-text-primary);
+  background: var(--color-bg-button);
   padding: 8px 16px;
   border-radius: 12px;
-  border: 2px solid rgba(255, 255, 255, 0.6);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  border: 2px solid var(--color-border-soft);
+  box-shadow: 0 2px 6px var(--color-shadow-soft);
   min-width: 60px;
   text-align: center;
 }

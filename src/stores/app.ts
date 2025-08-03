@@ -269,10 +269,9 @@ export const useAppStore = defineStore('app', () => {
 
   // 단어 수정
   const updateWord = async (id: string, updates: Partial<WordItem>) => {
-    if ((updates.imageUrl !== undefined && (!updates.imageUrl || updates.imageUrl === '')) ||
-        (updates.audioKo !== undefined && (!updates.audioKo || updates.audioKo === '')) ||
-        (updates.audioEn !== undefined && (!updates.audioEn || updates.audioEn === ''))) {
-      throw new Error('이미지와 한/영 음성은 필수입니다.');
+    // 이미지만 필수, 음성은 TTS로 대체 가능하므로 선택사항
+    if (updates.imageUrl !== undefined && (!updates.imageUrl || updates.imageUrl === '')) {
+      throw new Error('이미지는 필수입니다.');
     }
     try {
       console.log('📝 Updating word in database:', id);
@@ -281,8 +280,8 @@ export const useAppStore = defineStore('app', () => {
       if (updates.name) dbUpdates.name = updates.name;
       if (updates.nameEn) dbUpdates.name_en = updates.nameEn;
       if (updates.imageUrl) dbUpdates.image_url = updates.imageUrl;
-      if (updates.audioKo) dbUpdates.audio_ko = updates.audioKo;
-      if (updates.audioEn) dbUpdates.audio_en = updates.audioEn;
+      if (updates.audioKo !== undefined) dbUpdates.audio_ko = updates.audioKo;
+      if (updates.audioEn !== undefined) dbUpdates.audio_en = updates.audioEn;
       if (updates.category) dbUpdates.category = updates.category;
       if (updates.minAge) dbUpdates.min_age = updates.minAge;
       if (updates.maxAge) dbUpdates.max_age = updates.maxAge;

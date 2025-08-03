@@ -149,7 +149,7 @@ const whiteKeys: PianoKey[] = [
   { note: 'G4', label: '솔', position: 11 * WHITE_KEY_WIDTH_PERCENT, isBlack: false, octave: 4 },
 ];
 
-// 검은 건반 정의 (총 9개)
+// 검은 건반 정의 (총 8개)
 const blackKeys: PianoKey[] = [
   { note: 'C#3', label: '도#', position: 0 * WHITE_KEY_WIDTH_PERCENT + BLACK_KEY_OFFSET_PERCENT, isBlack: true, octave: 3 },
   { note: 'D#3', label: '레#', position: 1 * WHITE_KEY_WIDTH_PERCENT + BLACK_KEY_OFFSET_PERCENT, isBlack: true, octave: 3 },
@@ -160,7 +160,6 @@ const blackKeys: PianoKey[] = [
   { note: 'C#4', label: '도#', position: 7 * WHITE_KEY_WIDTH_PERCENT + BLACK_KEY_OFFSET_PERCENT, isBlack: true, octave: 4 },
   { note: 'D#4', label: '레#', position: 8 * WHITE_KEY_WIDTH_PERCENT + BLACK_KEY_OFFSET_PERCENT, isBlack: true, octave: 4 },
   { note: 'F#4', label: '파#', position: 10 * WHITE_KEY_WIDTH_PERCENT + BLACK_KEY_OFFSET_PERCENT, isBlack: true, octave: 4 },
-  { note: 'G#4', label: '솔#', position: 11 * WHITE_KEY_WIDTH_PERCENT + BLACK_KEY_OFFSET_PERCENT, isBlack: true, octave: 4 },
 ];
 
 interface Song {
@@ -382,7 +381,7 @@ const handleKeyboardEvent = (event: KeyboardEvent) => {
     'a': 'C3', 's': 'D3', 'd': 'E3', 'f': 'F3', 'g': 'G3', 'h': 'A3', 'j': 'B3',
     'k': 'C4', 'l': 'D4', ';': 'E4', '\'': 'F4', 'z': 'G4',
     'w': 'C#3', 'e': 'D#3', 't': 'F#3', 'y': 'G#3', 'u': 'A#3',
-    'o': 'C#4', 'p': 'D#4', '[': 'F#4', ']': 'G#4',
+    'o': 'C#4', 'p': 'D#4', '[': 'F#4',
   };
   
   const note = keyMap[event.key.toLowerCase()];
@@ -401,7 +400,7 @@ const handleKeyboardUp = (event: KeyboardEvent) => {
     'a': 'C3', 's': 'D3', 'd': 'E3', 'f': 'F3', 'g': 'G3', 'h': 'A3', 'j': 'B3',
     'k': 'C4', 'l': 'D4', ';': 'E4', '\'': 'F4', 'z': 'G4',
     'w': 'C#3', 'e': 'D#3', 't': 'F#3', 'y': 'G#3', 'u': 'A#3',
-    'o': 'C#4', 'p': 'D#4', '[': 'F#4', ']': 'G#4',
+    'o': 'C#4', 'p': 'D#4', '[': 'F#4',
   };
   
   const note = keyMap[event.key.toLowerCase()];
@@ -504,28 +503,29 @@ watch(selectedSong, () => {
 
 .song-select {
   padding: 8px 12px;
-  border: 1px solid var(--color-border);
+  border: 1px solid #ddd;
   border-radius: 8px;
-  background: var(--color-bg-secondary);
-  color: var(--color-text-primary);
+  background: white;
+  color: #333;
   font-size: 0.9rem;
   cursor: pointer;
 }
 
 .guide-btn {
   padding: 8px 12px;
-  border: 1px solid var(--color-border);
+  border: 1px solid #ddd;
   border-radius: 8px;
-  background: var(--color-bg-secondary);
-  color: var(--color-text-primary);
+  background: white;
+  color: #333;
   font-size: 0.9rem;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .guide-btn:hover:not(:disabled) {
-  background: var(--color-bg-hover);
-  border-color: var(--color-primary);
+  background: #f5f5f5;
+  border-color: #007bff;
+  color: #333;
 }
 
 .guide-btn:disabled {
@@ -534,36 +534,36 @@ watch(selectedSong, () => {
 }
 
 .auto-play-btn {
-  background: var(--color-primary);
+  background: #007bff;
   color: white;
-  border-color: var(--color-primary);
+  border-color: #007bff;
 }
 
 .auto-play-btn:hover:not(:disabled) {
-  background: var(--color-primary-dark);
-  border-color: var(--color-primary-dark);
+  background: #0056b3;
+  border-color: #0056b3;
 }
 
 .stop-auto-play-btn {
-  background: var(--color-danger);
+  background: #dc3545;
   color: white;
-  border-color: var(--color-danger);
+  border-color: #dc3545;
 }
 
 .stop-auto-play-btn:hover:not(:disabled) {
-  background: var(--color-danger-dark);
-  border-color: var(--color-danger-dark);
+  background: #c82333;
+  border-color: #c82333;
 }
 
 .reset-btn {
-  background: var(--color-info);
+  background: #17a2b8;
   color: white;
-  border-color: var(--color-info);
+  border-color: #17a2b8;
 }
 
 .reset-btn:hover:not(:disabled) {
-  background: var(--color-info-dark);
-  border-color: var(--color-info-dark);
+  background: #138496;
+  border-color: #138496;
 }
 
 /* 피아노 키보드 */
@@ -587,7 +587,7 @@ watch(selectedSong, () => {
 .white-key {
   position: absolute;
   height: 100%;
-  background: var(--color-bg-card);
+  background: #ffffff;
   border: 1px solid var(--color-border);
   border-radius: 0 0 8px 8px;
   cursor: pointer;
@@ -601,7 +601,7 @@ watch(selectedSong, () => {
 }
 
 .white-key:hover {
-  background: var(--color-bg-hover);
+  background: #f8f8f8;
   transform: translateY(-2px);
   box-shadow: var(--shadow-lg);
 }
@@ -639,8 +639,8 @@ watch(selectedSong, () => {
 .black-key {
   position: absolute;
   height: 100%;
-  background: var(--color-text-primary);
-  border: 1px solid var(--color-text-primary);
+  background: #2c2c2c;
+  border: 1px solid #2c2c2c;
   border-radius: 0 0 6px 6px;
   cursor: pointer;
   transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
@@ -655,7 +655,7 @@ watch(selectedSong, () => {
 }
 
 .black-key:hover {
-  background: var(--color-text-secondary);
+  background: #404040;
   transform: translateY(-2px);
   box-shadow: var(--shadow-dark-hover);
 }
@@ -683,12 +683,12 @@ watch(selectedSong, () => {
 .key-label {
   font-size: 0.9rem;
   font-weight: 600;
-  color: var(--color-text-secondary);
+  color: #666666;
   text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.8);
 }
 
 .black-key .key-label {
-  color: var(--color-bg-card);
+  color: #ffffff;
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
 }
 
