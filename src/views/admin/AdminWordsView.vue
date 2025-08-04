@@ -223,7 +223,7 @@
 
             <div class="form-group">
               <label class="form-label">
-                이미지 *
+                이미지
                 <button 
                   type="button" 
                   class="info-tooltip" 
@@ -233,7 +233,7 @@
                   ℹ️
                 </button>
                 <div v-if="activeTooltip === 'image'" class="tooltip">
-                  단어를 나타내는 이미지를 업로드하세요 (JPG, PNG 등)
+                  이미지를 업로드하거나 비워두면 단어명으로 자동 검색합니다
                 </div>
               </label>
               <FileUploadInput
@@ -241,7 +241,7 @@
                 label="이미지"
                 placeholder="https://example.com/image.jpg"
                 file-type="image"
-                :required="true"
+                :required="false"
               />
             </div>
 
@@ -292,6 +292,11 @@
                   :required="false"
                 />
               </div>
+            </div>
+
+            <div class="auto-fetch-info">
+              <div class="info-icon">🖼️</div>
+              <span>이미지가 없으면 Pexels에서 자동으로 검색하여 가져옵니다</span>
             </div>
 
             <div class="tts-info">
@@ -419,9 +424,9 @@
               v-else 
               type="submit" 
               class="btn btn-primary" 
-              :disabled="isLoading"
+              :disabled="isLoading || isSearching"
             >
-              {{ isLoading ? '저장 중...' : (showAddModal ? '단어 추가' : '수정 완료') }}
+              {{ getLoadingText() }}
             </button>
           </div>
         </form>
@@ -460,12 +465,14 @@ import AdminHeader from '@/components/AdminHeader.vue';
 import FileUploadInput from '@/components/FileUploadInput.vue';
 import { useAppStore } from '@/stores/app';
 import { useAuthStore } from '@/stores/auth';
+import { useAutoImageFetch } from '@/composables/useAutoImageFetch';
 import type { WordItem } from '@/types';
 import { useI18n } from 'vue-i18n';
 
 const store = useAppStore();
 const authStore = useAuthStore();
 const { t, messages } = useI18n();
+const { isSearching, searchError, fetchAndUploadImage, clearError } = useAutoImageFetch();
 
 const showAddModal = ref(false);
 const showEditModal = ref(false);
@@ -514,6 +521,16 @@ const getImageUrl = (url: string): string => {
     return '/server' + url;
   }
   return url;
+};
+
+const getLoadingText = (): string => {
+  if (isSearching.value) {
+    return '이미지 검색 중...';
+  }
+  if (isLoading.value) {
+    return '저장 중...';
+  }
+  return showAddModal.value ? '단어 추가' : '수정 완료';
 };
 
 const resetForm = () => {
@@ -580,10 +597,8 @@ const validateCurrentStep = (): boolean => {
       return false;
     }
   } else if (currentStep.value === 2) {
-    if (!formData.imageUrl.trim()) {
-      error.value = '이미지를 업로드해주세요.';
-      return false;
-    }
+    // 이미지가 없어도 자동으로 가져올 수 있으므로 선택사항으로 변경
+    // 이미지 검증은 저장 시점에서 처리
   }
   
   return true;
@@ -632,12 +647,38 @@ const saveWord = async () => {
 
   isLoading.value = true;
   error.value = '';
+  clearError();
 
   try {
+    let imageUrl = formData.imageUrl;
+
+    // 이미지가 없을 경우 Pexels에서 자동으로 가져오기
+    if (!imageUrl.trim() && formData.name.trim() && formData.nameEn.trim()) {
+      console.log('🔍 No image provided, auto-fetching from Pexels...');
+      
+      const fetchedImageUrl = await fetchAndUploadImage(formData.name, formData.nameEn);
+      
+      if (fetchedImageUrl) {
+        imageUrl = fetchedImageUrl;
+        console.log('✅ Auto-fetched image successfully:', imageUrl);
+      } else {
+        // 이미지를 가져올 수 없는 경우 사용자에게 알림
+        if (searchError.value) {
+          error.value = `이미지 자동 가져오기 실패: ${searchError.value} 직접 이미지를 업로드해주세요.`;
+        } else {
+          error.value = '이미지를 자동으로 가져올 수 없습니다. 직접 이미지를 업로드해주세요.';
+        }
+        return;
+      }
+    } else if (!imageUrl.trim()) {
+      error.value = '이미지를 업로드하거나 한국어/영어 이름을 입력해주세요.';
+      return;
+    }
+
     const wordData = {
       name: formData.name,
       nameEn: formData.nameEn,
-      imageUrl: formData.imageUrl,
+      imageUrl: imageUrl,
       audioKo: formData.audioKo,
       audioEn: formData.audioEn,
       category: formData.category,
@@ -1271,6 +1312,20 @@ onMounted(async () => {
   border-left: 4px solid transparent;
   border-right: 4px solid transparent;
   border-bottom: 4px solid var(--color-bg-card);
+}
+
+/* Auto-fetch 정보 스타일 */
+.auto-fetch-info {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(147, 51, 234, 0.1));
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  padding: var(--spacing-md);
+  border-radius: var(--radius-md);
+  color: var(--color-text-secondary);
+  font-size: 0.875rem;
+  margin-top: var(--spacing-md);
 }
 
 /* TTS 정보 스타일 */
