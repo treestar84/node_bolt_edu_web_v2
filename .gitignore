@@ -23,7 +23,6 @@ public/.DS_Store
 supabase/.DS_Store
 server/.DS_Store
 server/uploads/
-server/data/
 *.suo
 *.ntvs*
 *.njsproj
@@ -38,8 +37,9 @@ server/data/
 .env.production.local
 
 # Security sensitive files
-server/data/
 server/uploads/
+server/data/*.json
+!server/data/*.js
 *.key
 *.pem
 *.p12
