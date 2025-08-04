@@ -5,7 +5,7 @@ import { getApiKeys as getDbApiKeys, getApiKeyForAuth as getDbApiKeyForAuth, add
 const ENV_API_KEYS = [
   {
     id: 'env-primary-key',
-    key: process.env.VITE_API_KEY || '9d4d66b259384b44be5dccee037a4cc1',
+    key: process.env.VITE_API_KEY,
     name: 'Primary Environment Key',
     description: 'Primary API key from environment variables',
     active: true,
@@ -13,7 +13,7 @@ const ENV_API_KEYS = [
     lastUsed: null,
     usageCount: 0
   }
-];
+].filter(key => key.key); // 환경변수가 없으면 제외
 
 // 모든 API 키 조회 (DB + 환경변수)
 export const getApiKeys = async () => {

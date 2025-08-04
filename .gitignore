@@ -39,6 +39,7 @@ server/uploads/
 # Security sensitive files
 server/uploads/
 server/data/*.json
+server/data/apiKeys.json
 !server/data/*.js
 *.key
 *.pem
