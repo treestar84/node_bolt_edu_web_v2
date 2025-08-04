@@ -5,13 +5,57 @@ export function useAudio() {
   const currentAudio = ref<HTMLAudioElement | null>(null);
   const audioDuration = ref(0);
   let currentTimeoutId: NodeJS.Timeout | null = null;
+  let audioContext: AudioContext | null = null;
+  let isAudioUnlocked = ref(false);
+
+  // Initialize audio context for mobile devices
+  const initializeAudioContext = async () => {
+    if (audioContext) return;
+    
+    try {
+      audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      
+      if (audioContext.state === 'suspended') {
+        await audioContext.resume();
+      }
+      
+      isAudioUnlocked.value = true;
+      console.log('🔊 Audio context initialized:', audioContext.state);
+    } catch (error) {
+      console.error('Failed to initialize audio context:', error);
+    }
+  };
+
+  // Unlock audio on first user interaction
+  const unlockAudio = async () => {
+    if (isAudioUnlocked.value) return;
+    
+    try {
+      await initializeAudioContext();
+      
+      // Create a silent audio buffer to unlock audio
+      const silentAudio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNTBFVi1wVcpnq+K0QUKFWKNcQJunYYwJQYHBIZfOPZ5YOF5xfEglQ3qyKY5Dfjxr/YtWTD3fmPnMZNKPRXmFP6BjyTYo');
+      silentAudio.volume = 0.01;
+      await silentAudio.play();
+      
+      isAudioUnlocked.value = true;
+      console.log('🔓 Audio unlocked successfully');
+    } catch (error) {
+      console.warn('Audio unlock failed:', error);
+    }
+  };
 
   const playAudio = (
     audioUrl: string,
     options?: { fallbackText?: string; onEnded?: () => void } | string
   ): Promise<number> => {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       console.log('🎵 Starting audio playback:', audioUrl);
+      
+      // Ensure audio is unlocked on mobile
+      if (!isAudioUnlocked.value) {
+        await unlockAudio();
+      }
       
       // Handle both string and object options for backward compatibility
       let fallbackText: string | undefined;
@@ -37,7 +81,17 @@ export function useAudio() {
         currentAudio.value = null;
       }
 
-      const audio = new Audio(audioUrl);
+      const audio = new Audio();
+      audio.crossOrigin = 'anonymous';
+      audio.preload = 'auto';
+      audio.src = audioUrl;
+      
+      // Mobile optimization
+      (audio as any).playsInline = true;
+      if ('webkitPlaysInline' in audio) {
+        (audio as any).webkitPlaysInline = true;
+      }
+      
       currentAudio.value = audio;
       isPlaying.value = true;
 
@@ -248,6 +302,8 @@ export function useAudio() {
     isPlaying,
     audioDuration,
     playAudio,
-    stopAudio
+    stopAudio,
+    unlockAudio,
+    isAudioUnlocked
   };
 }
