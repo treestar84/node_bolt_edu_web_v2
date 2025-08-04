@@ -12,14 +12,14 @@
               class="btn btn-sm"
               :class="viewMode === 'grid' ? 'btn-primary' : 'btn-secondary'"
             >
-              📱 전체보기
+              📱 {{ $t('words.gridView') }}
             </button>
             <button 
               @click="viewMode = 'single'"
               class="btn btn-sm"
               :class="viewMode === 'single' ? 'btn-primary' : 'btn-secondary'"
             >
-              🎯 학습모드
+              🎯 {{ $t('words.learningMode') }}
             </button>
           </div>
           
@@ -85,8 +85,8 @@
 
 
             <div class="learning-header">
-              <div class="learning-desc">{{$t('page.singleDesc')}}</div>
-              <div class="content-count">{{$t('page.contentCount', { count: filteredWords.length })}}</div>
+              <div class="learning-desc">{{$t('words.singleDesc')}}</div>
+              <div class="content-count">{{$t('words.contentCount', { count: filteredWords.length })}}</div>
               <div class="progress-info">
                 <span class="current-word">{{ currentWordIndex + 1 }} / {{ filteredWords.length }}</span>
                 <div class="progress-bar">
@@ -104,7 +104,7 @@
                     v-model="autoAdvanceEnabled"
                     @change="toggleAutoAdvance"
                   />
-                  <span class="toggle-text">{{$t('page.autoAdvance')}}</span>
+                  <span class="toggle-text">{{$t('words.autoAdvance')}}</span>
                 </label>
               </div>
             </div>
@@ -123,16 +123,16 @@
 
         <div v-if="filteredWords.length === 0" class="empty-state">
           <div class="empty-icon">📚</div>
-          <h3>{{$t('page.emptyTitle')}}</h3>
-          <p>{{$t('page.emptyDesc')}}</p>
-          <router-link to="/admin" class="btn btn-primary">{{$t('page.adminBtn')}}</router-link>
+          <h3>{{$t('words.emptyTitle')}}</h3>
+          <p>{{$t('words.emptyDesc')}}</p>
+          <router-link to="/admin" class="btn btn-primary">{{$t('words.adminBtn')}}</router-link>
         </div>
       </div>
     </main>
 
     <div class="content-controls">
       <div class="footer-top-row">
-        <h1 class="footer-title">{{$t('page.title')}}</h1>
+        <h1 class="footer-title">{{$t('words.title')}}</h1>
         <div class="view-mode-toggle">
           <button 
             @click="viewMode = 'grid'"
@@ -158,14 +158,14 @@
             :disabled="currentWordIndex === 0"
             class="btn btn-sm btn-secondary"
           >
-            {{$t('page.prev')}}
+            {{$t('common.prev')}}
           </button>
           
           <button 
             @click="shuffleWords"
             class="btn btn-sm btn-secondary"
           >
-            {{$t('page.shuffle')}}
+            {{$t('words.shuffle')}}
           </button>
           
           <button 
@@ -173,7 +173,7 @@
             :disabled="currentWordIndex === filteredWords.length - 1"
             class="btn btn-sm btn-secondary"
           >
-            {{$t('page.next')}}
+            {{$t('common.next')}}
           </button>
         </div>
         

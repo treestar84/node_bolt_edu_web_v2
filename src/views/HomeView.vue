@@ -22,21 +22,21 @@
           <!-- 콘텐츠 레이어 -->
           <div class="hero-content">
             <div class="hero-badge">
-              {{ authStore.childAge }}세 맞춤 학습
+              {{ $t('home.ageCustomized', { age: authStore.childAge }) }}
             </div>
             <h1 class="hero-title fade-in">
-              You are my heart outside my body.
+              {{ $t('home.title') }}
             </h1>
             <p class="hero-description fade-in">
-              {{$t('landing.description')}}
+              {{ $t('home.description') }}
             </p>
 
             <div class="hero-actions fade-in">
               <router-link to="/words" class="btn btn-primary btn-lg">
-                단어 학습하기
+                {{ $t('home.startWords') }}
               </router-link>
               <router-link to="/quiz" class="btn btn-secondary btn-lg">
-                퀴즈 놀이
+                {{ $t('home.startQuiz') }}
               </router-link>
             </div>
           </div>

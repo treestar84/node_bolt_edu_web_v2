@@ -2,13 +2,13 @@ import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import { useSupabase } from '@/composables/useSupabase';
 import type { WordItem, Book, Badge, ApiKey, Language } from '@/types';
-import { i18n } from '@/main';
+import { changeLanguageWithEvent, getCurrentLanguage } from '@/utils/i18n';
 
 export const useAppStore = defineStore('app', () => {
   const { supabase } = useSupabase();
   
-  // Language state
-  const currentLanguage = ref<Language>('ko');
+  // Language state - i18n 시스템과 동기화
+  const currentLanguage = ref<Language>(getCurrentLanguage());
   
   // Words state - 공용 콘텐츠 우선 로드
   const currentWords = ref<WordItem[]>([]);
@@ -64,11 +64,18 @@ export const useAppStore = defineStore('app', () => {
   });
 
   // Actions
-  const setLanguage = (language: Language) => {
-    currentLanguage.value = language;
-    if (i18n.global) {
-      i18n.global.locale.value = language;
+  const setLanguage = async (language: Language) => {
+    console.log(`🌐 Changing language from ${currentLanguage.value} to ${language}`);
+    
+    const success = await changeLanguageWithEvent(language);
+    if (success) {
+      currentLanguage.value = language;
+      console.log(`✅ Language successfully changed to ${language}`);
+    } else {
+      console.error(`❌ Failed to change language to ${language}`);
     }
+    
+    return success;
   };
 
   // 공용 콘텐츠 우선 로드 (인증 없이도 접근 가능) - 개선된 버전

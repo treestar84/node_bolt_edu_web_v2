@@ -49,7 +49,7 @@
         <div v-else-if="coloring.gameState.value === 'coloring'" class="coloring-game">
           <div class="game-header">
             <button @click="coloring.goHome" class="btn btn-secondary back-btn">
-              ← {{$t('coloring.back')}}
+              ← {{$t('common.back')}}
             </button>
             <div class="header-center">
               <h2 class="coloring-title">{{ coloring.getCurrentName(coloring.selectedWord.value!) }} {{$t('coloring.title')}}</h2>

@@ -1,17 +1,17 @@
 <template>
-  <nav class="navigation" role="navigation" aria-label="메인 네비게이션">
+  <nav class="navigation" role="navigation" :aria-label="$t('navigation.mainNavigation')">
     <div class="container">
       <div class="nav-content">
         <div class="nav-left">
           <router-link 
             to="/" 
             class="nav-brand"
-            aria-label="홈페이지로 이동"
+            :aria-label="$t('navigation.goToHome')"
           >
             <span class="brand-text">{{ authStore.siteName }}</span>
           </router-link>
           
-          <ul class="nav-menu desktop-menu" role="menubar" aria-label="데스크톱 메뉴">
+          <ul class="nav-menu desktop-menu" role="menubar" :aria-label="$t('navigation.desktopMenu')">
             <li role="none" v-for="item in menuItems" :key="item.path">
               <router-link 
                 :to="item.path" 
@@ -20,7 +20,7 @@
                 role="menuitem"
                 :aria-current="$route.path === item.path ? 'page' : undefined"
               >
-                <span class="nav-text">{{$t('menu.'+item.key)}}</span>
+                <span class="nav-text">{{$t('navigation.'+item.key)}}</span>
               </router-link>
             </li>
           </ul>
@@ -33,7 +33,7 @@
             @keydown.escape="closeMobileMenu"
             class="mobile-menu-btn"
             :class="{ active: mobileMenuOpen }"
-            :aria-label="mobileMenuOpen ? '메뉴 닫기' : '메뉴 열기'"
+            :aria-label="mobileMenuOpen ? $t('navigation.closeMenu') : $t('navigation.openMenu')"
             :aria-expanded="mobileMenuOpen"
             aria-controls="mobile-menu"
             type="button"
@@ -44,7 +44,7 @@
           </button>
 
           <div class="nav-controls desktop-controls">
-            <div class="age-indicator" v-if="authStore.userProfile" role="status" aria-label="자녀 나이">
+            <div class="age-indicator" v-if="authStore.userProfile" role="status" :aria-label="$t('ui.childAge')">
               <span class="age-badge">{{ authStore.childAge }}세</span>
             </div>
             
@@ -52,52 +52,43 @@
               <button 
                 @click="toggleTheme"
                 class="theme-btn"
-                :aria-label="isDark ? '라이트 모드로 변경' : '다크 모드로 변경'"
-                :title="isDark ? '라이트 모드로 변경' : '다크 모드로 변경'"
+                :aria-label="isDark ? $t('ui.theme.switchToLight') : $t('ui.theme.switchToDark')"
+                :title="isDark ? $t('ui.theme.switchToLight') : $t('ui.theme.switchToDark')"
                 type="button"
               >
                 <span class="theme-icon" aria-hidden="true">{{ isDark ? '☀️' : '🌙' }}</span>
               </button>
             </div>
             
-            <fieldset class="language-toggle" aria-label="언어 선택">
-              <legend class="sr-only">언어 선택</legend>
+            <div class="language-selector">
               <button 
-                @click="() => setLanguage('ko')"
-                class="btn btn-secondary btn-sm"
-                :class="{ active: store.currentLanguage === 'ko' }"
-                :aria-pressed="store.currentLanguage === 'ko'"
-                aria-label="한국어로 변경"
+                @click="toggleLanguage"
+                class="language-toggle-btn"
+                :aria-label="$t('ui.language.select')"
+                :title="$t('ui.language.select')"
                 type="button"
               >
-                한글
+                <span class="current-language">
+                  {{ store.currentLanguage === 'ko' ? '한글' : 'ENG' }}
+                </span>
+                <span class="language-icon" aria-hidden="true">🌐</span>
               </button>
-              <button 
-                @click="() => setLanguage('en')"
-                class="btn btn-secondary btn-sm"
-                :class="{ active: store.currentLanguage === 'en' }"
-                :aria-pressed="store.currentLanguage === 'en'"
-                aria-label="영어로 변경"
-                type="button"
-              >
-                ENG
-              </button>
-            </fieldset>
+            </div>
             
-            <nav class="user-menu" v-if="authStore.isAuthenticated" aria-label="사용자 메뉴">
+            <nav class="user-menu" v-if="authStore.isAuthenticated" :aria-label="$t('navigation.userMenu')">
               <router-link 
                 to="/settings" 
                 class="btn btn-sm btn-secondary"
-                aria-label="설정 페이지로 이동"
+                :aria-label="$t('navigation.goToSettings')"
               >
-                {{$t('menu.settings')}}
+                {{$t('navigation.settings')}}
               </router-link>
               <router-link 
                 to="/admin" 
                 class="btn btn-sm btn-secondary"
-                aria-label="관리자 페이지로 이동"
+                :aria-label="$t('navigation.goToAdmin')"
               >
-                {{$t('menu.admin')}}
+                {{$t('navigation.admin')}}
               </router-link>
             </nav>
             
@@ -105,16 +96,16 @@
               <router-link 
                 to="/login" 
                 class="btn btn-sm btn-primary"
-                aria-label="로그인 페이지로 이동"
+                :aria-label="$t('navigation.goToLogin')"
               >
-                {{$t('menu.login')}}
+                {{$t('navigation.login')}}
               </router-link>
               <router-link 
                 to="/admin" 
                 class="btn btn-sm btn-secondary"
-                aria-label="관리자 페이지로 이동"
+                :aria-label="$t('navigation.goToAdmin')"
               >
-                {{$t('menu.admin')}}
+                {{$t('navigation.admin')}}
               </router-link>
             </div>
           </div>
@@ -137,11 +128,11 @@
       class="mobile-menu" 
       :class="{ open: mobileMenuOpen }"
       :aria-hidden="!mobileMenuOpen"
-      aria-label="모바일 메뉴"
+      :aria-label="$t('navigation.mobileMenu')"
     >
       <div class="mobile-menu-content">
         <div class="mobile-menu-header">
-          <div class="age-indicator" v-if="authStore.userProfile" role="status" aria-label="자녀 나이">
+          <div class="age-indicator" v-if="authStore.userProfile" role="status" :aria-label="$t('ui.childAge')">
             <span class="age-badge">{{ authStore.childAge }}세</span>
           </div>
           
@@ -150,23 +141,23 @@
               <button 
                 @click="toggleTheme"
                 class="theme-btn"
-                :aria-label="isDark ? '라이트 모드로 변경' : '다크 모드로 변경'"
-                :title="isDark ? '라이트 모드로 변경' : '다크 모드로 변경'"
+                :aria-label="isDark ? $t('ui.theme.switchToLight') : $t('ui.theme.switchToDark')"
+                :title="isDark ? $t('ui.theme.switchToLight') : $t('ui.theme.switchToDark')"
                 type="button"
               >
                 <span class="theme-icon" aria-hidden="true">{{ isDark ? '☀️' : '🌙' }}</span>
-                <span class="theme-text">{{ isDark ? '라이트' : '다크' }}</span>
+                <span class="theme-text">{{ isDark ? $t('ui.theme.light') : $t('ui.theme.dark') }}</span>
               </button>
             </div>
             
-            <fieldset class="language-toggle" aria-label="언어 선택">
-              <legend class="sr-only">언어 선택</legend>
+            <fieldset class="language-toggle" :aria-label="$t('ui.language.select')">
+              <legend class="sr-only">{{ $t('ui.language.select') }}</legend>
               <button 
                 @click="() => setLanguage('ko')"
                 class="btn btn-secondary btn-sm"
                 :class="{ active: store.currentLanguage === 'ko' }"
                 :aria-pressed="store.currentLanguage === 'ko'"
-                aria-label="한국어로 변경"
+                :aria-label="$t('ui.language.switchToKorean')"
                 type="button"
               >
                 한글
@@ -176,7 +167,7 @@
                 class="btn btn-secondary btn-sm"
                 :class="{ active: store.currentLanguage === 'en' }"
                 :aria-pressed="store.currentLanguage === 'en'"
-                aria-label="영어로 변경"
+                :aria-label="$t('ui.language.switchToEnglish')"
                 type="button"
               >
                 ENG
@@ -185,7 +176,7 @@
           </div>
         </div>
         
-        <nav class="mobile-menu-items" aria-label="모바일 메뉴 항목">
+        <nav class="mobile-menu-items" :aria-label="$t('navigation.mobileMenuItems')">
           <router-link 
             v-for="item in menuItems" 
             :key="item.path"
@@ -196,19 +187,19 @@
             @click="closeMobileMenu"
             @keydown.escape="closeMobileMenu"
           >
-            <span class="nav-text">{{$t('menu.'+item.key)}}</span>
+            <span class="nav-text">{{$t('navigation.'+item.key)}}</span>
           </router-link>
         </nav>
         
         <div class="mobile-menu-footer">
-          <nav class="mobile-auth-buttons" v-if="authStore.isAuthenticated" aria-label="사용자 메뉴">
+          <nav class="mobile-auth-buttons" v-if="authStore.isAuthenticated" :aria-label="$t('navigation.userMenu')">
             <router-link 
               to="/settings" 
               class="btn btn-sm btn-secondary" 
               @click="closeMobileMenu"
-              aria-label="설정 페이지로 이동"
+              :aria-label="$t('navigation.goToSettings')"
             >
-              {{$t('menu.settings')}}
+              {{$t('navigation.settings')}}
             </router-link>
             <router-link 
               to="/admin" 
@@ -216,7 +207,7 @@
               @click="closeMobileMenu"
               aria-label="관리자 페이지로 이동"
             >
-              {{$t('menu.admin')}}
+              {{$t('navigation.admin')}}
             </router-link>
           </nav>
           
@@ -225,9 +216,9 @@
               to="/login" 
               class="btn btn-sm btn-primary" 
               @click="closeMobileMenu"
-              aria-label="로그인 페이지로 이동"
+              :aria-label="$t('navigation.goToLogin')"
             >
-              {{$t('menu.login')}}
+              {{$t('navigation.login')}}
             </router-link>
             <router-link 
               to="/admin" 
@@ -235,7 +226,7 @@
               @click="closeMobileMenu"
               aria-label="관리자 페이지로 이동"
             >
-              {{$t('menu.admin')}}
+              {{$t('navigation.admin')}}
             </router-link>
           </div>
         </div>
@@ -249,6 +240,7 @@ import { computed, ref, nextTick, onMounted, onUnmounted } from 'vue';
 import { useAppStore } from '@/stores/app';
 import { useAuthStore } from '@/stores/auth';
 import { useTheme } from '@/composables/useTheme';
+import { getNextLanguage } from '@/utils/i18n';
 
 const store = useAppStore();
 const authStore = useAuthStore();
@@ -267,8 +259,14 @@ const menuItems = computed(() => [
   { key: 'achievements', path: '/achievements' }
 ]);
 
-const setLanguage = (lang: 'ko' | 'en') => {
-  store.setLanguage(lang);
+const setLanguage = async (lang: 'ko' | 'en') => {
+  await store.setLanguage(lang);
+};
+
+// 언어 토글 함수 (한글 ↔ 영어)
+const toggleLanguage = async () => {
+  const nextLang = getNextLanguage(store.currentLanguage);
+  await setLanguage(nextLang as 'ko' | 'en');
 };
 
 const toggleMobileMenu = () => {
@@ -550,35 +548,53 @@ onUnmounted(() => {
   border: 1px solid var(--color-border);
 }
 
-.language-toggle {
+/* Language selector */
+.language-selector {
   display: flex;
+  align-items: center;
+}
+
+.language-toggle-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   background: var(--color-bg-secondary);
-  border-radius: 8px;
-  padding: 2px;
-  border: 1px solid var(--color-border);
-}
-
-.language-toggle .btn {
-  border: none;
-  background: transparent;
-  min-height: 32px;
-  padding: 6px 12px;
-  color: var(--color-text-muted);
-  font-weight: 500;
-  font-size: 0.75rem;
-  border-radius: 6px;
-  transition: all 0.15s ease;
-}
-
-.language-toggle .btn.active {
-  background: var(--color-bg-primary);
   color: var(--color-text-primary);
-  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--color-border);
+  padding: 8px 12px;
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 70px;
+  justify-content: center;
 }
 
-.language-toggle .btn:focus {
+.language-toggle-btn:hover {
+  background: var(--color-bg-hover);
+  border-color: var(--color-primary);
+  transform: translateY(-1px);
+}
+
+.language-toggle-btn:focus {
   outline: 2px solid var(--color-primary);
-  outline-offset: 1px;
+  outline-offset: 2px;
+  border-radius: var(--radius-md);
+}
+
+.language-toggle-btn:active {
+  transform: translateY(0);
+}
+
+.current-language {
+  font-weight: 600;
+  letter-spacing: 0.025em;
+}
+
+.language-icon {
+  font-size: 0.875rem;
+  opacity: 0.7;
 }
 
 .theme-toggle {

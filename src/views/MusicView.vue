@@ -40,7 +40,7 @@
         <div v-else-if="music.gameState.value === 'piano'" class="piano-game">
           <div class="game-header">
             <button @click="music.goBack" class="btn btn-secondary back-btn">
-              {{$t('music.back')}}
+              ← {{$t('common.back')}}
             </button>
             <div class="header-center">
               <h2 class="instrument-title">{{$t('music.piano.name')}}</h2>
@@ -76,7 +76,7 @@
         <div v-else-if="music.gameState.value === 'car-sounds'" class="drum-game">
           <div class="game-header">
             <button @click="music.goBack" class="btn btn-secondary back-btn">
-              {{$t('music.back')}}
+              ← {{$t('common.back')}}
             </button>
             <div class="header-center">
               <h2 class="instrument-title">{{$t('music.drums.name')}}</h2>
@@ -96,7 +96,7 @@
         <div v-else-if="music.gameState.value === 'violin'" class="violin-game">
           <div class="game-header">
             <button @click="music.goBack" class="btn btn-secondary back-btn">
-              {{$t('music.back')}}
+              ← {{$t('common.back')}}
             </button>
             <div class="header-center">
               <h2 class="instrument-title">{{$t('music.violin.name')}}</h2>

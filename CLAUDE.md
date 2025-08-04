@@ -172,3 +172,151 @@ interface Book {
 - Vite 프록시 설정으로 `/server` 경로를 Express 서버로 연결
 - 파일 업로드는 Express 서버를 통해 처리
 - 주요 데이터는 Supabase를 통해 관리
+
+# 다국어 지원 (Internationalization)
+
+## 🌐 개요
+이 프로젝트는 Vue i18n을 기반으로 한 완전한 다국어 지원 시스템을 구축했습니다.
+
+### 지원 언어
+- **한국어 (ko)** - 기본 언어
+- **영어 (en)** - 보조 언어
+- **확장 가능**: 일본어, 중국어 등 추가 언어 지원 용이
+
+## 📁 언어팩 구조
+```
+src/
+├── locales/          # 언어팩 파일들
+│   ├── ko.json      # 한국어 번역
+│   ├── en.json      # 영어 번역
+│   └── [lang].json  # 향후 추가 언어
+├── utils/
+│   └── i18n.ts      # i18n 유틸리티 및 설정
+└── main.ts          # 앱 초기화 (i18n 포함)
+```
+
+## 🔧 주요 기능
+
+### 1. 동적 언어팩 로딩
+- 필요한 언어만 동적으로 로드하여 성능 최적화
+- 브라우저 언어 자동 감지
+- localStorage에 언어 설정 자동 저장
+
+### 2. 사용자 친화적 언어 전환
+- 네비게이션바의 글로벌 아이콘 버튼
+- 클릭 한 번으로 언어 토글
+- 실시간 언어 변경 (페이지 새로고침 불필요)
+
+### 3. 확장 가능한 아키텍처
+- 새로운 언어 추가 시 JSON 파일만 추가하면 됨
+- 중앙화된 언어 관리 시스템
+- 타입 안전성 보장
+
+## 🎯 개발 가이드라인
+
+### 새로운 텍스트 추가 시
+```vue
+<!-- ❌ 하드코딩 금지 -->
+<h1>안녕하세요</h1>
+<button>저장</button>
+
+<!-- ✅ i18n 키 사용 -->
+<h1>{{ $t('common.hello') }}</h1>
+<button>{{ $t('common.save') }}</button>
+```
+
+### 언어팩 키 네이밍 규칙
+```json
+{
+  "common": {        // 공통 요소
+    "save": "저장",
+    "cancel": "취소"
+  },
+  "navigation": {    // 네비게이션 관련
+    "home": "홈",
+    "settings": "설정"
+  },
+  "auth": {          // 인증 관련
+    "login": "로그인",
+    "logout": "로그아웃"
+  },
+  "forms": {         // 폼 관련
+    "required": "필수",
+    "optional": "선택사항"
+  }
+}
+```
+
+### 동적 텍스트 처리
+```vue
+<!-- 매개변수 사용 -->
+<p>{{ $t('words.contentCount', { count: items.length }) }}</p>
+<p>{{ $t('dashboard.description', { child: childName }) }}</p>
+
+<!-- 복수형 처리 -->
+<p>{{ $t('time.minutesAgo', { count: minutes }) }}</p>
+```
+
+### 새로운 언어 추가 방법
+1. `src/locales/[언어코드].json` 파일 생성
+2. `src/utils/i18n.ts`의 `SUPPORTED_LANGUAGES` 배열에 언어 코드 추가
+3. 필요시 언어별 특별 처리 로직 추가
+
+## 🚀 사용법
+
+### 컴포넌트에서 사용
+```vue
+<template>
+  <div>
+    <h1>{{ $t('page.title') }}</h1>
+    <p>{{ $t('page.description', { lang: currentLang }) }}</p>
+  </div>
+</template>
+
+<script setup>
+import { useI18n } from 'vue-i18n'
+
+const { t, locale } = useI18n()
+const currentLang = computed(() => locale.value)
+</script>
+```
+
+### 프로그래밍 방식으로 언어 변경
+```typescript
+import { changeLanguage } from '@/utils/i18n'
+
+// 특정 언어로 변경
+await changeLanguage('en')
+
+// 다음 언어로 토글
+import { getNextLanguage, getCurrentLanguage } from '@/utils/i18n'
+const nextLang = getNextLanguage(getCurrentLanguage())
+await changeLanguage(nextLang)
+```
+
+## ⚠️ 주의사항
+
+### 필수 규칙
+1. **모든 사용자 대상 텍스트는 반드시 i18n 키 사용**
+2. **console.log나 기술적 키워드는 예외**
+3. **새로운 컴포넌트 작성 시 i18n 우선 고려**
+4. **aria-label, title 등 접근성 텍스트도 i18n 적용**
+
+### 성능 고려사항
+- 언어팩은 필요시에만 로드됨 (Lazy Loading)
+- 현재 사용하지 않는 언어는 메모리에 로드되지 않음
+- 언어 변경 시 매끄러운 전환 보장
+
+## 🔍 문제 해결
+
+### 번역 키가 표시되는 경우
+1. 해당 키가 현재 언어팩에 존재하는지 확인
+2. 키 경로가 올바른지 확인 (예: `common.save`)
+3. 언어팩 JSON 문법 오류 확인
+
+### 언어 변경이 작동하지 않는 경우
+1. 환경 변수 확인
+2. 브라우저 콘솔에서 에러 메시지 확인
+3. localStorage 언어 설정 확인
+
+**IMPORTANT: 다국어 지원 시스템이 구축되었으므로, 모든 새로운 UI 텍스트는 반드시 i18n 키를 사용해야 합니다. 하드코딩된 텍스트는 절대 금지입니다.**

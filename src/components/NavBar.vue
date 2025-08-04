@@ -1,12 +1,12 @@
 <template>
   <nav class="navbar">
     <ul class="nav-links">
-      <li><router-link to="/">{{$t('menu.home')}}</router-link></li>
-      <li><router-link to="/books">{{$t('menu.books')}}</router-link></li>
-      <li><router-link to="/words">{{$t('menu.words')}}</router-link></li>
-      <li><router-link to="/badges">{{$t('menu.badges')}}</router-link></li>
-      <li><router-link to="/music">{{$t('menu.music')}}</router-link></li>
-      <li><router-link to="/achievements">{{$t('menu.achievements')}}</router-link></li>
+      <li><router-link to="/">{{$t('navigation.home')}}</router-link></li>
+      <li><router-link to="/books">{{$t('navigation.books')}}</router-link></li>
+      <li><router-link to="/words">{{$t('navigation.words')}}</router-link></li>
+      <li><router-link to="/badges">{{$t('navigation.badges')}}</router-link></li>
+      <li><router-link to="/music">{{$t('navigation.music')}}</router-link></li>
+      <li><router-link to="/achievements">{{$t('navigation.achievements')}}</router-link></li>
     </ul>
     <div class="nav-controls">
       <button @click="toggleLang">{{ $i18n.locale === 'ko' ? 'ENG' : '한글' }}</button>
