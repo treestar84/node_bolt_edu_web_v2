@@ -99,17 +99,37 @@
 
     <!-- Add/Edit Modal -->
     <div v-if="showAddModal || showEditModal" class="modal-overlay" @click="closeModals">
-      <div class="modal-content large-modal" @click.stop>
+      <div class="modal-content step-modal" @click.stop>
         <div class="modal-header">
-          <h2>{{ showAddModal ? '새 책 추가' : '책 수정' }}</h2>
+          <div class="modal-title-section">
+            <h2>{{ showAddModal ? '새 책 추가' : '책 수정' }}</h2>
+            <div class="step-indicator">
+              <div 
+                v-for="(step, index) in steps" 
+                :key="index" 
+                class="step-dot"
+                :class="{ 
+                  'active': currentStep === index + 1,
+                  'completed': currentStep > index + 1
+                }"
+              >
+                <span v-if="currentStep > index + 1" class="step-check">✓</span>
+                <span v-else>{{ index + 1 }}</span>
+              </div>
+            </div>
+          </div>
           <button @click="closeModals" class="modal-close">×</button>
         </div>
         
         <form @submit.prevent="saveBook" class="modal-form">
-          <div class="basic-info-section">
-            <h3 class="section-title">기본 정보</h3>
+          <!-- Step 1: Basic Information -->
+          <div v-if="currentStep === 1" class="step-content">
+            <div class="step-header">
+              <h3 class="step-title">📚 기본 정보</h3>
+              <p class="step-description">책의 기본 정보를 입력해주세요</p>
+            </div>
             
-            <div class="form-row">
+            <div class="form-grid">
               <div class="form-group">
                 <label class="form-label">책 제목</label>
                 <input 
@@ -122,7 +142,21 @@
               </div>
 
               <div class="form-group">
-                <label class="form-label">적정 나이</label>
+                <label class="form-label">
+                  적정 나이
+                  <button 
+                    type="button"
+                    class="tooltip-trigger"
+                    @mouseenter="showTooltip = 'age'"
+                    @mouseleave="showTooltip = null"
+                  >
+                    ℹ️
+                    <div v-if="showTooltip === 'age'" class="tooltip">
+                      아이의 발달 수준에 맞는 적정 나이를 설정해주세요.
+                      나이 범위가 넓을수록 더 많은 아이들이 볼 수 있어요.
+                    </div>
+                  </button>
+                </label>
                 <div class="age-inputs">
                   <select v-model.number="formData.minAge" class="form-input" required>
                     <option value="3">3세</option>
@@ -141,23 +175,23 @@
               </div>
             </div>
 
-            <div class="form-group">
-              <label class="form-label">
-                표지 이미지
-                <span v-if="uploadMode === 'video'" class="optional-label">(선택사항 - 영상에서 자동 생성됨)</span>
-              </label>
-              <FileUploadInput
-                v-model="formData.coverImage"
-                label="표지 이미지"
-                placeholder="https://example.com/cover.jpg"
-                file-type="image"
-                :required="uploadMode !== 'video'"
-              />
-            </div>
-
             <!-- 시스템 관리자만 소유권 선택 가능 -->
             <div v-if="isSystemAdmin" class="form-group">
-              <label class="form-label">소유권 설정</label>
+              <label class="form-label">
+                소유권 설정
+                <button 
+                  type="button"
+                  class="tooltip-trigger"
+                  @mouseenter="showTooltip = 'ownership'"
+                  @mouseleave="showTooltip = null"
+                >
+                  ℹ️
+                  <div v-if="showTooltip === 'ownership'" class="tooltip">
+                    공용: 모든 사용자에게 표시됩니다<br>
+                    개인: 나만 볼 수 있습니다
+                  </div>
+                </button>
+              </label>
               <div class="ownership-options">
                 <label class="radio-option">
                   <input 
@@ -167,7 +201,7 @@
                     name="ownerType"
                   />
                   <span class="radio-text">
-                    <strong>공용</strong> - 모든 사용자에게 표시
+                    <strong>🌍 공용</strong>
                   </span>
                 </label>
                 <label class="radio-option">
@@ -178,141 +212,195 @@
                     name="ownerType"
                   />
                   <span class="radio-text">
-                    <strong>개인</strong> - 나만 볼 수 있음
+                    <strong>👤 개인</strong>
                   </span>
                 </label>
               </div>
             </div>
           </div>
 
-          <div class="upload-mode-section">
-            <h3 class="section-title">콘텐츠 입력 방식</h3>
-            <div class="upload-mode-options">
-              <label class="radio-option">
+          <!-- Step 2: Content Method -->
+          <div v-if="currentStep === 2" class="step-content">
+            <div class="step-header">
+              <h3 class="step-title">🎨 콘텐츠 입력 방식</h3>
+              <p class="step-description">책 콘텐츠를 어떻게 만들지 선택해주세요</p>
+            </div>
+            
+            <div class="content-method-grid">
+              <label class="method-card" :class="{ selected: uploadMode === 'traditional' }">
                 <input 
                   type="radio" 
                   v-model="uploadMode" 
                   value="traditional"
                   name="uploadMode"
                 />
-                <span class="radio-text">
-                  <strong>개별 업로드</strong> - 각 페이지의 이미지와 음성을 개별 등록
-                </span>
+                <div class="method-icon">📖</div>
+                <div class="method-content">
+                  <h4>개별 업로드</h4>
+                  <p>각 페이지의 이미지와 음성을 따로 등록</p>
+                  <div class="method-features">
+                    <span class="feature-tag">✓ 세밀한 제어</span>
+                    <span class="feature-tag">✓ 페이지별 편집</span>
+                  </div>
+                </div>
               </label>
-              <label class="radio-option">
+              
+              <label class="method-card" :class="{ selected: uploadMode === 'video' }">
                 <input 
                   type="radio" 
                   v-model="uploadMode" 
                   value="video"
                   name="uploadMode"
                 />
-                <span class="radio-text">
-                  <strong>영상 업로드</strong> - 전체 스토리를 하나의 영상으로 등록
-                </span>
+                <div class="method-icon">🎬</div>
+                <div class="method-content">
+                  <h4>영상 업로드</h4>
+                  <p>전체 스토리를 하나의 영상으로 등록</p>
+                  <div class="method-features">
+                    <span class="feature-tag">✓ 간편한 등록</span>
+                    <span class="feature-tag">✓ 자동 썸네일</span>
+                  </div>
+                </div>
               </label>
             </div>
           </div>
 
-          <!-- Traditional Upload Mode -->
-          <div v-if="uploadMode === 'traditional'" class="pages-section">
-            <h3 class="section-title">책 페이지 (4장)</h3>
-            
-            <div class="pages-container">
-              <div 
-                v-for="(page, index) in formData.pages" 
-                :key="index"
-                class="page-form-card"
-              >
-                <h4 class="page-title">{{ index + 1 }}장</h4>
-                
-                <div class="page-form-content">
-                  <div class="page-form-row">
-                    <div class="form-group">
-                      <label class="form-label">이미지</label>
+          <!-- Step 3: Content Details -->
+          <div v-if="currentStep === 3" class="step-content">
+            <div class="step-header">
+              <h3 class="step-title">
+                {{ uploadMode === 'video' ? '🎬 영상 콘텐츠' : '📄 페이지 콘텐츠' }}
+              </h3>
+              <p class="step-description">
+                {{ uploadMode === 'video' 
+                   ? '스토리 영상과 표지 이미지를 설정해주세요' 
+                   : '각 페이지의 이미지, 음성, 텍스트를 입력해주세요' 
+                }}
+              </p>
+            </div>
+
+            <!-- Cover Image (always shown) -->
+            <div class="form-group">
+              <label class="form-label">
+                표지 이미지
+                <span v-if="uploadMode === 'video'" class="optional-badge">자동생성</span>
+                <button 
+                  type="button"
+                  class="tooltip-trigger"
+                  @mouseenter="showTooltip = 'cover'"
+                  @mouseleave="showTooltip = null"
+                >
+                  ℹ️
+                  <div v-if="showTooltip === 'cover'" class="tooltip">
+                    {{ uploadMode === 'video' 
+                       ? '영상을 업로드하면 첫 번째 프레임에서 자동으로 생성됩니다' 
+                       : '책의 표지로 사용될 이미지를 업로드해주세요' 
+                    }}
+                  </div>
+                </button>
+              </label>
+              <FileUploadInput
+                v-model="formData.coverImage"
+                label="표지 이미지"
+                placeholder="이미지 파일을 선택하세요"
+                file-type="image"
+                :required="uploadMode !== 'video'"
+              />
+            </div>
+
+            <!-- Video Upload Mode -->
+            <div v-if="uploadMode === 'video'">
+              <div class="form-group">
+                <label class="form-label">
+                  스토리 영상
+                  <button 
+                    type="button"
+                    class="tooltip-trigger"
+                    @mouseenter="showTooltip = 'video'"
+                    @mouseleave="showTooltip = null"
+                  >
+                    ℹ️
+                    <div v-if="showTooltip === 'video'" class="tooltip">
+                      HD(1280x720) 이상 권장<br>
+                      지원 형식: MP4, AVI, MOV, WebM<br>
+                      최대 크기: 200MB
+                    </div>
+                  </button>
+                </label>
+                <FileUploadInput
+                  v-model="formData.videoUrl"
+                  label="스토리 영상"
+                  placeholder="영상 파일을 선택하세요"
+                  file-type="video"
+                  :required="true"
+                />
+              </div>
+              
+              <!-- Auto-generation status -->
+              <div v-if="isAutoCoverGenerating || isThumbnailGenerating" class="auto-generation-status">
+                <div class="status-icon spinning">⚙️</div>
+                <span>{{ generationStatus || '썸네일 자동 생성 중...' }}</span>
+              </div>
+              
+              <div v-else-if="formData.videoUrl && formData.coverImage" class="auto-generation-success">
+                <div class="status-icon">✅</div>
+                <span>커버 이미지가 자동 생성되었습니다!</span>
+                <div class="thumbnail-preview">
+                  <img :src="getImageUrl(formData.coverImage)" alt="생성된 커버" />
+                </div>
+              </div>
+            </div>
+
+            <!-- Traditional Upload Mode -->
+            <div v-else class="pages-section">
+              <div class="pages-grid">
+                <div 
+                  v-for="(page, index) in formData.pages" 
+                  :key="index"
+                  class="page-card"
+                >
+                  <div class="page-header">
+                    <span class="page-number">{{ index + 1 }}장</span>
+                    <button 
+                      type="button"
+                      class="tooltip-trigger"
+                      @mouseenter="showTooltip = `page-${index}`"
+                      @mouseleave="showTooltip = null"
+                    >
+                      ℹ️
+                      <div v-if="showTooltip === `page-${index}`" class="tooltip">
+                        이미지와 음성은 선택사항입니다<br>
+                        텍스트만으로도 페이지를 만들 수 있어요
+                      </div>
+                    </button>
+                  </div>
+                  
+                  <div class="page-content">
+                    <div class="file-inputs">
                       <FileUploadInput
                         v-model="page.imageUrl"
-                        label="페이지 이미지"
-                        placeholder="https://example.com/page1.jpg"
+                        label="이미지"
+                        placeholder="이미지 파일"
                         file-type="image"
                         :required="false"
                       />
-                    </div>
-
-                    <div class="form-group">
-                      <label class="form-label">음성</label>
                       <FileUploadInput
                         v-model="page.audioUrl"
-                        label="페이지 음성"
-                        placeholder="/audio/book1-page1.mp3"
+                        label="음성"
+                        placeholder="음성 파일"
                         file-type="audio"
                         :required="false"
                       />
                     </div>
-                  </div>
-
-                  <div class="form-group">
-                    <label class="form-label">텍스트 (선택사항)</label>
+                    
                     <textarea 
                       v-model="page.textContent" 
-                      class="form-input textarea"
-                      placeholder="예: 귀여운 고양이가 있어요"
+                      class="form-input page-text"
+                      placeholder="페이지 텍스트 (선택사항)"
                       rows="2"
                     ></textarea>
                   </div>
                 </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Video Upload Mode -->
-          <div v-else-if="uploadMode === 'video'" class="video-section">
-            <h3 class="section-title">스토리 영상</h3>
-            <div class="video-upload-area">
-              <FileUploadInput
-                v-model="formData.videoUrl"
-                label="스토리 영상"
-                placeholder="MP4, AVI, MOV 파일을 업로드하세요"
-                file-type="video"
-                :required="true"
-              />
-              
-              <!-- 자동 커버 생성 상태 표시 -->
-              <div v-if="isAutoCoverGenerating || isThumbnailGenerating" class="thumbnail-generating">
-                <div class="generating-indicator">
-                  <div class="spinner"></div>
-                  <p>{{ generationStatus || '영상에서 썸네일을 자동 생성하는 중...' }}</p>
-                </div>
-              </div>
-              
-              <!-- 커버 생성 완료 표시 -->
-              <div v-else-if="formData.videoUrl && formData.coverImage" class="thumbnail-generated">
-                <div class="success-indicator">
-                  <span class="success-icon">✅</span>
-                  <p>커버 이미지가 자동으로 생성되었습니다!</p>
-                </div>
-                <div class="thumbnail-preview">
-                  <img :src="getImageUrl(formData.coverImage)" alt="생성된 커버" class="generated-thumbnail" />
-                </div>
-              </div>
-              
-              <!-- FFmpeg 상태 표시 -->
-              <div v-if="ffmpegStatus && !ffmpegStatus.available" class="ffmpeg-warning">
-                <div class="warning-indicator">
-                  <span class="warning-icon">⚠️</span>
-                  <p>{{ ffmpegStatus.message }}</p>
-                  <small>고품질 비디오 프레임 추출을 위해서는 FFmpeg가 필요합니다.</small>
-                </div>
-              </div>
-              
-              <div class="video-description">
-                <p class="upload-tip">💡 <strong>영상 업로드 팁:</strong></p>
-                <ul class="tip-list">
-                  <li>전체 스토리를 포함한 하나의 영상 파일을 업로드하세요</li>
-                  <li>영상 업로드 시 첫 번째 프레임에서 <strong>썸네일이 자동 생성</strong>됩니다</li>
-                  <li>권장 해상도: 1280x720 (HD) 이상</li>
-                  <li>지원 형식: MP4, AVI, MOV, WMV, WebM</li>
-                  <li>최대 파일 크기: 200MB</li>
-                </ul>
               </div>
             </div>
           </div>
@@ -322,10 +410,32 @@
           </div>
 
           <div class="modal-actions">
+            <button 
+              v-if="currentStep > 1" 
+              type="button" 
+              @click="currentStep--" 
+              class="btn btn-secondary"
+            >
+              이전
+            </button>
             <button type="button" @click="closeModals" class="btn btn-secondary">
               취소
             </button>
-            <button type="submit" class="btn btn-primary" :disabled="isLoading">
+            <button 
+              v-if="currentStep < 3" 
+              type="button" 
+              @click="nextStep" 
+              class="btn btn-primary"
+              :disabled="!canProceedToNextStep"
+            >
+              다음
+            </button>
+            <button 
+              v-else 
+              type="submit" 
+              class="btn btn-primary" 
+              :disabled="isLoading"
+            >
               {{ isLoading ? '저장 중...' : (showAddModal ? '추가' : '수정') }}
             </button>
           </div>
@@ -390,6 +500,11 @@ const error = ref('');
 const isGeneratingTest = ref(false);
 const ffmpegStatus = ref<{ available: boolean; message: string } | null>(null);
 
+// Step management
+const currentStep = ref(1);
+const showTooltip = ref<string | null>(null);
+const steps = ['기본정보', '콘텐츠 방식', '세부설정'];
+
 // 시스템 관리자 여부 확인
 const isSystemAdmin = computed(() => {
   return authStore.userProfile?.userType === 'teacher' || authStore.userProfile?.userType === 'director';
@@ -420,6 +535,8 @@ const formData = reactive({
 
 
 const resetForm = () => {
+  currentStep.value = 1;
+  showTooltip.value = null;
   uploadMode.value = 'traditional';
   formData.title = '';
   formData.coverImage = '';
@@ -445,6 +562,7 @@ const closeModals = () => {
 
 const editBook = (book: Book) => {
   editingBook.value = book;
+  currentStep.value = 1; // Start from first step for editing
   formData.title = book.title;
   formData.coverImage = book.coverImage;
   formData.minAge = book.minAge;
@@ -523,14 +641,23 @@ URL: ${result.data.video.url}`);
 };
 
 const saveBook = async () => {
+  // Validate all steps before saving
   if (formData.minAge > formData.maxAge) {
     error.value = '최소 나이는 최대 나이보다 작거나 같아야 합니다.';
+    currentStep.value = 1; // Go back to basic info step
+    return;
+  }
+
+  if (!uploadMode.value) {
+    error.value = '콘텐츠 입력 방식을 선택해주세요.';
+    currentStep.value = 2; // Go back to content method step
     return;
   }
 
   // 영상 모드에서는 영상 파일이 필수
   if (uploadMode.value === 'video' && !formData.videoUrl) {
     error.value = '영상 파일을 업로드해주세요.';
+    currentStep.value = 3; // Stay on content details step
     return;
   }
 
@@ -620,6 +747,7 @@ const saveBook = async () => {
   } catch (err: any) {
     console.error('❌ Error saving book:', err);
     error.value = err.message || '저장 중 오류가 발생했습니다.';
+    // Stay on current step when there's an error
   } finally {
     isLoading.value = false;
   }
@@ -663,6 +791,14 @@ onMounted(async () => {
   
   // 폼 초기값 설정
   resetForm();
+  
+  // Close tooltips when clicking outside
+  document.addEventListener('click', (e) => {
+    const target = e.target as HTMLElement;
+    if (!target.closest('.tooltip-trigger')) {
+      showTooltip.value = null;
+    }
+  });
 });
 
 // 영상에서 썸네일을 생성하는 함수
@@ -701,6 +837,13 @@ watch(() => formData.videoUrl, async (newVideoUrl, oldVideoUrl) => {
     if (!formData.coverImage || formData.coverImage.trim() === '') {
       await generateThumbnailFromVideo(newVideoUrl);
     }
+  }
+});
+
+// Reset upload mode selection when switching steps
+watch(() => currentStep.value, (newStep) => {
+  if (newStep === 1) {
+    showTooltip.value = null;
   }
 });
 
@@ -752,6 +895,30 @@ const handleAdminVideoHover = async (book: any, isHovering: boolean) => {
     }
   } catch (error) {
     console.log(`ℹ️ Admin video autoplay blocked for book: ${book.title}`, error);
+  }
+};
+
+// Step navigation logic
+const canProceedToNextStep = computed(() => {
+  switch (currentStep.value) {
+    case 1:
+      return formData.title.trim() !== '' && formData.minAge <= formData.maxAge;
+    case 2:
+      return uploadMode.value !== '';
+    case 3:
+      if (uploadMode.value === 'video') {
+        return formData.videoUrl !== '';
+      }
+      return true; // Traditional mode doesn't require any specific validation
+    default:
+      return false;
+  }
+});
+
+const nextStep = () => {
+  if (canProceedToNextStep.value && currentStep.value < 3) {
+    currentStep.value++;
+    error.value = ''; // Clear any previous errors when moving to next step
   }
 };
 
@@ -974,11 +1141,8 @@ watch(
 
 .ownership-options {
   display: flex;
-  flex-direction: column;
-  gap: var(--spacing-md);
-  background: var(--color-bg-secondary);
-  padding: var(--spacing-lg);
-  border-radius: var(--radius-md);
+  gap: var(--spacing-lg);
+  margin-top: var(--spacing-sm);
 }
 
 .radio-option {
@@ -986,13 +1150,17 @@ watch(
   align-items: center;
   gap: var(--spacing-sm);
   cursor: pointer;
-  padding: var(--spacing-md);
-  border-radius: var(--radius-sm);
-  transition: background-color 0.2s ease;
+  padding: var(--spacing-md) var(--spacing-lg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  transition: all 0.2s ease;
+  background: var(--color-bg-card);
+  flex: 1;
 }
 
 .radio-option:hover {
-  background: var(--color-bg-hover);
+  border-color: var(--color-primary);
+  background: rgba(var(--color-primary-rgb), 0.05);
 }
 
 .radio-option input[type="radio"] {
@@ -1004,6 +1172,7 @@ watch(
 .radio-text {
   color: var(--color-text-primary);
   font-size: 0.875rem;
+  font-weight: 500;
 }
 
 .empty-state {
@@ -1055,20 +1224,67 @@ watch(
   overflow-y: auto;
 }
 
-.large-modal {
-  max-width: 900px;
+.step-modal {
+  max-width: 800px;
+  max-height: 85vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: var(--spacing-xl);
+  padding: var(--spacing-lg) var(--spacing-xl);
   border-bottom: 1px solid var(--color-border);
-  position: sticky;
-  top: 0;
   background: var(--color-bg-card);
-  z-index: 10;
+  flex-shrink: 0;
+}
+
+.modal-title-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.step-indicator {
+  display: flex;
+  gap: var(--spacing-sm);
+  align-items: center;
+}
+
+.step-dot {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--color-bg-secondary);
+  border: 2px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  transition: all 0.3s ease;
+}
+
+.step-dot.active {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-text-white);
+  transform: scale(1.1);
+}
+
+.step-dot.completed {
+  background: var(--color-success);
+  border-color: var(--color-success);
+  color: var(--color-text-white);
+}
+
+.step-check {
+  font-size: 1rem;
+  font-weight: bold;
 }
 
 .modal-header h2 {
@@ -1094,7 +1310,37 @@ watch(
 }
 
 .modal-form {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+.step-content {
   padding: var(--spacing-xl);
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+}
+
+.step-header {
+  text-align: center;
+  margin-bottom: var(--spacing-xl);
+  padding-bottom: var(--spacing-lg);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.step-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-sm);
+}
+
+.step-description {
+  color: var(--color-text-secondary);
+  font-size: 0.875rem;
+  margin: 0;
 }
 
 .basic-info-section {
@@ -1110,10 +1356,90 @@ watch(
   border-bottom: 1px solid var(--color-border);
 }
 
-.form-row {
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-xl);
+  margin-bottom: var(--spacing-xl);
+}
+
+.content-method-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: var(--spacing-lg);
+  margin-top: var(--spacing-lg);
+}
+
+.method-card {
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-xl);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: var(--color-bg-card);
+  position: relative;
+  overflow: hidden;
+}
+
+.method-card:hover {
+  border-color: var(--color-primary);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.method-card.selected {
+  border-color: var(--color-primary);
+  background: rgba(var(--color-primary-rgb), 0.05);
+  box-shadow: var(--shadow-md);
+}
+
+.method-card input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.method-icon {
+  font-size: 2.5rem;
+  text-align: center;
+  margin-bottom: var(--spacing-md);
+}
+
+.method-content h4 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-sm);
+  text-align: center;
+}
+
+.method-content p {
+  color: var(--color-text-secondary);
+  font-size: 0.875rem;
+  text-align: center;
+  margin-bottom: var(--spacing-md);
+  line-height: 1.5;
+}
+
+.method-features {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+  justify-content: center;
+}
+
+.feature-tag {
+  background: var(--color-bg-secondary);
+  color: var(--color-text-secondary);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.method-card.selected .feature-tag {
+  background: var(--color-primary);
+  color: var(--color-bg-primary);
 }
 
 .age-inputs {
@@ -1131,44 +1457,60 @@ watch(
   margin-bottom: var(--spacing-xl);
 }
 
-.pages-container {
+.pages-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: var(--spacing-lg);
+  margin-top: var(--spacing-lg);
 }
 
-.page-form-card {
-  background: var(--color-bg-secondary);
+.page-card {
+  background: var(--color-bg-card);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  padding: var(--spacing-md);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  transition: all 0.2s ease;
 }
 
-.page-title {
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--color-text-primary);
-  margin-bottom: var(--spacing-md);
+.page-card:hover {
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-sm);
+}
+
+.page-header {
   display: flex;
   align-items: center;
-  gap: var(--spacing-sm);
+  justify-content: space-between;
+  margin-bottom: var(--spacing-md);
+  padding-bottom: var(--spacing-sm);
+  border-bottom: 1px solid var(--color-border);
 }
 
-.page-title::before {
-  content: '📄';
-  font-size: 1.2rem;
+.page-number {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-primary);
+  background: rgba(var(--color-primary-rgb), 0.1);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-sm);
 }
 
-.page-form-content {
+.page-content {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-sm);
+  gap: var(--spacing-md);
 }
 
-.page-form-row {
+.file-inputs {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: var(--spacing-sm);
+}
+
+.page-text {
+  resize: vertical;
+  min-height: 60px;
+  font-size: 0.875rem;
 }
 
 .textarea {
@@ -1189,14 +1531,17 @@ watch(
 
 .modal-actions {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
+  align-items: center;
   gap: var(--spacing-md);
-  margin-top: var(--spacing-xl);
-  padding-top: var(--spacing-lg);
+  padding: var(--spacing-lg) var(--spacing-xl);
   border-top: 1px solid var(--color-border);
-  position: sticky;
-  bottom: 0;
   background: var(--color-bg-card);
+  flex-shrink: 0;
+}
+
+.modal-actions > :first-child {
+  margin-right: auto;
 }
 
 .delete-content {
@@ -1224,39 +1569,132 @@ watch(
   gap: var(--spacing-lg);
 }
 
-.video-description {
-  background: var(--color-bg-secondary);
-  padding: var(--spacing-lg);
-  border-radius: var(--radius-md);
-  border-left: 4px solid var(--color-primary);
-}
-
-.upload-tip {
-  color: var(--color-text-primary);
-  font-size: 1rem;
-  margin: 0 0 var(--spacing-md) 0;
-}
-
-.tip-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.tip-list li {
+/* Tooltip Styles */
+.tooltip-trigger {
+  background: none;
+  border: none;
   color: var(--color-text-secondary);
-  font-size: 0.875rem;
-  margin-bottom: var(--spacing-xs);
-  padding-left: var(--spacing-lg);
+  cursor: help;
+  padding: var(--spacing-xs);
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
   position: relative;
+  transition: all 0.2s ease;
+  margin-left: var(--spacing-xs);
 }
 
-.tip-list li:before {
-  content: '•';
+.tooltip-trigger:hover {
+  background: var(--color-bg-hover);
   color: var(--color-primary);
-  font-weight: bold;
+}
+
+.tooltip {
   position: absolute;
-  left: var(--spacing-sm);
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--color-bg-tooltip, #2d3748);
+  color: var(--color-text-white);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-md);
+  font-size: 0.75rem;
+  line-height: 1.4;
+  white-space: nowrap;
+  z-index: 1000;
+  box-shadow: var(--shadow-lg);
+  margin-bottom: var(--spacing-xs);
+  min-width: 200px;
+  max-width: 300px;
+  white-space: normal;
+  text-align: left;
+}
+
+.tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 4px solid transparent;
+  border-top-color: var(--color-bg-tooltip, #2d3748);
+}
+
+/* Auto-generation status */
+.auto-generation-status {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md);
+  background: rgba(var(--color-primary-rgb), 0.1);
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radius-md);
+  color: var(--color-primary);
+  font-size: 0.875rem;
+  margin-top: var(--spacing-md);
+}
+
+.auto-generation-success {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md);
+  background: rgba(var(--color-success-rgb), 0.1);
+  border: 1px solid var(--color-success);
+  border-radius: var(--radius-md);
+  margin-top: var(--spacing-md);
+}
+
+.auto-generation-success > div:first-child {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  color: var(--color-success);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.status-icon {
+  font-size: 1rem;
+}
+
+.status-icon.spinning {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.thumbnail-preview {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--spacing-sm);
+}
+
+.thumbnail-preview img {
+  max-width: 120px;
+  max-height: 80px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  object-fit: cover;
+}
+
+.optional-badge {
+  background: var(--color-info);
+  color: var(--color-text-white);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-sm);
+  font-size: 0.65rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-left: var(--spacing-sm);
 }
 
 /* 썸네일 생성 관련 스타일 */
@@ -1369,47 +1807,83 @@ watch(
     gap: var(--spacing-lg);
   }
   
-  .form-row {
+  .form-grid {
     grid-template-columns: 1fr;
+    gap: var(--spacing-lg);
   }
   
-  .pages-container {
+  .content-method-grid {
     grid-template-columns: 1fr;
     gap: var(--spacing-md);
   }
   
-  .page-form-row {
+  .pages-grid {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-md);
+  }
+  
+  .file-inputs {
     grid-template-columns: 1fr;
   }
   
-  .modal-content {
-    margin: var(--spacing-md);
-    max-width: none;
+  .ownership-options {
+    flex-direction: column;
+    gap: var(--spacing-sm);
   }
   
-  .large-modal {
+  .modal-content {
+    margin: var(--spacing-sm);
+    max-width: none;
+    max-height: 95vh;
+  }
+  
+  .step-modal {
     max-width: none;
   }
   
   .modal-header {
+    padding: var(--spacing-md);
+  }
+  
+  .step-content {
     padding: var(--spacing-lg);
   }
   
-  .modal-form {
-    padding: var(--spacing-lg);
+  .modal-actions {
+    padding: var(--spacing-md);
+    flex-direction: column-reverse;
+    gap: var(--spacing-sm);
   }
   
-  .page-form-card {
-    padding: var(--spacing-sm);
+  .modal-actions > :first-child {
+    margin-right: 0;
+  }
+  
+  .step-indicator {
+    gap: var(--spacing-xs);
+  }
+  
+  .step-dot {
+    width: 28px;
+    height: 28px;
+    font-size: 0.7rem;
+  }
+  
+  .tooltip {
+    position: fixed;
+    bottom: auto;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    min-width: 250px;
+    max-width: 90vw;
+  }
+  
+  .tooltip::after {
+    display: none;
   }
 }
 
-.optional-label {
-  font-size: 0.8rem;
-  color: var(--color-text-secondary);
-  font-weight: normal;
-  margin-left: 8px;
-}
 
 /* 호버 효과 */
 .book-card:hover .book-cover img,
@@ -1419,5 +1893,12 @@ watch(
 
 .book-card:hover .video-overlay {
   opacity: 0.9;
+}
+
+/* CSS Variables for colors with RGB values */
+:root {
+  --color-primary-rgb: 59, 130, 246;
+  --color-success-rgb: 16, 185, 129;
+  --color-info-rgb: 14, 165, 233;
 }
 </style>

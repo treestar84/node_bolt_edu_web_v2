@@ -10,7 +10,7 @@
             <div class="admin-type-indicator" v-if="isSystemAdmin">
               <span class="admin-badge">시스템 관리자</span>
             </div>
-            <button @click="showAddModal = true" class="btn btn-primary">
+            <button @click="startAddWord" class="btn btn-primary">
               <span>➕</span>
               새 단어 추가
             </button>
@@ -73,132 +73,322 @@
       </div>
     </main>
 
-    <!-- Add/Edit Modal -->
-    <div v-if="showAddModal || showEditModal" class="modal-overlay" @click="closeModals">
-      <div class="modal-content large-modal" @click.stop>
+    <!-- Step-by-Step Modal -->
+    <div v-if="showStepModal" class="modal-overlay" @click="closeModals">
+      <div class="modal-content step-modal" @click.stop>
         <div class="modal-header">
-          <h2>{{ showAddModal ? '새 단어 추가' : '단어 수정' }}</h2>
+          <div class="step-header">
+            <h2>{{ showAddModal ? '새 단어 추가' : '단어 수정' }}</h2>
+            <div class="step-indicator">
+              <div class="steps">
+                <div 
+                  v-for="(step, index) in steps" 
+                  :key="index"
+                  class="step-item"
+                  :class="{ 
+                    'active': currentStep === index + 1, 
+                    'completed': currentStep > index + 1 
+                  }"
+                >
+                  <div class="step-number">{{ index + 1 }}</div>
+                  <div class="step-title">{{ step.title }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
           <button @click="closeModals" class="modal-close">×</button>
         </div>
         
-        <form @submit.prevent="saveWord" class="modal-form">
-          <div class="form-row">
-            <div class="form-group">
-              <label class="form-label">한국어 이름</label>
-              <input 
-                v-model="formData.name" 
-                type="text" 
-                class="form-input" 
-                placeholder="예: 고양이"
-                required 
-              />
+        <form @submit.prevent="handleStepSubmit" class="modal-form">
+          <!-- Step 1: 기본 정보 -->
+          <div v-if="currentStep === 1" class="step-content">
+            <div class="step-description">
+              <h3>기본 정보</h3>
+              <p>단어의 기본 정보를 입력해주세요</p>
             </div>
-            <div class="form-group">
-              <label class="form-label">영어 이름</label>
-              <input 
-                v-model="formData.nameEn" 
-                type="text" 
-                class="form-input" 
-                placeholder="예: Cat"
-                required 
-              />
+            
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">
+                  한국어 이름
+                  <button 
+                    type="button" 
+                    class="info-tooltip" 
+                    @click="showTooltip('korean-name')"
+                    @blur="hideTooltip"
+                  >
+                    ℹ️
+                  </button>
+                  <div v-if="activeTooltip === 'korean-name'" class="tooltip">
+                    아이들이 학습할 한국어 단어를 입력하세요
+                  </div>
+                </label>
+                <input 
+                  v-model="formData.name" 
+                  type="text" 
+                  class="form-input" 
+                  placeholder="예: 고양이"
+                  required
+                  ref="firstInput"
+                />
+              </div>
+              <div class="form-group">
+                <label class="form-label">
+                  영어 이름
+                  <button 
+                    type="button" 
+                    class="info-tooltip" 
+                    @click="showTooltip('english-name')"
+                    @blur="hideTooltip"
+                  >
+                    ℹ️
+                  </button>
+                  <div v-if="activeTooltip === 'english-name'" class="tooltip">
+                    해당하는 영어 단어를 입력하세요
+                  </div>
+                </label>
+                <input 
+                  v-model="formData.nameEn" 
+                  type="text" 
+                  class="form-input" 
+                  placeholder="예: Cat"
+                  required 
+                />
+              </div>
             </div>
-          </div>
 
-          <div class="form-group">
-            <label class="form-label">이미지</label>
-            <FileUploadInput
-              v-model="formData.imageUrl"
-              label="이미지"
-              placeholder="https://example.com/image.jpg"
-              file-type="image"
-              :required="true"
-            />
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label class="form-label">한국어 음성 <span class="optional">(선택, 없으면 자동 음성)</span></label>
-              <FileUploadInput
-                v-model="formData.audioKo"
-                :label="$t('admin.audioKoLabel')"
-                placeholder="/audio/cat-ko.mp3"
-                file-type="audio"
-                :required="false"
-              />
-            </div>
-            <div class="form-group">
-              <label class="form-label">영어 음성 <span class="optional">(선택, 없으면 자동 음성)</span></label>
-              <FileUploadInput
-                v-model="formData.audioEn"
-                :label="$t('admin.audioEnLabel')"
-                placeholder="/audio/cat-en.mp3"
-                file-type="audio"
-                :required="false"
-              />
-            </div>
-          </div>
-
-          <div class="form-hint tts-guide">
-            음성 파일을 등록하지 않으면, 브라우저의 TTS(음성 합성)로 자동 안내됩니다.
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label class="form-label">카테고리</label>
-              <select v-model="formData.category" class="form-input" required>
-                <option value="">카테고리 선택</option>
-                <option v-for="key in categoryKeys" :key="key" :value="key">
-                  {{ getCategoryName(key) }}
-                </option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label class="form-label">적정 나이</label>
-              <div class="age-inputs">
-                <select v-model.number="formData.minAge" class="form-input" required>
-                  <option value="3">3세</option>
-                  <option value="4">4세</option>
-                  <option value="5">5세</option>
-                  <option value="6">6세</option>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">
+                  카테고리
+                  <button 
+                    type="button" 
+                    class="info-tooltip" 
+                    @click="showTooltip('category')"
+                    @blur="hideTooltip"
+                  >
+                    ℹ️
+                  </button>
+                  <div v-if="activeTooltip === 'category'" class="tooltip">
+                    단어가 속할 분류를 선택하세요
+                  </div>
+                </label>
+                <select v-model="formData.category" class="form-input" required>
+                  <option value="">카테고리 선택</option>
+                  <option v-for="key in categoryKeys" :key="key" :value="key">
+                    {{ getCategoryName(key) }}
+                  </option>
                 </select>
-                <span class="age-separator">~</span>
-                <select v-model.number="formData.maxAge" class="form-input" required>
-                  <option value="3">3세</option>
-                  <option value="4">4세</option>
-                  <option value="5">5세</option>
-                  <option value="6">6세</option>
-                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">
+                  적정 나이
+                  <button 
+                    type="button" 
+                    class="info-tooltip" 
+                    @click="showTooltip('age')"
+                    @blur="hideTooltip"
+                  >
+                    ℹ️
+                  </button>
+                  <div v-if="activeTooltip === 'age'" class="tooltip">
+                    이 단어를 학습하기 적절한 나이 범위를 설정하세요
+                  </div>
+                </label>
+                <div class="age-inputs">
+                  <select v-model.number="formData.minAge" class="form-input" required>
+                    <option value="3">3세</option>
+                    <option value="4">4세</option>
+                    <option value="5">5세</option>
+                    <option value="6">6세</option>
+                  </select>
+                  <span class="age-separator">~</span>
+                  <select v-model.number="formData.maxAge" class="form-input" required>
+                    <option value="3">3세</option>
+                    <option value="4">4세</option>
+                    <option value="5">5세</option>
+                    <option value="6">6세</option>
+                  </select>
+                </div>
               </div>
             </div>
           </div>
 
-          <!-- 시스템 관리자만 소유권 선택 가능 -->
-          <div v-if="isSystemAdmin" class="form-group">
-            <label class="form-label">소유권 설정</label>
-            <div class="ownership-options">
-              <label class="radio-option">
-                <input 
-                  type="radio" 
-                  v-model="formData.ownerType" 
-                  value="global"
-                  name="ownerType"
-                />
-                <span class="radio-text">
-                  <strong>공용</strong> - 모든 사용자에게 표시
-                </span>
+          <!-- Step 2: 파일 업로드 -->
+          <div v-if="currentStep === 2" class="step-content">
+            <div class="step-description">
+              <h3>파일 업로드</h3>
+              <p>이미지와 음성 파일을 업로드해주세요</p>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">
+                이미지 *
+                <button 
+                  type="button" 
+                  class="info-tooltip" 
+                  @click="showTooltip('image')"
+                  @blur="hideTooltip"
+                >
+                  ℹ️
+                </button>
+                <div v-if="activeTooltip === 'image'" class="tooltip">
+                  단어를 나타내는 이미지를 업로드하세요 (JPG, PNG 등)
+                </div>
               </label>
-              <label class="radio-option">
-                <input 
-                  type="radio" 
-                  v-model="formData.ownerType" 
-                  value="user"
-                  name="ownerType"
+              <FileUploadInput
+                v-model="formData.imageUrl"
+                label="이미지"
+                placeholder="https://example.com/image.jpg"
+                file-type="image"
+                :required="true"
+              />
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">
+                  한국어 음성
+                  <button 
+                    type="button" 
+                    class="info-tooltip" 
+                    @click="showTooltip('audio-ko')"
+                    @blur="hideTooltip"
+                  >
+                    ℹ️
+                  </button>
+                  <div v-if="activeTooltip === 'audio-ko'" class="tooltip">
+                    선택사항: 업로드하지 않으면 자동 음성으로 발음됩니다
+                  </div>
+                </label>
+                <FileUploadInput
+                  v-model="formData.audioKo"
+                  :label="$t('admin.audioKoLabel')"
+                  placeholder="/audio/cat-ko.mp3"
+                  file-type="audio"
+                  :required="false"
                 />
-                <span class="radio-text">
-                  <strong>개인</strong> - 나만 볼 수 있음
-                </span>
+              </div>
+              <div class="form-group">
+                <label class="form-label">
+                  영어 음성
+                  <button 
+                    type="button" 
+                    class="info-tooltip" 
+                    @click="showTooltip('audio-en')"
+                    @blur="hideTooltip"
+                  >
+                    ℹ️
+                  </button>
+                  <div v-if="activeTooltip === 'audio-en'" class="tooltip">
+                    선택사항: 업로드하지 않으면 자동 음성으로 발음됩니다
+                  </div>
+                </label>
+                <FileUploadInput
+                  v-model="formData.audioEn"
+                  :label="$t('admin.audioEnLabel')"
+                  placeholder="/audio/cat-en.mp3"
+                  file-type="audio"
+                  :required="false"
+                />
+              </div>
+            </div>
+
+            <div class="tts-info">
+              <div class="info-icon">💡</div>
+              <span>음성 파일이 없으면 브라우저 TTS로 자동 발음됩니다</span>
+            </div>
+          </div>
+
+          <!-- Step 3: 추가 설정 -->
+          <div v-if="currentStep === 3" class="step-content">
+            <div class="step-description">
+              <h3>추가 설정</h3>
+              <p>소유권 및 기타 설정을 완료해주세요</p>
+            </div>
+
+            <!-- 시스템 관리자만 소유권 선택 가능 -->
+            <div v-if="isSystemAdmin" class="form-group">
+              <label class="form-label">
+                소유권 설정
+                <button 
+                  type="button" 
+                  class="info-tooltip" 
+                  @click="showTooltip('ownership')"
+                  @blur="hideTooltip"
+                >
+                  ℹ️
+                </button>
+                <div v-if="activeTooltip === 'ownership'" class="tooltip">
+                  공용: 모든 사용자가 볼 수 있음<br>
+                  개인: 본인만 볼 수 있음
+                </div>
               </label>
+              <div class="ownership-options">
+                <label class="radio-option">
+                  <input 
+                    type="radio" 
+                    v-model="formData.ownerType" 
+                    value="global"
+                    name="ownerType"
+                  />
+                  <div class="radio-content">
+                    <div class="radio-icon">🌍</div>
+                    <div class="radio-text">
+                      <strong>공용</strong>
+                      <span>모든 사용자에게 표시</span>
+                    </div>
+                  </div>
+                </label>
+                <label class="radio-option">
+                  <input 
+                    type="radio" 
+                    v-model="formData.ownerType" 
+                    value="user"
+                    name="ownerType"
+                  />
+                  <div class="radio-content">
+                    <div class="radio-icon">👤</div>
+                    <div class="radio-text">
+                      <strong>개인</strong>
+                      <span>나만 볼 수 있음</span>
+                    </div>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            <div v-else class="form-group">
+              <div class="ownership-info">
+                <div class="info-icon">👤</div>
+                <div class="info-text">
+                  <strong>개인 단어</strong>
+                  <span>이 단어는 본인만 볼 수 있습니다</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- 요약 정보 -->
+            <div class="summary-card">
+              <h4>입력 정보 요약</h4>
+              <div class="summary-grid">
+                <div class="summary-item">
+                  <span class="label">한국어:</span>
+                  <span class="value">{{ formData.name || '-' }}</span>
+                </div>
+                <div class="summary-item">
+                  <span class="label">영어:</span>
+                  <span class="value">{{ formData.nameEn || '-' }}</span>
+                </div>
+                <div class="summary-item">
+                  <span class="label">카테고리:</span>
+                  <span class="value">{{ formData.category ? getCategoryName(formData.category) : '-' }}</span>
+                </div>
+                <div class="summary-item">
+                  <span class="label">나이:</span>
+                  <span class="value">{{ formData.minAge }}~{{ formData.maxAge }}세</span>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -207,11 +397,31 @@
           </div>
 
           <div class="modal-actions">
+            <button 
+              v-if="currentStep > 1" 
+              type="button" 
+              @click="previousStep" 
+              class="btn btn-secondary"
+            >
+              이전
+            </button>
             <button type="button" @click="closeModals" class="btn btn-secondary">
               취소
             </button>
-            <button type="submit" class="btn btn-primary" :disabled="isLoading">
-              {{ isLoading ? '저장 중...' : (showAddModal ? '추가' : '수정') }}
+            <button 
+              v-if="currentStep < 3" 
+              type="submit" 
+              class="btn btn-primary"
+            >
+              다음
+            </button>
+            <button 
+              v-else 
+              type="submit" 
+              class="btn btn-primary" 
+              :disabled="isLoading"
+            >
+              {{ isLoading ? '저장 중...' : (showAddModal ? '단어 추가' : '수정 완료') }}
             </button>
           </div>
         </form>
@@ -259,11 +469,22 @@ const { t, messages } = useI18n();
 
 const showAddModal = ref(false);
 const showEditModal = ref(false);
+const showStepModal = ref(false);
 const showDeleteModal = ref(false);
 const editingWord = ref<WordItem | null>(null);
 const wordToDelete = ref<WordItem | null>(null);
 const isLoading = ref(false);
 const error = ref('');
+const currentStep = ref(1);
+const activeTooltip = ref<string | null>(null);
+const firstInput = ref<HTMLInputElement | null>(null);
+
+// 단계별 구성
+const steps = [
+  { title: '기본정보', description: '단어 이름과 카테고리' },
+  { title: '파일업로드', description: '이미지와 음성 파일' },
+  { title: '추가설정', description: '소유권 및 최종 확인' }
+];
 
 // 시스템 관리자 여부 확인
 const isSystemAdmin = computed(() => {
@@ -307,11 +528,83 @@ const resetForm = () => {
   // 시스템 관리자는 기본적으로 공용으로, 일반 사용자는 개인으로 설정
   formData.ownerType = isSystemAdmin.value ? 'global' : 'user';
   error.value = '';
+  currentStep.value = 1;
+  activeTooltip.value = null;
+};
+
+const startAddWord = () => {
+  resetForm();
+  showAddModal.value = true;
+  showStepModal.value = true;
+  currentStep.value = 1;
+};
+
+const showTooltip = (type: string) => {
+  activeTooltip.value = activeTooltip.value === type ? null : type;
+};
+
+const hideTooltip = () => {
+  activeTooltip.value = null;
+};
+
+const nextStep = () => {
+  if (currentStep.value < 3) {
+    currentStep.value++;
+  }
+};
+
+const previousStep = () => {
+  if (currentStep.value > 1) {
+    currentStep.value--;
+  }
+};
+
+const validateCurrentStep = (): boolean => {
+  error.value = '';
+  
+  if (currentStep.value === 1) {
+    if (!formData.name.trim()) {
+      error.value = '한국어 이름을 입력해주세요.';
+      return false;
+    }
+    if (!formData.nameEn.trim()) {
+      error.value = '영어 이름을 입력해주세요.';
+      return false;
+    }
+    if (!formData.category) {
+      error.value = '카테고리를 선택해주세요.';
+      return false;
+    }
+    if (formData.minAge > formData.maxAge) {
+      error.value = '최소 나이는 최대 나이보다 작거나 같아야 합니다.';
+      return false;
+    }
+  } else if (currentStep.value === 2) {
+    if (!formData.imageUrl.trim()) {
+      error.value = '이미지를 업로드해주세요.';
+      return false;
+    }
+  }
+  
+  return true;
+};
+
+const handleStepSubmit = async () => {
+  if (!validateCurrentStep()) {
+    return;
+  }
+  
+  if (currentStep.value < 3) {
+    nextStep();
+  } else {
+    await saveWord();
+  }
 };
 
 const closeModals = () => {
   showAddModal.value = false;
   showEditModal.value = false;
+  showStepModal.value = false;
   editingWord.value = null;
   resetForm();
 };
@@ -328,11 +621,12 @@ const editWord = (word: WordItem) => {
   formData.maxAge = word.maxAge;
   formData.ownerType = word.ownerType;
   showEditModal.value = true;
+  showStepModal.value = true;
+  currentStep.value = 1;
 };
 
 const saveWord = async () => {
-  if (formData.minAge > formData.maxAge) {
-    error.value = '최소 나이는 최대 나이보다 작거나 같아야 합니다.';
+  if (!validateCurrentStep()) {
     return;
   }
 
@@ -565,7 +859,7 @@ onMounted(async () => {
 
 .age-range {
   background: var(--color-primary);
-  color: var(--color-text-white);
+  color: var(--color-bg-primary);
   padding: var(--spacing-xs) var(--spacing-sm);
   border-radius: var(--radius-sm);
   font-size: 0.75rem;
@@ -806,6 +1100,227 @@ onMounted(async () => {
   
   .large-modal {
     max-width: none;
+  }
+}
+
+/* 단계별 모달 스타일 */
+.step-modal {
+  max-width: 700px;
+}
+
+.step-header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.step-header h2 {
+  margin: 0;
+}
+
+.step-indicator {
+  display: flex;
+  justify-content: center;
+}
+
+.steps {
+  display: flex;
+  gap: var(--spacing-xl);
+}
+
+.step-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-xs);
+  opacity: 0.4;
+  transition: all 0.3s ease;
+}
+
+.step-item.active {
+  opacity: 1;
+  color: var(--color-primary);
+}
+
+.step-item.completed {
+  opacity: 0.8;
+  color: var(--color-success);
+}
+
+.step-number {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 0.875rem;
+  border: 2px solid currentColor;
+  background: var(--color-bg-card);
+}
+
+.step-item.active .step-number {
+  background: var(--color-primary);
+  color: var(--color-bg-primary);
+}
+
+.step-item.completed .step-number {
+  background: var(--color-success);
+  color: var(--color-text-white);
+}
+
+.step-title {
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.step-content {
+  min-height: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.step-description {
+  text-align: center;
+  padding: var(--spacing-lg);
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-md);
+  border-left: 4px solid var(--color-primary);
+}
+
+.step-description h3 {
+  font-size: 1.25rem;
+  margin-bottom: var(--spacing-sm);
+  color: var(--color-text-primary);
+}
+
+.step-description p {
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+/* 툴팁 스타일 */
+.info-tooltip {
+  background: none;
+  border: none;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  font-size: 0.875rem;
+  margin-left: var(--spacing-xs);
+  padding: 2px;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.info-tooltip:hover {
+  color: var(--color-primary);
+  background: var(--color-bg-hover);
+}
+
+.tooltip {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-top: var(--spacing-xs);
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  z-index: 1000;
+  box-shadow: var(--shadow-lg);
+  animation: tooltipFadeIn 0.2s ease;
+}
+
+@keyframes tooltipFadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+.tooltip::before {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-bottom: 4px solid var(--color-border);
+}
+
+.tooltip::after {
+  content: '';
+  position: absolute;
+  top: -3px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-bottom: 4px solid var(--color-bg-card);
+}
+
+/* TTS 정보 스타일 */
+.tts-info {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  background: var(--color-bg-secondary);
+  padding: var(--spacing-md);
+  border-radius: var(--radius-md);
+  color: var(--color-text-secondary);
+  font-size: 0.875rem;
+  margin-top: var(--spacing-md);
+}
+
+.info-icon {
+  font-size: 1rem;
+}
+
+@media (max-width: 768px) {
+  .steps {
+    gap: var(--spacing-md);
+  }
+  
+  .step-item {
+    gap: var(--spacing-xs);
+  }
+  
+  .step-number {
+    width: 28px;
+    height: 28px;
+    font-size: 0.75rem;
+  }
+  
+  .step-title {
+    font-size: 0.6rem;
+  }
+  
+  .step-content {
+    min-height: 300px;
+  }
+  
+  .tooltip {
+    position: fixed;
+    left: 50% !important;
+    top: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    margin-top: 0;
+    white-space: normal;
+    max-width: 80vw;
   }
 }
 </style>
