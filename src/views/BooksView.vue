@@ -15,22 +15,36 @@
           <div 
             v-for="book in store.currentBooks" 
             :key="book.id"
+            :ref="(el) => setBookRef(el as Element, book.id)"
             class="book-card fade-in"
           >
             <div class="book-cover" @click="openBook(book.id)" @mouseenter="handleMouseEnter(book)" @mouseleave="handleMouseLeave(book)" @touchstart="handleTouchStart(book)" @touchend="handleTouchEnd(book)">
+              <!-- 로딩 스켈레톤 -->
+              <div v-if="!isVisible(book.id)" class="book-skeleton">
+                <div class="skeleton-cover"></div>
+                <div class="skeleton-overlay">
+                  <span class="skeleton-icon">📖</span>
+                  <span class="skeleton-text">로딩중...</span>
+                </div>
+              </div>
+              
               <!-- 비디오 모드인 경우 비디오 미리보기 -->
-              <template v-if="book.isVideoMode && book.videoUrl">
+              <template v-else-if="book.isVideoMode && book.videoUrl">
                 <video 
                   :ref="'video-' + book.id"
                   :data-video-id="book.id"
-                  :src="getImageUrl(book.videoUrl)" 
-                  :poster="book.coverImage ? getImageUrl(book.coverImage) : undefined"
+                  :src="isVisible(book.id) && getLoadingState(book.id) !== 'error' ? getImageUrl(book.videoUrl) : ''" 
+                  :poster="book.coverImage ? getThumbnailUrl(book.coverImage) : undefined"
                   class="book-video"
                   muted
                   loop
-                  preload="metadata"
+                  preload="none"
+                  playsinline
+                  webkit-playsinline
                   @canplay="onVideoCanPlay"
                   @error="onVideoError"
+                  @loadstart="() => setLoadingState(book.id, 'loading')"
+                  @loadeddata="() => setLoadingState(book.id, 'loaded')"
                 >
                   비디오를 지원하지 않는 브라우저입니다.
                 </video>
@@ -38,18 +52,50 @@
                   <span class="play-icon">🎬</span>
                   <span class="play-text">영상보기</span>
                 </div>
+                <!-- 로딩 인디케이터 -->
+                <div v-if="getLoadingState(book.id) === 'loading'" class="loading-indicator">
+                  <div class="spinner"></div>
+                </div>
               </template>
+              
               <!-- 일반 이미지 모드 -->
               <template v-else>
-                <img 
-                  v-if="book.coverImage" 
-                  :src="getImageUrl(book.coverImage)" 
-                  :alt="book.title" 
-                />
-                <div v-else class="no-cover-placeholder">
-                  <span class="placeholder-icon">📖</span>
-                  <p class="placeholder-text">{{ book.title }}</p>
+                <div class="progressive-image-container">
+                  <!-- 저화질 블러 이미지 (즉시 로드) -->
+                  <img 
+                    v-if="book.coverImage && !isLowQualityLoaded(book.id)" 
+                    :src="getLowQualityImageUrl(book.coverImage)"
+                    :alt="book.title"
+                    class="blur-placeholder"
+                    loading="eager"
+                    @load="() => setLowQualityLoaded(book.id)"
+                    @error="() => setLoadingState(book.id, 'error')"
+                  />
+                  
+                  <!-- 고화질 이미지 (Lazy Loading) -->
+                  <img 
+                    v-if="book.coverImage" 
+                    :src="isVisible(book.id) ? getThumbnailUrl(book.coverImage) : ''"
+                    :alt="book.title"
+                    class="high-quality-image"
+                    :class="{ 'loaded': getLoadingState(book.id) === 'loaded' }"
+                    loading="lazy"
+                    @load="() => setLoadingState(book.id, 'loaded')"
+                    @error="() => setLoadingState(book.id, 'error')"
+                  />
+                  
+                  <!-- 이미지 없을 때 플레이스홀더 -->
+                  <div v-if="!book.coverImage" class="no-cover-placeholder">
+                    <span class="placeholder-icon">📖</span>
+                    <p class="placeholder-text">{{ book.title }}</p>
+                  </div>
+                  
+                  <!-- 로딩 인디케이터 -->
+                  <div v-if="getLoadingState(book.id) === 'loading'" class="loading-indicator">
+                    <div class="spinner"></div>
+                  </div>
                 </div>
+                
                 <div class="play-overlay">
                   <span class="play-icon">📖</span>
                   <span class="play-text">읽기</span>
@@ -96,12 +142,40 @@ import LikeButton from '@/components/LikeButton.vue';
 import { useAppStore } from '@/stores/app';
 import { useAuthStore } from '@/stores/auth';
 import { useContentStore } from '@/stores/content';
+import { useLazyLoading, useImageLoading } from '@/composables/useLazyLoading';
 import type { Book } from '@/types';
 
 const store = useAppStore();
 const authStore = useAuthStore();
 const contentStore = useContentStore();
 const router = useRouter();
+
+// Lazy Loading 및 이미지 로딩 상태 관리
+const { observeElement, isVisible, preloadVisible } = useLazyLoading();
+const { 
+  setLoadingState, 
+  getLoadingState, 
+  setLowQualityLoaded, 
+  isLowQualityLoaded, 
+  getLowQualityImageUrl,
+  getThumbnailUrl 
+} = useImageLoading();
+
+// 책 요소 ref 설정 및 Intersection Observer 등록
+const setBookRef = (element: Element | null, bookId: string) => {
+  if (element) {
+    // 첫 번째 몇 개 책은 미리 로드 (Above the fold)
+    const bookIndex = store.currentBooks.findIndex(book => book.id === bookId);
+    if (bookIndex < 2) {
+      // 처음 2개 책은 즉시 표시
+      preloadVisible(bookId);
+      setLoadingState(bookId, 'loading');
+    } else {
+      // 나머지는 Intersection Observer로 관찰
+      observeElement(element, bookId);
+    }
+  }
+};
 
 const getImageUrl = (url: string): string => {
   if (url.startsWith('/uploads/')) {
@@ -137,9 +211,16 @@ const onBookLiked = (isLiked: boolean) => {
 
 // 비디오 제어 관련 함수들
 const handleMouseEnter = async (book: Book) => {
-  if (book.isVideoMode && book.videoUrl) {
+  if (book.isVideoMode && book.videoUrl && isVisible(book.id) && getLoadingState(book.id) !== 'error') {
     const videoElement = document.querySelector(`[data-video-id="${book.id}"]`) as HTMLVideoElement;
     if (videoElement) {
+      // 비디오가 아직 로드되지 않았다면 src 설정
+      if (!videoElement.src || videoElement.src === '') {
+        setLoadingState(book.id, 'loading');
+        videoElement.src = getImageUrl(book.videoUrl || '');
+        videoElement.load();
+      }
+      
       try {
         await videoElement.play();
         console.log(`✅ Video preview started for book: ${book.title}`);
@@ -168,7 +249,11 @@ const onVideoCanPlay = (event: Event) => {
 
 const onVideoError = (event: Event) => {
   const video = event.target as HTMLVideoElement;
-  console.error('❌ Video loading error:', video.src, event);
+  const bookId = video.getAttribute('data-video-id');
+  if (bookId) {
+    setLoadingState(bookId, 'error');
+    console.error('❌ Video loading error for book:', bookId, video.src, event);
+  }
 };
 
 // 터치 이벤트 처리 (모바일)
@@ -176,10 +261,17 @@ let touchTimer: NodeJS.Timeout | null = null;
 
 const handleTouchStart = async (book: Book) => {
   // 터치 시작시 비디오 재생
-  if (book.isVideoMode && book.videoUrl) {
+  if (book.isVideoMode && book.videoUrl && isVisible(book.id) && getLoadingState(book.id) !== 'error') {
     touchTimer = setTimeout(async () => {
       const videoElement = document.querySelector(`[data-video-id="${book.id}"]`) as HTMLVideoElement;
       if (videoElement) {
+        // 비디오가 아직 로드되지 않았다면 src 설정
+        if (!videoElement.src || videoElement.src === '') {
+          setLoadingState(book.id, 'loading');
+          videoElement.src = getImageUrl(book.videoUrl || '');
+          videoElement.load();
+        }
+        
         try {
           await videoElement.play();
           console.log(`✅ Video preview started (touch) for book: ${book.title}`);
@@ -580,11 +672,197 @@ onMounted(async () => {
   }
 }
 
+/* Lazy Loading 및 Progressive Image Loading 스타일 */
+
+/* 스켈레톤 로딩 */
+.book-skeleton {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  background: var(--color-bg-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.skeleton-cover {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    var(--color-bg-secondary) 0%,
+    var(--color-bg-tertiary) 50%,
+    var(--color-bg-secondary) 100%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.5s ease-in-out infinite;
+}
+
+.skeleton-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-text-muted);
+}
+
+.skeleton-icon {
+  font-size: 2rem;
+  opacity: 0.6;
+}
+
+.skeleton-text {
+  font-size: 0.875rem;
+  font-weight: 500;
+  opacity: 0.8;
+}
+
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Progressive Image Loading */
+.progressive-image-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.blur-placeholder {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: blur(5px);
+  transform: scale(1.1);
+  transition: opacity 0.3s ease;
+  z-index: 1;
+}
+
+.high-quality-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 2;
+}
+
+.high-quality-image.loaded {
+  opacity: 1;
+}
+
+/* 로딩 인디케이터 */
+.loading-indicator {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 3;
+  background: rgba(0, 0, 0, 0.7);
+  border-radius: 50%;
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.spinner {
+  width: 24px;
+  height: 24px;
+  border: 2px solid transparent;
+  border-top: 2px solid var(--color-primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* 비디오 스켈레톤 및 로딩 상태 */
+.book-video {
+  background: var(--color-bg-secondary);
+  position: relative;
+}
+
+.book-video:not([src]) {
+  background: linear-gradient(
+    90deg,
+    var(--color-bg-secondary) 0%,
+    var(--color-bg-tertiary) 50%,
+    var(--color-bg-secondary) 100%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.5s ease-in-out infinite;
+}
+
+/* 페이드인 애니메이션 (성능 최적화) */
+.fade-in {
+  opacity: 0;
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 모바일 최적화 */
+@media (max-width: 768px) {
+  .skeleton-icon {
+    font-size: 1.5rem;
+  }
+  
+  .skeleton-text {
+    font-size: 0.75rem;
+  }
+  
+  .spinner {
+    width: 20px;
+    height: 20px;
+  }
+  
+  .loading-indicator {
+    padding: 10px;
+  }
+}
+
 /* Accessibility improvements */
 @media (prefers-reduced-motion: reduce) {
   .book-card,
   .book-cover img,
-  .play-overlay {
+  .play-overlay,
+  .blur-placeholder,
+  .high-quality-image,
+  .fade-in {
+    animation: none;
     transition: none;
   }
   
@@ -594,6 +872,11 @@ onMounted(async () => {
   
   .book-card:hover .book-cover img {
     transform: none;
+  }
+  
+  .skeleton-cover {
+    animation: none;
+    background: var(--color-bg-tertiary);
   }
 }
 </style>
