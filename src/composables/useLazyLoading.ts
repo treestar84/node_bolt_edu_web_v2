@@ -1,8 +1,9 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 
 export function useLazyLoading() {
-  const visibleElements = ref(new Set<string>())
+  const visibleElements = ref<Record<string, boolean>>({})
   const observer = ref<IntersectionObserver | null>(null)
+  const visibilityCallbacks = ref<Record<string, () => void>>({})
 
   const initializeObserver = () => {
     if (!('IntersectionObserver' in window)) {
@@ -16,7 +17,15 @@ export function useLazyLoading() {
           const elementId = entry.target.getAttribute('data-lazy-id')
           if (elementId) {
             if (entry.isIntersecting) {
-              visibleElements.value.add(elementId)
+              visibleElements.value[elementId] = true
+              
+              // 콜백 실행
+              const callback = visibilityCallbacks.value[elementId]
+              if (callback) {
+                callback()
+                delete visibilityCallbacks.value[elementId]
+              }
+              
               // 한 번 로드되면 관찰 중단
               observer.value?.unobserve(entry.target)
             }
@@ -33,21 +42,24 @@ export function useLazyLoading() {
     return observer.value
   }
 
-  const observeElement = (element: Element, id: string) => {
+  const observeElement = (element: Element, id: string, onVisible?: () => void) => {
     if (!observer.value) return
     
     element.setAttribute('data-lazy-id', id)
+    if (onVisible) {
+      visibilityCallbacks.value[id] = onVisible
+    }
     observer.value.observe(element)
   }
 
   const isVisible = (id: string): boolean => {
     // Intersection Observer를 지원하지 않는 경우 항상 true 반환
     if (!observer.value) return true
-    return visibleElements.value.has(id)
+    return visibleElements.value[id] || false
   }
 
   const preloadVisible = (id: string) => {
-    visibleElements.value.add(id)
+    visibleElements.value[id] = true
   }
 
   onMounted(() => {
@@ -70,23 +82,28 @@ export function useLazyLoading() {
 
 // 이미지 로딩 상태 관리
 export function useImageLoading() {
-  const loadingStates = ref(new Map<string, 'loading' | 'loaded' | 'error'>())
-  const lowQualityLoaded = ref(new Set<string>())
+  const loadingStates = ref<Record<string, 'loading' | 'loaded' | 'error'>>({})
+  const lowQualityLoaded = ref<Record<string, boolean>>({})
 
   const setLoadingState = (id: string, state: 'loading' | 'loaded' | 'error') => {
-    loadingStates.value.set(id, state)
+    if (loadingStates.value[id] === state) return // 동일한 상태면 업데이트 하지 않음
+    
+    console.log(`🔄 Loading state changed: ${id} -> ${state}`)
+    loadingStates.value[id] = state
   }
 
   const getLoadingState = (id: string) => {
-    return loadingStates.value.get(id) || 'loading'
+    return loadingStates.value[id] || 'loaded'
   }
 
   const setLowQualityLoaded = (id: string) => {
-    lowQualityLoaded.value.add(id)
+    if (lowQualityLoaded.value[id]) return // 이미 로드된 상태면 업데이트 하지 않음
+    
+    lowQualityLoaded.value[id] = true
   }
 
   const isLowQualityLoaded = (id: string) => {
-    return lowQualityLoaded.value.has(id)
+    return lowQualityLoaded.value[id] || false
   }
 
   // 저화질 이미지 URL 생성 (블러 효과용)
@@ -99,9 +116,9 @@ export function useImageLoading() {
       baseUrl = '/server' + originalUrl
     }
     
-    // 작은 크기로 리사이즈 (서버에서 지원한다면)
-    // 현재는 원본 URL을 사용하되, 나중에 썸네일 API 추가 시 활용
-    return baseUrl + '?w=50&h=50&q=20' // 예시: 서버에서 리사이즈 지원
+    // 현재 서버에서 이미지 리사이징을 지원하지 않으므로 원본 URL 반환
+    // Progressive Loading을 위해 동일한 이미지를 사용
+    return baseUrl
   }
 
   // 썸네일 URL 생성
@@ -114,8 +131,9 @@ export function useImageLoading() {
       baseUrl = '/server' + originalUrl
     }
     
-    // 실제 구현에서는 서버의 이미지 리사이징 API를 사용
-    return baseUrl + `?w=${width}&h=${height}&q=80`
+    // 현재 서버에서 이미지 리사이징을 지원하지 않으므로 원본 URL 반환
+    // 나중에 썸네일 API가 구현되면 파라미터 추가
+    return baseUrl // + `?w=${width}&h=${height}&q=80`
   }
 
   return {

@@ -12,6 +12,7 @@ import authRoutes from './routes/auth.js';
 import wordsRoutes from './routes/words.js';
 import booksRoutes from './routes/books.js';
 import uploadRoutes from './routes/upload.js';
+import videoRoutes from './routes/video.js';
 import apiKeyRoutes from './routes/apiKeys.js';
 import testDataRoutes from './routes/testData.js';
 
@@ -116,6 +117,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/words', wordsRoutes);
 app.use('/api/books', booksRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/video', videoRoutes);
 app.use('/api/keys', apiKeyRoutes);
 app.use('/api/test', testDataRoutes);
 
@@ -152,6 +154,11 @@ app.get('/api/docs', (req, res) => {
         'POST /upload/audio': 'Upload audio file (requires API key)',
         'POST /upload/video': 'Upload video file (requires API key)',
         'POST /upload/batch': 'Upload multiple files (requires API key)'
+      },
+      video: {
+        'POST /video/extract-frame': 'Extract first frame from uploaded video (requires API key)',
+        'POST /video/extract-frame-from-path': 'Extract first frame from existing video file (requires API key)',
+        'GET /video/ffmpeg-status': 'Check FFmpeg availability status'
       },
       keys: {
         'GET /keys': 'Get API keys (admin only)',

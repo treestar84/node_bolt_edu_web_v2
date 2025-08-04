@@ -11,96 +11,46 @@
           </p>
         </div>
 
-        <div v-if="store.currentBooks.length > 0" class="books-grid">
+
+        <div v-if="(store.currentBooks?.length || 0) > 0" class="books-grid">
           <div 
-            v-for="book in store.currentBooks" 
+            v-for="book in (store.currentBooks || [])" 
             :key="book.id"
             :ref="(el) => setBookRef(el as Element, book.id)"
             class="book-card fade-in"
           >
-            <div class="book-cover" @click="openBook(book.id)" @mouseenter="handleMouseEnter(book)" @mouseleave="handleMouseLeave(book)" @touchstart="handleTouchStart(book)" @touchend="handleTouchEnd(book)">
-              <!-- 로딩 스켈레톤 -->
-              <div v-if="!isVisible(book.id)" class="book-skeleton">
-                <div class="skeleton-cover"></div>
-                <div class="skeleton-overlay">
-                  <span class="skeleton-icon">📖</span>
-                  <span class="skeleton-text">로딩중...</span>
+            <div class="book-cover" @click="openBook(book.id)">
+              <!-- 커버 이미지가 있으면 즉시 표시 -->
+              <img 
+                v-if="book.coverImage" 
+                :src="getImageUrl(book.coverImage)"
+                :alt="book.title"
+                style="width: 100%; height: 100%; object-fit: cover;"
+              />
+              
+              <!-- 커버 이미지가 없지만 비디오가 있는 경우 -->
+              <video 
+                v-else-if="!book.coverImage && book.videoUrl"
+                :src="getImageUrl(book.videoUrl)"
+                :alt="book.title"
+                style="width: 100%; height: 100%; object-fit: cover;"
+                muted
+                preload="metadata"
+              />
+              
+              <!-- 커버 이미지도 비디오도 없으면 플레이스홀더 -->
+              <div v-else class="no-cover-placeholder" style="background: #f5f5f5; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                <span style="font-size: 3rem; margin-bottom: 8px;">📖</span>
+                <p style="font-size: 1rem; font-weight: 600; text-align: center; margin: 0 0 4px 0; padding: 0 8px;">{{ book.title }}</p>
+                <div style="font-size: 0.75rem; color: #999;">
+                  썸네일 없음
                 </div>
               </div>
               
-              <!-- 비디오 모드인 경우 비디오 미리보기 -->
-              <template v-else-if="book.isVideoMode && book.videoUrl">
-                <video 
-                  :ref="'video-' + book.id"
-                  :data-video-id="book.id"
-                  :src="isVisible(book.id) && getLoadingState(book.id) !== 'error' ? getImageUrl(book.videoUrl) : ''" 
-                  :poster="book.coverImage ? getThumbnailUrl(book.coverImage) : undefined"
-                  class="book-video"
-                  muted
-                  loop
-                  preload="none"
-                  playsinline
-                  webkit-playsinline
-                  @canplay="onVideoCanPlay"
-                  @error="onVideoError"
-                  @loadstart="() => setLoadingState(book.id, 'loading')"
-                  @loadeddata="() => setLoadingState(book.id, 'loaded')"
-                >
-                  비디오를 지원하지 않는 브라우저입니다.
-                </video>
-                <div class="play-overlay video-overlay">
-                  <span class="play-icon">🎬</span>
-                  <span class="play-text">영상보기</span>
-                </div>
-                <!-- 로딩 인디케이터 -->
-                <div v-if="getLoadingState(book.id) === 'loading'" class="loading-indicator">
-                  <div class="spinner"></div>
-                </div>
-              </template>
-              
-              <!-- 일반 이미지 모드 -->
-              <template v-else>
-                <div class="progressive-image-container">
-                  <!-- 저화질 블러 이미지 (즉시 로드) -->
-                  <img 
-                    v-if="book.coverImage && !isLowQualityLoaded(book.id)" 
-                    :src="getLowQualityImageUrl(book.coverImage)"
-                    :alt="book.title"
-                    class="blur-placeholder"
-                    loading="eager"
-                    @load="() => setLowQualityLoaded(book.id)"
-                    @error="() => setLoadingState(book.id, 'error')"
-                  />
-                  
-                  <!-- 고화질 이미지 (Lazy Loading) -->
-                  <img 
-                    v-if="book.coverImage" 
-                    :src="isVisible(book.id) ? getThumbnailUrl(book.coverImage) : ''"
-                    :alt="book.title"
-                    class="high-quality-image"
-                    :class="{ 'loaded': getLoadingState(book.id) === 'loaded' }"
-                    loading="lazy"
-                    @load="() => setLoadingState(book.id, 'loaded')"
-                    @error="() => setLoadingState(book.id, 'error')"
-                  />
-                  
-                  <!-- 이미지 없을 때 플레이스홀더 -->
-                  <div v-if="!book.coverImage" class="no-cover-placeholder">
-                    <span class="placeholder-icon">📖</span>
-                    <p class="placeholder-text">{{ book.title }}</p>
-                  </div>
-                  
-                  <!-- 로딩 인디케이터 -->
-                  <div v-if="getLoadingState(book.id) === 'loading'" class="loading-indicator">
-                    <div class="spinner"></div>
-                  </div>
-                </div>
-                
-                <div class="play-overlay">
-                  <span class="play-icon">📖</span>
-                  <span class="play-text">읽기</span>
-                </div>
-              </template>
+              <div class="play-overlay">
+                <span class="play-icon">📖</span>
+                <span class="play-text">읽기</span>
+              </div>
             </div>
             <div class="book-info">
               <div class="book-details" @click="openBook(book.id)">
@@ -161,18 +111,24 @@ const {
   getThumbnailUrl 
 } = useImageLoading();
 
-// 책 요소 ref 설정 및 Intersection Observer 등록
+// 책 요소 ref 설정 및 Intersection Observer 등록 (비디오만 해당)
 const setBookRef = (element: Element | null, bookId: string) => {
   if (element) {
-    // 첫 번째 몇 개 책은 미리 로드 (Above the fold)
     const bookIndex = store.currentBooks.findIndex(book => book.id === bookId);
-    if (bookIndex < 2) {
-      // 처음 2개 책은 즉시 표시
-      preloadVisible(bookId);
-      setLoadingState(bookId, 'loading');
+    const book = store.currentBooks[bookIndex];
+    
+    // 비디오 모드인 경우에만 Lazy Loading 적용
+    if (book?.isVideoMode) {
+      if (bookIndex < 2) {
+        // 처음 2개 비디오는 즉시 표시
+        preloadVisible(bookId);
+      } else {
+        // 나머지 비디오는 Intersection Observer로 관찰
+        observeElement(element, bookId);
+      }
     } else {
-      // 나머지는 Intersection Observer로 관찰
-      observeElement(element, bookId);
+      // 이미지 모드는 항상 즉시 표시
+      preloadVisible(bookId);
     }
   }
 };
@@ -183,6 +139,7 @@ const getImageUrl = (url: string): string => {
   }
   return url;
 };
+
 
 const openBook = async (bookId: string) => {
   // 책 읽기 진행도 업데이트
@@ -244,7 +201,11 @@ const handleMouseLeave = (book: Book) => {
 
 const onVideoCanPlay = (event: Event) => {
   const video = event.target as HTMLVideoElement;
-  console.log('📹 Video is ready to play:', video.src);
+  const bookId = video.getAttribute('data-video-id');
+  if (bookId) {
+    setLoadingState(bookId, 'loaded');
+    console.log('📹 Video is ready to play:', video.src);
+  }
 };
 
 const onVideoError = (event: Event) => {
@@ -304,9 +265,7 @@ const handleTouchEnd = (book: Book) => {
 
 onMounted(async () => {
   // 로그인 상태와 관계없이 모든 책을 로드
-  console.log('📖 BooksView: Loading all books...');
   await store.loadBooks();
-  console.log('✅ BooksView: Books loaded:', store.currentBooks.length);
 });
 </script>
 
@@ -377,11 +336,13 @@ onMounted(async () => {
 }
 
 .book-cover img,
-.book-video {
+.book-video,
+.book-thumbnail {
   width: 100%;
   height: 100%;
   object-fit: cover;
   transition: transform 0.2s ease;
+  background: var(--color-bg-secondary); /* 이미지 로딩 중 배경색 */
 }
 
 .book-video {
@@ -415,7 +376,8 @@ onMounted(async () => {
 }
 
 .book-card:hover .book-cover img,
-.book-card:hover .book-video {
+.book-card:hover .book-video,
+.book-card:hover .book-thumbnail {
   transform: scale(1.05);
 }
 

@@ -3,8 +3,208 @@ import { authenticateApiKey } from '../middleware/auth.js';
 import { getBooks, addBook, updateBook, deleteBook } from '../data/store.js';
 import { upload, handleUploadError } from '../middleware/upload.js';
 import { v4 as uuidv4 } from 'uuid';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+import { spawn } from 'child_process';
+import sharp from 'sharp';
+import fs from 'fs/promises';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const router = express.Router();
+
+/**
+ * Auto-generate cover image from video using FFmpeg
+ */
+const generateCoverFromVideo = async (videoPath, outputPath) => {
+  return new Promise((resolve, reject) => {
+    console.log('🎬 Generating cover from video:', videoPath);
+    
+    const ffmpeg = spawn('ffmpeg', [
+      '-i', videoPath,
+      '-vframes', '1',
+      '-q:v', '2',
+      '-f', 'image2',
+      '-y',
+      outputPath
+    ]);
+    
+    let errorOutput = '';
+    
+    ffmpeg.stderr.on('data', (data) => {
+      errorOutput += data.toString();
+    });
+    
+    ffmpeg.on('close', (code) => {
+      if (code === 0) {
+        console.log('✅ Cover generated from video:', outputPath);
+        resolve(true);
+      } else {
+        console.error('❌ FFmpeg failed with code:', code);
+        reject(new Error(`FFmpeg failed: ${errorOutput}`));
+      }
+    });
+    
+    ffmpeg.on('error', (error) => {
+      reject(error);
+    });
+  });
+};
+
+/**
+ * Generate cover from first page image
+ */
+const generateCoverFromFirstPage = async (firstPageImagePath, outputPath) => {
+  try {
+    console.log('🖼️ Generating cover from first page:', firstPageImagePath);
+    
+    await sharp(firstPageImagePath)
+      .resize(320, 240, {
+        fit: 'cover',
+        position: 'center'
+      })
+      .jpeg({ quality: 85 })
+      .toFile(outputPath);
+    
+    console.log('✅ Cover generated from first page:', outputPath);
+    return true;
+  } catch (error) {
+    console.error('❌ Failed to generate cover from first page:', error);
+    throw error;
+  }
+};
+
+/**
+ * Generate placeholder cover
+ */
+const generatePlaceholderCover = async (title, outputPath) => {
+  try {
+    console.log('🎨 Generating placeholder cover for:', title);
+    
+    const placeholderSvg = `
+      <svg width="320" height="240" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+          </linearGradient>
+        </defs>
+        <rect width="320" height="240" fill="url(#grad1)" />
+        <text x="160" y="100" font-family="Arial, sans-serif" font-size="18" fill="white" text-anchor="middle" font-weight="bold">
+          📖 ${title}
+        </text>
+        <text x="160" y="130" font-family="Arial, sans-serif" font-size="14" fill="white" text-anchor="middle">
+          스토리북
+        </text>
+      </svg>
+    `;
+    
+    await sharp(Buffer.from(placeholderSvg))
+      .png()
+      .toFile(outputPath);
+    
+    console.log('✅ Placeholder cover generated:', outputPath);
+    return true;
+  } catch (error) {
+    console.error('❌ Failed to generate placeholder cover:', error);
+    throw error;
+  }
+};
+
+/**
+ * Check if FFmpeg is available
+ */
+const checkFFmpegAvailability = () => {
+  return new Promise((resolve) => {
+    const ffmpeg = spawn('ffmpeg', ['-version']);
+    
+    ffmpeg.on('close', (code) => {
+      resolve(code === 0);
+    });
+    
+    ffmpeg.on('error', () => {
+      resolve(false);
+    });
+  });
+};
+
+/**
+ * Auto-generate cover image with priority system:
+ * 1. Use user-uploaded cover (if provided)
+ * 2. Extract from video (if video exists and FFmpeg available)
+ * 3. Use first page image (if pages exist)
+ * 4. Generate placeholder
+ */
+const autoGenerateCover = async (bookData) => {
+  try {
+    // 1. If cover image is already provided, use it
+    if (bookData.coverImage && bookData.coverImage.trim()) {
+      console.log('📷 Using provided cover image:', bookData.coverImage);
+      return bookData.coverImage;
+    }
+    
+    console.log('🤖 Auto-generating cover for:', bookData.title);
+    
+    const coverId = uuidv4();
+    const coverPath = join(__dirname, '../uploads/images', `${coverId}.jpg`);
+    const coverUrl = `/uploads/images/${coverId}.jpg`;
+    
+    let coverGenerated = false;
+    
+    // 2. Try to extract from video (if video mode and FFmpeg available)
+    if (bookData.isVideoMode && bookData.videoUrl) {
+      const hasFFmpeg = await checkFFmpegAvailability();
+      
+      if (hasFFmpeg) {
+        try {
+          const videoPath = join(__dirname, '..', bookData.videoUrl);
+          
+          // Check if video file exists
+          await fs.access(videoPath);
+          
+          await generateCoverFromVideo(videoPath, coverPath);
+          coverGenerated = true;
+          console.log('✅ Cover extracted from video');
+        } catch (error) {
+          console.warn('⚠️ Failed to extract cover from video:', error.message);
+        }
+      } else {
+        console.warn('⚠️ FFmpeg not available, skipping video frame extraction');
+      }
+    }
+    
+    // 3. Try to use first page image (if traditional book with pages)
+    if (!coverGenerated && !bookData.isVideoMode && bookData.pages && bookData.pages.length > 0) {
+      try {
+        const firstPageImagePath = join(__dirname, '..', bookData.pages[0].imageUrl);
+        
+        // Check if first page image exists
+        await fs.access(firstPageImagePath);
+        
+        await generateCoverFromFirstPage(firstPageImagePath, coverPath);
+        coverGenerated = true;
+        console.log('✅ Cover generated from first page');
+      } catch (error) {
+        console.warn('⚠️ Failed to generate cover from first page:', error.message);
+      }
+    }
+    
+    // 4. Generate placeholder as fallback
+    if (!coverGenerated) {
+      await generatePlaceholderCover(bookData.title, coverPath);
+      coverGenerated = true;
+      console.log('✅ Placeholder cover generated');
+    }
+    
+    return coverGenerated ? coverUrl : '';
+    
+  } catch (error) {
+    console.error('❌ Auto cover generation failed:', error);
+    // Return empty string if all methods fail
+    return '';
+  }
+};
 
 /**
  * @swagger
@@ -286,12 +486,19 @@ router.post('/', authenticateApiKey, async (req, res) => {
       };
     }
     
+    // Auto-generate cover if not provided
+    const finalCoverImage = await autoGenerateCover(bookData);
+    if (finalCoverImage) {
+      bookData.coverImage = finalCoverImage;
+    }
+    
     const newBook = await addBook(bookData);
     
     res.status(201).json({
       success: true,
       data: newBook,
-      message: 'Book created successfully'
+      message: 'Book created successfully',
+      coverGenerated: finalCoverImage !== (bookData.coverImage || '')
     });
   } catch (error) {
     res.status(500).json({
@@ -449,6 +656,12 @@ router.post('/video-upload', authenticateApiKey, upload.fields([
       maxAge: maxAge ? parseInt(maxAge) : 7
     };
     
+    // Auto-generate cover if not provided
+    const finalCoverImage = await autoGenerateCover(bookData);
+    if (finalCoverImage) {
+      bookData.coverImage = finalCoverImage;
+    }
+    
     const newBook = await addBook(bookData);
     
     res.status(201).json({
@@ -472,7 +685,8 @@ router.post('/video-upload', authenticateApiKey, upload.fields([
           } : null
         }
       },
-      message: 'Video storybook created successfully'
+      message: 'Video storybook created successfully',
+      coverGenerated: finalCoverImage !== coverImageUrl
     });
   } catch (error) {
     console.error('Video upload error:', error);
@@ -623,12 +837,19 @@ router.post('/complete', authenticateApiKey, async (req, res) => {
       ]
     };
     
+    // Auto-generate cover if not provided
+    const finalCoverImage = await autoGenerateCover(bookData);
+    if (finalCoverImage) {
+      bookData.coverImage = finalCoverImage;
+    }
+    
     const newBook = await addBook(bookData);
     
     res.status(201).json({
       success: true,
       data: newBook,
-      message: 'Complete book created successfully'
+      message: 'Complete book created successfully',
+      coverGenerated: finalCoverImage !== bookData.coverImage
     });
   } catch (error) {
     res.status(500).json({

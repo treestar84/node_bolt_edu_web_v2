@@ -1,62 +1,14 @@
 [
   {
-    "id": "9b1e1163-e68e-4a4c-b4c5-3fb1b7a7ce40",
-    "title": "테스트 비디오 스토리",
-    "coverImage": "/uploads/images/test-thumbnail.jpg",
-    "isVideoMode": true,
-    "videoUrl": "/uploads/videos/08b04586-f38e-4b73-b120-bb5eb7da10b3.mp4",
-    "pages": [],
-    "minAge": 3,
-    "maxAge": 7,
-    "createdAt": "2025-07-29T14:32:16.819Z",
-    "updatedAt": "2025-07-29T14:32:16.819Z"
-  },
-  {
-    "id": "cbea8889-c850-4d7b-96d6-1ae5ab95bfc6",
-    "title": "커버 이미지 없는 비디오 스토리",
+    "id": "b37c9f12-d2d5-4799-96b4-bfb33038281f",
+    "title": "걸어가는사람",
     "coverImage": "",
     "isVideoMode": true,
-    "videoUrl": "/uploads/videos/1f90aeb1-7897-41f1-8855-5dd6cd5e1841.mp4",
-    "pages": [],
-    "minAge": 3,
-    "maxAge": 7,
-    "createdAt": "2025-07-29T16:04:46.126Z",
-    "updatedAt": "2025-07-29T16:04:46.126Z"
-  },
-  {
-    "id": "ed52c466-0ef7-4d89-9ab1-ff309f123b19",
-    "title": "이것도되나",
-    "coverImage": "",
-    "isVideoMode": true,
-    "videoUrl": "/uploads/videos/0123d362-5af6-44be-984d-5cf6d4f365f5.mp4",
+    "videoUrl": "/uploads/videos/e64aaa3f-97fc-4e6e-99a9-400bde89a078.mp4",
     "pages": [],
     "minAge": 3,
     "maxAge": 6,
-    "createdAt": "2025-07-29T16:09:19.942Z",
-    "updatedAt": "2025-07-29T16:09:19.942Z"
-  },
-  {
-    "id": "c1e1398f-0f22-4752-983c-0b5fa2cdbbdf",
-    "title": "동물이간다",
-    "coverImage": "",
-    "isVideoMode": true,
-    "videoUrl": "/uploads/videos/7794b536-2a79-4ef9-ac2a-156be2281246.mp4",
-    "pages": [],
-    "minAge": 3,
-    "maxAge": 6,
-    "createdAt": "2025-07-29T16:29:49.777Z",
-    "updatedAt": "2025-07-29T16:29:49.777Z"
-  },
-  {
-    "id": "f41fc2d0-ccf7-4075-8ca8-ea61fdfb3dc7",
-    "title": "japan",
-    "coverImage": "",
-    "isVideoMode": true,
-    "videoUrl": "/uploads/videos/55460bb5-fb81-4926-aaad-9f419d9dc0e1.mp4",
-    "pages": [],
-    "minAge": 3,
-    "maxAge": 7,
-    "createdAt": "2025-08-03T04:01:37.340Z",
-    "updatedAt": "2025-08-03T04:01:37.340Z"
+    "createdAt": "2025-08-04T09:17:33.683Z",
+    "updatedAt": "2025-08-04T09:17:33.683Z"
   }
 ]

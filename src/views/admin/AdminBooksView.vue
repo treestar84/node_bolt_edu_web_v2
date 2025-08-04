@@ -276,22 +276,31 @@
                 :required="true"
               />
               
-              <!-- 썸네일 생성 상태 표시 -->
-              <div v-if="isThumbnailGenerating" class="thumbnail-generating">
+              <!-- 자동 커버 생성 상태 표시 -->
+              <div v-if="isAutoCoverGenerating || isThumbnailGenerating" class="thumbnail-generating">
                 <div class="generating-indicator">
                   <div class="spinner"></div>
-                  <p>영상에서 썸네일을 자동 생성하는 중...</p>
+                  <p>{{ generationStatus || '영상에서 썸네일을 자동 생성하는 중...' }}</p>
                 </div>
               </div>
               
-              <!-- 썸네일 생성 완료 표시 -->
+              <!-- 커버 생성 완료 표시 -->
               <div v-else-if="formData.videoUrl && formData.coverImage" class="thumbnail-generated">
                 <div class="success-indicator">
                   <span class="success-icon">✅</span>
-                  <p>썸네일이 자동으로 생성되었습니다!</p>
+                  <p>커버 이미지가 자동으로 생성되었습니다!</p>
                 </div>
                 <div class="thumbnail-preview">
-                  <img :src="getImageUrl(formData.coverImage)" alt="생성된 썸네일" class="generated-thumbnail" />
+                  <img :src="getImageUrl(formData.coverImage)" alt="생성된 커버" class="generated-thumbnail" />
+                </div>
+              </div>
+              
+              <!-- FFmpeg 상태 표시 -->
+              <div v-if="ffmpegStatus && !ffmpegStatus.available" class="ffmpeg-warning">
+                <div class="warning-indicator">
+                  <span class="warning-icon">⚠️</span>
+                  <p>{{ ffmpegStatus.message }}</p>
+                  <small>고품질 비디오 프레임 추출을 위해서는 FFmpeg가 필요합니다.</small>
                 </div>
               </div>
               
@@ -357,11 +366,19 @@ import FileUploadInput from '@/components/FileUploadInput.vue';
 import { useAppStore } from '@/stores/app';
 import { useAuthStore } from '@/stores/auth';
 import { useVideoThumbnail } from '@/composables/useVideoThumbnail';
+import { useAutoCoverGeneration } from '@/composables/useAutoCoverGeneration';
 import type { Book } from '@/types';
 
 const store = useAppStore();
 const authStore = useAuthStore();
 const { generateThumbnail, uploadThumbnail, isGenerating: isThumbnailGenerating } = useVideoThumbnail();
+const { 
+  autoGenerateCover, 
+  isGenerating: isAutoCoverGenerating, 
+  generationStatus, 
+  error: coverError,
+  checkFFmpegStatus 
+} = useAutoCoverGeneration();
 
 const showAddModal = ref(false);
 const showEditModal = ref(false);
@@ -371,6 +388,7 @@ const bookToDelete = ref<Book | null>(null);
 const isLoading = ref(false);
 const error = ref('');
 const isGeneratingTest = ref(false);
+const ffmpegStatus = ref<{ available: boolean; message: string } | null>(null);
 
 // 시스템 관리자 여부 확인
 const isSystemAdmin = computed(() => {
@@ -535,6 +553,19 @@ const saveBook = async () => {
         isVideoMode: true,
         pages: [] // 영상 모드에서는 빈 페이지 배열
       };
+
+      // 자동 커버 생성 시도
+      try {
+        const autoCover = await autoGenerateCover(bookData);
+        if (autoCover && autoCover !== formData.coverImage) {
+          bookData.coverImage = autoCover;
+          formData.coverImage = autoCover; // UI 업데이트용
+          console.log('✅ 자동 커버 생성 성공:', autoCover);
+        }
+      } catch (coverErr) {
+        console.warn('⚠️ 자동 커버 생성 실패, 기존 커버 사용:', coverErr);
+        // 커버 생성에 실패해도 책 저장은 계속 진행
+      }
     } else {
       // 개별 업로드 모드
       // undefined/null → '' 강제 보정
@@ -562,6 +593,19 @@ const saveBook = async () => {
         isVideoMode: false,
         pages: pagesData
       };
+
+      // 자동 커버 생성 시도 (전통적인 책 모드)
+      try {
+        const autoCover = await autoGenerateCover(bookData);
+        if (autoCover && autoCover !== formData.coverImage) {
+          bookData.coverImage = autoCover;
+          formData.coverImage = autoCover; // UI 업데이트용
+          console.log('✅ 전통 책 자동 커버 생성 성공:', autoCover);
+        }
+      } catch (coverErr) {
+        console.warn('⚠️ 전통 책 자동 커버 생성 실패, 기존 커버 사용:', coverErr);
+        // 커버 생성에 실패해도 책 저장은 계속 진행
+      }
     }
 
     if (showAddModal.value) {
@@ -608,6 +652,14 @@ onMounted(async () => {
   // 페이지 로드 시 최신 데이터 가져오기
   console.log('🔄 Loading books data...');
   await store.loadBooks();
+  
+  // FFmpeg 상태 확인
+  try {
+    ffmpegStatus.value = await checkFFmpegStatus();
+    console.log('🔧 FFmpeg 상태:', ffmpegStatus.value);
+  } catch (error) {
+    console.warn('⚠️ FFmpeg 상태 확인 실패:', error);
+  }
   
   // 폼 초기값 설정
   resetForm();
@@ -1269,6 +1321,36 @@ watch(
   border-radius: var(--radius-md);
   border: 1px solid var(--color-border);
   object-fit: cover;
+}
+
+/* FFmpeg 경고 스타일 */
+.ffmpeg-warning {
+  background: rgba(251, 191, 36, 0.1);
+  border: 1px solid #f59e0b;
+  border-radius: var(--radius-md);
+  padding: var(--spacing-lg);
+  margin: var(--spacing-md) 0;
+}
+
+.warning-indicator {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  color: #f59e0b;
+}
+
+.warning-indicator .warning-icon {
+  font-size: 1.2rem;
+}
+
+.warning-indicator p {
+  font-weight: 500;
+  margin: 0;
+}
+
+.warning-indicator small {
+  color: var(--color-text-secondary);
+  font-size: 0.75rem;
 }
 
 @media (max-width: 768px) {
