@@ -503,29 +503,29 @@ watch(selectedSong, () => {
 
 .song-select {
   padding: 8px 12px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--color-border);
   border-radius: 8px;
-  background: white;
-  color: #333;
+  background: var(--color-bg-card);
+  color: var(--color-text-primary);
   font-size: 0.9rem;
   cursor: pointer;
 }
 
 .guide-btn {
   padding: 8px 12px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--color-border);
   border-radius: 8px;
-  background: white;
-  color: #333;
+  background: var(--color-bg-card);
+  color: var(--color-text-primary);
   font-size: 0.9rem;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .guide-btn:hover:not(:disabled) {
-  background: #f5f5f5;
-  border-color: #007bff;
-  color: #333;
+  background: var(--color-bg-hover);
+  border-color: var(--color-primary);
+  color: var(--color-text-primary);
 }
 
 .guide-btn:disabled {
@@ -534,36 +534,36 @@ watch(selectedSong, () => {
 }
 
 .auto-play-btn {
-  background: #007bff;
+  background: var(--color-primary);
   color: white;
-  border-color: #007bff;
+  border-color: var(--color-primary);
 }
 
 .auto-play-btn:hover:not(:disabled) {
-  background: #0056b3;
-  border-color: #0056b3;
+  background: var(--color-primary-dark);
+  border-color: var(--color-primary-dark);
 }
 
 .stop-auto-play-btn {
-  background: #dc3545;
+  background: var(--color-danger, #dc3545);
   color: white;
-  border-color: #dc3545;
+  border-color: var(--color-danger, #dc3545);
 }
 
 .stop-auto-play-btn:hover:not(:disabled) {
-  background: #c82333;
-  border-color: #c82333;
+  background: var(--color-danger-dark, #c82333);
+  border-color: var(--color-danger-dark, #c82333);
 }
 
 .reset-btn {
-  background: #17a2b8;
+  background: var(--color-info, #17a2b8);
   color: white;
-  border-color: #17a2b8;
+  border-color: var(--color-info, #17a2b8);
 }
 
 .reset-btn:hover:not(:disabled) {
-  background: #138496;
-  border-color: #138496;
+  background: var(--color-info-dark, #138496);
+  border-color: var(--color-info-dark, #138496);
 }
 
 /* 피아노 키보드 */

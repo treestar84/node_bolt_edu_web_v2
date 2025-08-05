@@ -212,8 +212,8 @@ export const useAutoCoverGeneration = () => {
       console.log('✅ 플레이스홀더 커버 생성 성공');
       return placeholderCover;
 
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : '커버 생성 실패';
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : '커버 생성 실패';
       console.error('❌ 자동 커버 생성 최종 실패:', errorMessage);
       error.value = errorMessage;
       throw new Error(errorMessage);

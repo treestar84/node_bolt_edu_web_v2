@@ -51,8 +51,8 @@
             <div class="like-icon">❤️</div>
             <div class="like-content">
               <h3>{{ store.currentWords.find(word => word.id === like.contentId)?.name || like.contentId }}</h3>
-              <p class="like-type">{{ getContentTypeLabel(like.content_type) }}</p>
-              <p class="like-date">{{ formatDate(like.created_at) }}</p>
+              <p class="like-type">{{ getContentTypeLabel(like.contentType) }}</p>
+              <p class="like-date">{{ formatDate(like.createdAt) }}</p>
             </div>
           </div>
         </div>

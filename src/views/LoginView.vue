@@ -179,10 +179,11 @@
               <div v-if="connectionTestResult" class="debug-section">
                 <h5>연결 테스트 결과</h5>
                 <p><strong>전체 상태:</strong> {{ connectionTestResult.success ? '✅ 성공' : '❌ 실패' }}</p>
-                <p><strong>뱃지 테이블:</strong> {{ connectionTestResult.badgesAccess ? '✅ 접근 가능' : '❌ 접근 불가' }}</p>
-                <p><strong>프로필 테이블:</strong> {{ 
-                  connectionTestResult.user_profilesAccess === true ? '✅ 접근 가능' : 
-                  connectionTestResult.user_profilesAccess === false ? '❌ 접근 불가' : 
+                <p><strong>기본 연결:</strong> {{ connectionTestResult.tests?.basic ? '✅ 성공' : '❌ 실패' }}</p>
+                <p><strong>공개 테이블:</strong> {{ connectionTestResult.tests?.public ? '✅ 접근 가능' : '❌ 접근 불가' }}</p>
+                <p><strong>사용자 테이블:</strong> {{ 
+                  connectionTestResult.tests?.user === true ? '✅ 접근 가능' : 
+                  connectionTestResult.tests?.user === false ? '❌ 접근 불가' : 
                   '⚠️ 미인증' 
                 }}</p>
               </div>
@@ -358,9 +359,9 @@ const testConnection = async () => {
     if (result.success) {
       console.log('✅ Connection test successful:', result);
       alert('✅ 데이터베이스 연결 성공!\n\n' +
-            `인증 사용자: ${result.authUser || '없음'}\n` +
-            `뱃지 테이블: ${result.badgesAccess ? '접근 가능' : '접근 불가'}\n` +
-            `프로필 테이블: ${result.user_profilesAccess === true ? '접근 가능' : result.user_profilesAccess === false ? '접근 불가' : '미인증'}`);
+            `기본 연결: ${result.tests?.basic ? '성공' : '실패'}\n` +
+            `공개 테이블: ${result.tests?.public ? '접근 가능' : '접근 불가'}\n` +
+            `사용자 테이블: ${result.tests?.user === true ? '접근 가능' : result.tests?.user === false ? '접근 불가' : '미인증'}`);
     } else {
       console.error('❌ Connection test failed:', result);
       alert(`❌ 연결 실패!\n\n오류: ${result.error || '알 수 없는 오류'}`);

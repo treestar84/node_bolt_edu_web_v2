@@ -244,7 +244,7 @@ const instruments = computed(() => [
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background: #007bff;
+  background: var(--color-primary);
   border-radius: 16px;
   padding: 16px 24px;
   display: flex;
@@ -304,25 +304,25 @@ const instruments = computed(() => [
 
 .mode-btn {
   padding: 8px 16px;
-  border: 2px solid #ddd;
+  border: 2px solid var(--color-border);
   border-radius: 20px;
-  background: white;
-  color: #333;
+  background: var(--color-bg-card);
+  color: var(--color-text-primary);
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .mode-btn.active {
-  background: #007bff;
+  background: var(--color-primary);
   color: white;
   border-color: transparent;
 }
 
 .mode-btn:hover:not(.active) {
-  border-color: #007bff;
-  color: #007bff;
-  background: #f8f9fa;
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  background: var(--color-bg-hover);
 }
 
 /* 악기 컨테이너들 */

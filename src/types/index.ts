@@ -225,6 +225,60 @@ export interface ColoringStats {
   favoriteColor: string;
 }
 
+// 관리자 UI용 Word 인터페이스 (테이블 및 모달에서 사용)
+export interface WordTableItem {
+  id: string;
+  name: string;
+  nameEn: string;
+  imageUrl: string;
+  audioUrl: string;
+  category: string;
+  ageGroup: number;
+  ownerType?: 'admin' | 'teacher';
+}
+
+// Word 폼 데이터 인터페이스 (관리자 폼용 - 완전한 데이터)
+export interface WordFormData {
+  name: string;
+  nameEn: string;
+  imageUrl: string;
+  audioKo: string;
+  audioEn: string;
+  category: string;
+  minAge: number;
+  maxAge: number;
+  ownerType: 'global' | 'user';
+  ownerId?: string;
+}
+
+// Word 모달 폼 데이터 인터페이스 (UI 전용)
+export interface WordModalFormData {
+  name: string;
+  nameEn: string;
+  imageUrl: string;
+  audioUrl: string;
+  category: string;
+  ageGroup: number;
+  ownerType: 'admin' | 'teacher';
+}
+
+// Book 모달 폼 데이터 인터페이스 (UI 전용)
+export interface BookModalFormData {
+  title: string;
+  minAge: number;
+  maxAge: number;
+  ownerType: 'global' | 'user';
+  isVideoMode: boolean;
+}
+
+// 퍼즐 조각 인터페이스
+export interface PuzzlePiece {
+  id: string;
+  image: string;
+  correctPosition: number;
+  placed: boolean;
+}
+
 export type Language = 'ko' | 'en';
 export type GameMode = 'words' | 'quiz' | 'books' | 'puzzle' | 'coloring';
 export type UserType = 'teacher' | 'director' | 'parent';

@@ -122,7 +122,7 @@ export function useImageLoading() {
   }
 
   // 썸네일 URL 생성
-  const getThumbnailUrl = (originalUrl: string, width = 300, height = 200): string => {
+  const getThumbnailUrl = (originalUrl: string, _width = 300, _height = 200): string => {
     if (!originalUrl) return ''
     
     // 서버 경로 처리

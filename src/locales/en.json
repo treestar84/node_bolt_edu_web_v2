@@ -27,7 +27,8 @@
     "unknown": "Unknown",
     "processing": "Processing...",
     "complete": "Complete",
-    "start": "Start"
+    "start": "Start",
+    "seconds": "seconds"
   },
   "navigation": {
     "home": "Home",
@@ -210,11 +211,15 @@
     },
     "drums": {
       "name": "Drum Kit & Fun Sounds",
-      "description": "Play the drums and listen to fun sounds."
+      "description": "Play the drums and listen to fun sounds.",
+      "hits": "Hits",
+      "uniqueSounds": "Unique Sounds",
+      "playTime": "Play Time"
     },
     "violin": {
       "name": "Violin",
       "description": "Create elegant violin melodies.",
+      "selectSong": "Select a song to play",
       "songs": {
         "threeBears": "Three Bears",
         "butterfly": "Butterfly",

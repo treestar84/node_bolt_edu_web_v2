@@ -238,7 +238,7 @@ import { useAppStore } from '@/stores/app';
 import { useAuthStore } from '@/stores/auth';
 import { useContentStore } from '@/stores/content';
 import { useLikes } from '@/composables/useLikes';
-import type { ContentType, LikePeriod } from '@/types';
+import type { ContentType, LikePeriod, Like } from '@/types';
 import type { WordItem, Book } from '@/types';
 
 const router = useRouter();
@@ -277,18 +277,18 @@ const contentTypes = [
 // 좋아요 ID에 해당하는 실제 데이터 가져오기
 const likedWordItems = computed(() => {
   return likedWords.value
-    .map(like => store.currentWords.find(word => word.id === like.contentId))
+    .map((like: Like) => store.currentWords.find(word => word.id === like.contentId))
     .filter(Boolean);
 });
 
 const likedBookItems = computed(() => {
   return likedBooks.value
-    .map(like => store.currentBooks.find(book => book.id === like.contentId))
+    .map((like: Like) => store.currentBooks.find(book => book.id === like.contentId))
     .filter(Boolean);
 });
 
 const likedWordPairs = computed(() =>
-  likedWords.value.map(like => ({
+  likedWords.value.map((like: Like) => ({
     like,
     word: store.currentWords.find(word => word.id === like.contentId)
   }))

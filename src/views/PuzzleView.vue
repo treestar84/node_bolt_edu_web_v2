@@ -192,14 +192,7 @@ import { useAppStore } from '@/stores/app';
 import { useAuthStore } from '@/stores/auth';
 import { useContentStore } from '@/stores/content';
 import { useGameSounds } from '@/composables/useGameSounds';
-import type { WordItem, Badge } from '@/types';
-
-interface PuzzlePiece {
-  id: string;
-  image: string;
-  correctPosition: number;
-  placed: boolean;
-}
+import type { WordItem, Badge, PuzzlePiece } from '@/types';
 
 interface PuzzleSlot {
   filled: boolean;

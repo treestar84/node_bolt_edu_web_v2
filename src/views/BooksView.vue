@@ -92,8 +92,7 @@ import LikeButton from '@/components/LikeButton.vue';
 import { useAppStore } from '@/stores/app';
 import { useAuthStore } from '@/stores/auth';
 import { useContentStore } from '@/stores/content';
-import { useLazyLoading, useImageLoading } from '@/composables/useLazyLoading';
-import type { Book } from '@/types';
+import { useLazyLoading } from '@/composables/useLazyLoading';
 
 const store = useAppStore();
 const authStore = useAuthStore();
@@ -101,15 +100,9 @@ const contentStore = useContentStore();
 const router = useRouter();
 
 // Lazy Loading 및 이미지 로딩 상태 관리
-const { observeElement, isVisible, preloadVisible } = useLazyLoading();
-const { 
-  setLoadingState, 
-  getLoadingState, 
-  setLowQualityLoaded, 
-  isLowQualityLoaded, 
-  getLowQualityImageUrl,
-  getThumbnailUrl 
-} = useImageLoading();
+const { observeElement, preloadVisible } = useLazyLoading();
+// Image loading state management (for future use)
+// const { setLoadingState, getLoadingState } = useImageLoading();
 
 // 책 요소 ref 설정 및 Intersection Observer 등록 (비디오만 해당)
 const setBookRef = (element: Element | null, bookId: string) => {
@@ -166,8 +159,8 @@ const onBookLiked = (isLiked: boolean) => {
   console.log(`Book ${isLiked ? 'liked' : 'unliked'}`);
 };
 
-// 비디오 제어 관련 함수들
-const handleMouseEnter = async (book: Book) => {
+// 비디오 제어 관련 함수들 (향후 사용 예정)
+/* const handleMouseEnter = async (book: Book) => {
   if (book.isVideoMode && book.videoUrl && isVisible(book.id) && getLoadingState(book.id) !== 'error') {
     const videoElement = document.querySelector(`[data-video-id="${book.id}"]`) as HTMLVideoElement;
     if (videoElement) {
@@ -261,7 +254,7 @@ const handleTouchEnd = (book: Book) => {
       }
     }, 1000); // 1초 후 정지
   }
-};
+}; */
 
 onMounted(async () => {
   // 로그인 상태와 관계없이 모든 책을 로드
