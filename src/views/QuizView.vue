@@ -349,7 +349,7 @@ onMounted(() => {
   flex: 1;
   text-align: center;
   background: #2a2a2a;
-  padding: 8px 12px;
+  padding: 6px 10px;
   border-radius: 8px;
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
@@ -358,22 +358,22 @@ onMounted(() => {
   background: #1a1a1a;
   border: 2px solid rgba(255, 255, 255, 0.2);
   border-radius: 12px;
-  padding: 12px;
-  margin-top: 16px;
+  padding: 8px;
+  margin-top: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .stat-label {
   display: block;
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   color: #cccccc;
-  margin-bottom: 4px;
+  margin-bottom: 2px;
   font-weight: 500;
 }
 
 .stat-value {
   display: block;
-  font-size: 1.1rem;
+  font-size: 1rem;
   font-weight: 700;
   color: #ffffff;
 }
@@ -419,8 +419,8 @@ onMounted(() => {
   background: #1a1a1a;
   border: 2px solid rgba(255, 255, 255, 0.2);
   border-radius: 12px;
-  padding: 16px 20px;
-  margin-bottom: 20px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
@@ -432,7 +432,7 @@ onMounted(() => {
 }
 
 .question-content h2 {
-  font-size: 1.25rem;
+  font-size: 1.1rem;
   margin: 0;
   color: #ffffff;
   font-weight: 700;
@@ -442,13 +442,13 @@ onMounted(() => {
 .audio-button-compact {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 16px;
+  gap: 6px;
+  padding: 6px 12px;
   background: #007bff;
   color: white;
   border: none;
   border-radius: 8px;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -544,15 +544,15 @@ onMounted(() => {
 
 .quiz-option img {
   width: 100%;
-  height: 80px;
+  height: 160px;
   object-fit: cover;
 }
 
 .option-name {
-  padding: 8px 12px;
+  padding: 10px 12px;
   font-weight: 600;
   color: #ffffff;
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   line-height: 1.2;
 }
 
@@ -760,7 +760,7 @@ onMounted(() => {
   }
   
   .quiz-option img {
-    height: 120px;
+    height: 200px;
     flex: 1;
     object-fit: cover;
   }
@@ -808,7 +808,7 @@ onMounted(() => {
   }
   
   .quiz-option img {
-    height: 120px;
+    height: 180px;
   }
   
   .option-name {
@@ -858,7 +858,7 @@ onMounted(() => {
   }
   
   .quiz-option img {
-    height: 100px;
+    height: 140px;
   }
   
   .option-name {

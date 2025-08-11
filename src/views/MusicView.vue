@@ -316,7 +316,7 @@ const instruments = computed(() => [
 .mode-btn.active {
   background: var(--color-primary);
   color: white;
-  border-color: transparent;
+  border-color: var(--color-primary);
 }
 
 .mode-btn:hover:not(.active) {

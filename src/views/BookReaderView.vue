@@ -204,11 +204,17 @@ import { ref, computed, onMounted, watch, onUnmounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useAppStore } from '@/stores/app';
 import { useAudio } from '@/composables/useAudio';
+import { useSwipeGestures } from '@/composables/useSwipeGestures';
+import { useTouchFeedback } from '@/composables/useTouchFeedback';
 
 const route = useRoute();
 const router = useRouter();
 const store = useAppStore();
 const { isPlaying, playAudio, stopAudio } = useAudio();
+
+// 터치 및 제스처 설정
+const bookContainer = ref<HTMLElement | null>(null);
+const { feedbackPatterns } = useTouchFeedback();
 
 const currentPageIndex = ref(0);
 const autoPlayEnabled = ref(true);
@@ -239,6 +245,7 @@ const previousPage = () => {
     pageTransitioning.value = true;
     stopAudio();
     currentPageIndex.value--;
+    feedbackPatterns.swipe(); // 터치 피드백
     setTimeout(() => {
       pageTransitioning.value = false;
     }, 300);
@@ -250,6 +257,7 @@ const nextPage = () => {
     pageTransitioning.value = true;
     stopAudio();
     currentPageIndex.value++;
+    feedbackPatterns.swipe(); // 터치 피드백
     setTimeout(() => {
       pageTransitioning.value = false;
     }, 300);
