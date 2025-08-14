@@ -31,7 +31,7 @@
                 <h3 class="option-name">{{ getCurrentName(option) }}</h3>
                 <div class="difficulty-info">
                   <div class="difficulty-badge">
-                    {{ getPuzzlePieceCount(option) }}조각
+                    {{ $t('puzzle.pieceCount', { count: getPuzzlePieceCount(option) }) }}
                   </div>
                   <div v-if="option.imageAspectRatio" class="aspect-ratio-info">
                     {{ option.imageWidth }}×{{ option.imageHeight }}
@@ -128,7 +128,7 @@
                     <div 
                       :style="getPieceImageStyle(piece.correctPosition)"
                       class="piece-image"
-                      :title="`조각 ${piece.correctPosition + 1}`"
+                      :title="`${$t('puzzle.piece')} ${piece.correctPosition + 1}`"
                     ></div>
                   </div>
                   <div class="piece-number">{{ piece.correctPosition + 1 }}</div>
@@ -146,7 +146,7 @@
               <div class="confetti" v-for="i in 30" :key="i" :style="getConfettiStyle(i)"></div>
             </div>
             <h2 class="completion-title">{{$t('puzzle.complete')}}</h2>
-            <h3 class="completion-subtitle">{{ getCurrentName(selectedPuzzle!) }} 완성!</h3>
+            <h3 class="completion-subtitle">{{ getCurrentName(selectedPuzzle!) }} {{$t('puzzle.complete')}}</h3>
             
             <div class="completed-puzzle">
               <img :src="getImageUrl(selectedPuzzle!.imageUrl)" :alt="getCurrentName(selectedPuzzle!)" :style="{ aspectRatio: puzzleAspectRatio }" />
@@ -154,7 +154,7 @@
 
             <div v-if="newBadgeUnlocked" class="new-badge-notification">
               <div class="badge-unlock-icon">🏆</div>
-              <div class="badge-unlock-text">새로운 퍼즐 뱃지 획득!</div>
+              <div class="badge-unlock-text">{{$t('quiz.badge')}}</div>
               <div class="unlocked-badge">
                 <span class="unlocked-badge-icon">{{ newBadgeUnlocked.icon }}</span>
                 <span class="unlocked-badge-name">{{ newBadgeUnlocked.name }}</span>

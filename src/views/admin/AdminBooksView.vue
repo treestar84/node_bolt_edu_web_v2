@@ -141,11 +141,11 @@ const confirmDelete = async () => {
   isDeleting.value = true;
   try {
     await store.deleteBook(bookToDelete.value.id);
-    showToast('책이 성공적으로 삭제되었습니다.', 'success');
+    showToast($t('admin.bookDeleted'), 'success');
     closeDeleteModal();
   } catch (error) {
     console.error('Delete book error:', error);
-    showToast('책 삭제 중 오류가 발생했습니다.', 'error');
+    showToast($t('admin.deleteError'), 'error');
   } finally {
     isDeleting.value = false;
   }
@@ -156,16 +156,16 @@ const saveBook = async (bookData: any) => {
     if (selectedBook.value) {
       // Edit existing book
       await store.updateBook(selectedBook.value.id, bookData);
-      showToast('책이 성공적으로 수정되었습니다.', 'success');
+      showToast($t('admin.bookUpdated'), 'success');
     } else {
       // Add new book
       await store.addBook(bookData);
-      showToast('새 책이 성공적으로 추가되었습니다.', 'success');
+      showToast($t('admin.bookAdded'), 'success');
     }
     closeModal();
   } catch (error) {
     console.error('Save book error:', error);
-    showToast('책 저장 중 오류가 발생했습니다.', 'error');
+    showToast($t('admin.saveError'), 'error');
   }
 };
 
@@ -181,13 +181,13 @@ const generateTestVideo = async () => {
     });
     
     if (response.ok) {
-      showToast('테스트 비디오가 성공적으로 생성되었습니다.', 'success');
+      showToast($t('admin.videoGenerated'), 'success');
     } else {
       throw new Error('Video generation failed');
     }
   } catch (error) {
     console.error('Test video generation error:', error);
-    showToast('테스트 비디오 생성에 실패했습니다.', 'error');
+    showToast($t('admin.videoGenerationFailed'), 'error');
   } finally {
     isGeneratingTest.value = false;
   }

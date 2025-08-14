@@ -57,7 +57,7 @@
                 <div class="progress-bar">
                   <div class="progress-fill" :style="{ width: coloring.coloringProgress.value + '%' }"></div>
                 </div>
-                <span class="progress-text">{{ coloring.coloringProgress.value }}% 완성</span>
+                <span class="progress-text">{{ coloring.coloringProgress.value }}% {{$t('coloring.completed')}}</span>
               </div>
               <div class="completion-controls">
                 <button 
@@ -65,7 +65,7 @@
                   class="btn btn-success complete-btn"
                   :disabled="coloring.coloringProgress.value < 5"
                 >
-                  ✅ 색칠 완료!
+                  ✅ {{$t('coloring.finished')}}
                 </button>
               </div>
             </div>
@@ -177,14 +177,14 @@
                   ↶ {{$t('coloring.undo')}}
                 </button>
                 <button @click="handleSaveArtwork" class="btn btn-primary" :disabled="isSaving">
-                  <span v-if="isSaving">💾 저장 중...</span>
+                  <span v-if="isSaving">💾 {{$t('common.processing')}}</span>
                   <span v-else>💾 {{$t('coloring.save')}}</span>
                 </button>
                 <button @click="coloring.shareArtwork" class="btn btn-secondary">
                   📤 {{$t('coloring.share')}}
                 </button>
                 <router-link v-if="authStore.isAuthenticated" to="/coloring/gallery" class="btn btn-info">
-                  🖼️ 갤러리
+                  🖼️ {{$t('coloring.gallery')}}
                 </router-link>
               </div>
             </div>
@@ -207,14 +207,14 @@
             <div class="celebration-container">
               <div class="completion-badge">
                 <div class="badge-circle">
-                  <div class="badge-text">완성!</div>
+                  <div class="badge-text">{{$t('coloring.completed')}}!</div>
                   <div class="badge-progress">{{ coloring.coloringProgress.value }}%</div>
                 </div>
               </div>
             </div>
             
-            <h2 class="completion-title animate-in">🌟 훌륭해요! 🌟</h2>
-            <h3 class="completion-subtitle animate-in delay-1">{{ coloring.getCurrentName(coloring.selectedWord.value!) }} 색칠을 완성했어요!</h3>
+            <h2 class="completion-title animate-in">🌟 {{$t('coloring.excellent')}} 🌟</h2>
+            <h3 class="completion-subtitle animate-in delay-1">{{ coloring.getCurrentName(coloring.selectedWord.value!) }} {{$t('coloring.finished')}}!</h3>
             
             <div class="completed-artwork animate-in delay-2">
               <div class="artwork-frame">
@@ -222,23 +222,23 @@
                 <div class="artwork-shine"></div>
               </div>
               <p style="margin-top: 10px; font-size: 0.9rem; color: #666;">
-                작품이 보이지 않으면 위 프레임을 클릭해보세요
+                {{$t('coloring.frameHint')}}
               </p>
             </div>
 
             <div class="completion-actions animate-in delay-3">
               <button @click="handleSaveArtwork" class="btn btn-success btn-lg pulse" :disabled="isSaving">
-                <span v-if="isSaving">💾 저장 중...</span>
-                <span v-else>💾 작품 저장하기</span>
+                <span v-if="isSaving">💾 {{$t('common.processing')}}</span>
+                <span v-else>💾 {{$t('coloring.saveArtwork')}}</span>
               </button>
               <router-link v-if="authStore.isAuthenticated" to="/coloring/gallery" class="btn btn-info btn-lg">
-                🖼️ 갤러리 보기
+                🖼️ {{$t('coloring.gallery')}}
               </router-link>
               <button @click="coloring.startNewColoring" class="btn btn-primary btn-lg">
-                🎨 다른 그림 색칠하기
+                🎨 {{$t('coloring.colorAnother')}}
               </button>
               <button @click="coloring.goHome" class="btn btn-secondary btn-lg">
-                🏠 홈으로 가기
+                🏠 {{$t('common.back')}}
               </button>
             </div>
           </div>
@@ -247,8 +247,8 @@
         <!-- 빈 상태 -->
         <div v-if="coloringWords.length === 0" class="empty-state">
           <div class="empty-icon">🎨</div>
-          <h3>색칠할 수 있는 이미지가 없습니다</h3>
-          <p>직접 업로드한 이미지가 있는 단어만 색칠하기가 가능합니다.</p>
+          <h3>{{$t('coloring.noImages')}}</h3>
+          <p>{{$t('coloring.needImagesHint')}}</p>
           <div class="debug-info" style="margin: 20px 0; padding: 15px; background: #f0f0f0; border-radius: 8px; font-size: 0.9rem; text-align: left;">
             <div><strong>전체 단어 수:</strong> {{ store.currentWords.length }}</div>
             <div><strong>업로드된 이미지가 있는 단어:</strong> {{ store.currentWords.filter(w => w.imageUrl?.startsWith('/uploads/')).length }}</div>
@@ -261,7 +261,7 @@
             </div>
           </div>
           <router-link to="/admin/words" class="btn btn-primary">
-            관리자에서 이미지 추가하기
+            {{$t('coloring.addWordsBtn')}}
           </router-link>
         </div>
       </div>

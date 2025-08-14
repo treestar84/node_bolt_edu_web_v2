@@ -4,7 +4,7 @@
     <div class="reader-header">
       <div class="header-content">
         <button @click="goBack" class="btn btn-secondary back-btn">
-          ← 뒤로가기
+          ← {{$t('common.back')}}
         </button>
         <div class="title-section">
           <h1 class="book-title">{{ book?.title }}</h1>
@@ -12,7 +12,7 @@
             {{ currentPageIndex + 1 }} / {{ book?.pages?.length }}
           </div>
           <div class="video-indicator" v-else>
-            📹 영상 스토리
+            📹 {{$t('books.videoStory')}}
           </div>
         </div>
       </div>
@@ -24,14 +24,14 @@
           :disabled="currentPageIndex === 0"
           class="btn btn-lg btn-secondary navigation-btn"
         >
-          ← 이전
+          ← {{$t('common.prev')}}
         </button>
         <button
           @click="nextPage"
           :disabled="currentPageIndex === (book?.pages?.length ?? 0) - 1"
           class="btn btn-lg btn-secondary navigation-btn"
         >
-          다음 →
+          {{$t('common.next')}} →
         </button>
       </div>
     </div>
@@ -39,20 +39,20 @@
     <div v-if="!book">
       <div class="book-not-found">
         <div class="error-icon">📖</div>
-        <h2>책을 찾을 수 없습니다</h2>
-        <p>요청하신 그림책이 존재하지 않거나, 데이터가 로드되지 않았습니다.</p>
+        <h2>{{$t('books.notFound')}}</h2>
+        <p>{{$t('books.notFoundDesc')}}</p>
         <router-link to="/books" class="btn btn-primary">
-          그림책 목록으로 돌아가기
+          {{$t('books.backToList')}}
         </router-link>
       </div>
     </div>
     <div v-else-if="!book.isVideoMode && (!book.pages || book.pages.length === 0)">
       <div class="book-not-found">
         <div class="error-icon">📖</div>
-        <h2>책 페이지가 없습니다</h2>
-        <p>이 책에 등록된 페이지가 없습니다. 관리자에게 문의하세요.</p>
+        <h2>{{$t('books.noPages')}}</h2>
+        <p>{{$t('books.noPagesDesc')}}</p>
         <router-link to="/books" class="btn btn-primary">
-          그림책 목록으로 돌아가기
+          {{$t('books.backToList')}}
         </router-link>
       </div>
     </div>
@@ -68,11 +68,11 @@
             @loadeddata="onVideoLoaded"
             @error="onVideoError"
           >
-            비디오를 지원하지 않는 브라우저입니다.
+            {{$t('books.videoNotSupported')}}
           </video>
           <div class="video-controls">
             <p class="video-description">
-              전체 스토리가 담긴 영상을 시청하세요
+              {{$t('books.watchFullStory')}}
             </p>
           </div>
         </div>
@@ -98,7 +98,7 @@
               />
             </template>
             <template v-else>
-              <div class="missing-media">이미지가 없습니다</div>
+              <div class="missing-media">{{$t('books.noImage')}}</div>
             </template>
             
             <!-- Page text overlay -->
@@ -133,10 +133,10 @@
               :disabled="!currentPage || !currentPage.audioUrl"
             >
               <span class="audio-icon">{{ isPlaying ? '🔊' : '🔈' }}</span>
-              <span>음성 듣기</span>
+              <span>{{$t('books.listenAudio')}}</span>
             </button>
             <template v-if="!currentPage || !currentPage.audioUrl">
-              <div class="missing-media">오디오가 없습니다</div>
+              <div class="missing-media">{{$t('books.noAudio')}}</div>
             </template>
             
             <div class="auto-play-controls">
@@ -146,17 +146,17 @@
                   v-model="autoPlayEnabled"
                   @change="toggleAutoPlay"
                 />
-                <span class="toggle-text">자동 넘김</span>
+                <span class="toggle-text">{{$t('books.autoAdvance')}}</span>
               </label>
               
               <div v-if="autoPlayEnabled" class="delay-settings">
-                <label class="delay-label">넘김 딜레이:</label>
+                <label class="delay-label">{{$t('books.delayLabel')}}:</label>
                 <select v-model="autoAdvanceDelay" class="delay-select">
-                  <option :value="500">0.5초</option>
-                  <option :value="1000">1초</option>
-                  <option :value="1500">1.5초</option>
-                  <option :value="2000">2초</option>
-                  <option :value="3000">3초</option>
+                  <option :value="500">0.5{{$t('common.seconds')}}</option>
+                  <option :value="1000">1{{$t('common.seconds')}}</option>
+                  <option :value="1500">1.5{{$t('common.seconds')}}</option>
+                  <option :value="2000">2{{$t('common.seconds')}}</option>
+                  <option :value="3000">3{{$t('common.seconds')}}</option>
                 </select>
               </div>
             </div>
@@ -171,14 +171,14 @@
             :disabled="currentPageIndex === 0"
             class="btn btn-lg btn-secondary nav-btn"
           >
-            ← 이전
+            ← {{$t('common.prev')}}
           </button>
           <button
             @click="nextPage"
             :disabled="currentPageIndex === book.pages.length - 1"
             class="btn btn-lg btn-secondary nav-btn"
           >
-            다음 →
+            {{$t('common.next')}} →
           </button>
         </div>
         
@@ -202,6 +202,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch, onUnmounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import { useAppStore } from '@/stores/app';
 import { useAudio } from '@/composables/useAudio';
 import { useSwipeGestures } from '@/composables/useSwipeGestures';
@@ -209,6 +210,7 @@ import { useTouchFeedback } from '@/composables/useTouchFeedback';
 
 const route = useRoute();
 const router = useRouter();
+const { t } = useI18n();
 const store = useAppStore();
 const { isPlaying, playAudio, stopAudio } = useAudio();
 

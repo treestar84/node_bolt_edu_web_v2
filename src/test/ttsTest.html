@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>다국어 TTS 테스트 - 나비(butterfly)</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-container {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .language-test {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            margin: 5px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background: #f9f9f9;
+        }
+        .lang-info {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .lang-flag {
+            font-size: 20px;
+        }
+        .lang-name {
+            font-weight: 600;
+            min-width: 80px;
+        }
+        .lang-text {
+            color: #666;
+            min-width: 100px;
+        }
+        .test-btn {
+            padding: 8px 16px;
+            background: #007AFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .test-btn:hover {
+            background: #0056CC;
+        }
+        .test-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .status {
+            min-width: 100px;
+            text-align: right;
+            font-weight: 600;
+        }
+        .status.supported {
+            color: #34C759;
+        }
+        .status.not-supported {
+            color: #FF3B30;
+        }
+        .status.testing {
+            color: #FF9500;
+        }
+        .summary {
+            background: #e3f2fd;
+            border: 1px solid #2196F3;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        .summary h3 {
+            color: #1976D2;
+            margin-top: 0;
+        }
+        .voice-list {
+            margin-top: 10px;
+            padding: 10px;
+            background: #f0f0f0;
+            border-radius: 5px;
+            font-size: 12px;
+            max-height: 100px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🦋 다국어 TTS 테스트 - 나비</h1>
+        <p>"나비(butterfly)" 단어가 10개 언어로 실제 음성 재생되는지 테스트합니다</p>
+        <button onclick="testAllLanguages()" class="test-btn" style="font-size: 16px; padding: 12px 24px;">
+            🚀 전체 언어 테스트 시작
+        </button>
+    </div>
+
+    <div class="test-container">
+        <h3>🦋 테스트 단어: "butterfly" (나비)</h3>
+        <p>각 언어별로 "나비" 번역을 음성으로 재생해봅니다.</p>
+        
+        <div id="languageTests">
+            <!-- 언어 테스트 항목들이 여기에 동적으로 생성됩니다 -->
+        </div>
+    </div>
+
+    <div class="summary" id="summary" style="display: none;">
+        <h3>📊 테스트 결과 요약</h3>
+        <div id="summaryContent"></div>
+    </div>
+
+    <script>
+        // 테스트할 언어들과 번역 데이터
+        const languages = [
+            { code: 'ko-KR', name: '한국어', flag: '🇰🇷', text: '나비', word: '나비' },
+            { code: 'en-US', name: 'English', flag: '🇺🇸', text: 'butterfly', word: 'butterfly' },
+            { code: 'zh-CN', name: '中文', flag: '🇨🇳', text: '蝴蝶', word: '蝴蝶' },
+            { code: 'ja-JP', name: '日本語', flag: '🇯🇵', text: '蝶', word: '蝶' },
+            { code: 'es-ES', name: 'Español', flag: '🇪🇸', text: 'mariposa', word: 'mariposa' },
+            { code: 'fr-FR', name: 'Français', flag: '🇫🇷', text: 'papillon', word: 'papillon' },
+            { code: 'de-DE', name: 'Deutsch', flag: '🇩🇪', text: 'Schmetterling', word: 'Schmetterling' },
+            { code: 'ar-SA', name: 'العربية', flag: '🇸🇦', text: 'فراشة', word: 'فراشة' },
+            { code: 'hi-IN', name: 'हिन्दी', flag: '🇮🇳', text: 'तितली', word: 'तितली' },
+            { code: 'pt-BR', name: 'Português', flag: '🇧🇷', text: 'borboleta', word: 'borboleta' }
+        ];
+
+        let testResults = {};
+        let availableVoices = [];
+
+        // 사용 가능한 음성 목록 로드
+        function loadVoices() {
+            return new Promise((resolve) => {
+                let voices = speechSynthesis.getVoices();
+                if (voices.length > 0) {
+                    availableVoices = voices;
+                    resolve(voices);
+                } else {
+                    // 일부 브라우저에서는 비동기로 로드됨
+                    speechSynthesis.addEventListener('voiceschanged', () => {
+                        availableVoices = speechSynthesis.getVoices();
+                        resolve(availableVoices);
+                    });
+                }
+            });
+        }
+
+        // 특정 언어에 대한 최적 음성 찾기
+        function findBestVoice(langCode) {
+            if (!availableVoices.length) return null;
+            
+            const shortLang = langCode.substring(0, 2);
+            
+            // 정확히 일치하는 언어 코드 찾기
+            let voice = availableVoices.find(v => v.lang === langCode);
+            if (voice) return voice;
+            
+            // 언어 코드 앞 2자리 일치 찾기
+            voice = availableVoices.find(v => v.lang.startsWith(shortLang));
+            if (voice) return voice;
+            
+            // 여성 목소리 우선
+            voice = availableVoices.find(v => 
+                v.lang.startsWith(shortLang) && 
+                (v.name.includes('female') || v.name.includes('Female'))
+            );
+            if (voice) return voice;
+            
+            return null;
+        }
+
+        // 언어별 TTS 테스트
+        function testLanguageTTS(langData) {
+            return new Promise((resolve) => {
+                const voice = findBestVoice(langData.code);
+                
+                if (!voice) {
+                    resolve({ supported: false, error: '음성 없음' });
+                    return;
+                }
+
+                const utterance = new SpeechSynthesisUtterance(langData.word);
+                utterance.voice = voice;
+                utterance.rate = 0.8;
+                utterance.pitch = 1.0;
+
+                utterance.onend = () => {
+                    resolve({ 
+                        supported: true, 
+                        voice: voice.name,
+                        lang: voice.lang
+                    });
+                };
+
+                utterance.onerror = (error) => {
+                    resolve({ 
+                        supported: false, 
+                        error: error.error,
+                        voice: voice.name 
+                    });
+                };
+
+                try {
+                    speechSynthesis.speak(utterance);
+                } catch (error) {
+                    resolve({ 
+                        supported: false, 
+                        error: error.message 
+                    });
+                }
+            });
+        }
+
+        // UI 생성
+        function createLanguageTestUI() {
+            const container = document.getElementById('languageTests');
+            
+            languages.forEach((lang, index) => {
+                const div = document.createElement('div');
+                div.className = 'language-test';
+                div.innerHTML = `
+                    <div class="lang-info">
+                        <span class="lang-flag">${lang.flag}</span>
+                        <span class="lang-name">${lang.name}</span>
+                        <span class="lang-text">"${lang.text}"</span>
+                    </div>
+                    <button onclick="testSingleLanguage(${index})" class="test-btn">
+                        🔊 테스트
+                    </button>
+                    <div class="status" id="status-${index}">대기중</div>
+                    <div class="voice-list" id="voices-${index}" style="display: none;"></div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        // 개별 언어 테스트
+        async function testSingleLanguage(index) {
+            const lang = languages[index];
+            const statusEl = document.getElementById(`status-${index}`);
+            const voicesEl = document.getElementById(`voices-${index}`);
+            
+            statusEl.textContent = '테스트 중...';
+            statusEl.className = 'status testing';
+            
+            const result = await testLanguageTTS(lang);
+            testResults[lang.code] = result;
+            
+            if (result.supported) {
+                statusEl.textContent = '✅ 지원됨';
+                statusEl.className = 'status supported';
+                voicesEl.textContent = `사용된 음성: ${result.voice} (${result.lang})`;
+                voicesEl.style.display = 'block';
+            } else {
+                statusEl.textContent = `❌ 불가능 (${result.error})`;
+                statusEl.className = 'status not-supported';
+                if (result.voice) {
+                    voicesEl.textContent = `시도한 음성: ${result.voice}`;
+                    voicesEl.style.display = 'block';
+                }
+            }
+        }
+
+        // 전체 언어 테스트
+        async function testAllLanguages() {
+            document.querySelector('.header button').disabled = true;
+            document.querySelector('.header button').textContent = '테스트 중...';
+            
+            for (let i = 0; i < languages.length; i++) {
+                await testSingleLanguage(i);
+                // 각 테스트 사이에 약간의 딜레이
+                await new Promise(resolve => setTimeout(resolve, 500));
+            }
+            
+            showSummary();
+            
+            document.querySelector('.header button').disabled = false;
+            document.querySelector('.header button').textContent = '🔄 다시 테스트';
+        }
+
+        // 결과 요약 표시
+        function showSummary() {
+            const summaryEl = document.getElementById('summary');
+            const contentEl = document.getElementById('summaryContent');
+            
+            const supported = Object.values(testResults).filter(r => r.supported).length;
+            const total = Object.keys(testResults).length;
+            const percentage = Math.round((supported / total) * 100);
+            
+            const supportedLangs = languages.filter(lang => 
+                testResults[lang.code] && testResults[lang.code].supported
+            ).map(lang => `${lang.flag} ${lang.name}`).join(', ');
+            
+            const notSupportedLangs = languages.filter(lang => 
+                testResults[lang.code] && !testResults[lang.code].supported
+            ).map(lang => `${lang.flag} ${lang.name}`).join(', ');
+            
+            contentEl.innerHTML = `
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+                    <div>
+                        <h4>📊 전체 통계</h4>
+                        <p><strong>지원 언어:</strong> ${supported}/${total} (${percentage}%)</p>
+                        <p><strong>브라우저:</strong> ${navigator.userAgent.includes('Chrome') ? 'Chrome' : 
+                                                      navigator.userAgent.includes('Firefox') ? 'Firefox' : 
+                                                      navigator.userAgent.includes('Safari') ? 'Safari' : 'Other'}</p>
+                    </div>
+                    <div>
+                        <h4>✅ 지원되는 언어</h4>
+                        <p>${supportedLangs || '없음'}</p>
+                    </div>
+                    ${notSupportedLangs ? `
+                    <div>
+                        <h4>❌ 지원되지 않는 언어</h4>
+                        <p>${notSupportedLangs}</p>
+                    </div>
+                    ` : ''}
+                </div>
+                <div style="margin-top: 20px; padding: 15px; background: #f0f8ff; border-radius: 5px;">
+                    <h4>💡 결론</h4>
+                    <p>번역된 단어 중 <strong>${supported}개 언어</strong>는 TTS로 음성 재생이 가능합니다.</p>
+                    ${percentage < 100 ? '<p style="color: #ff6600;">⚠️ 일부 언어는 해당 브라우저에서 TTS를 지원하지 않습니다.</p>' : 
+                     '<p style="color: #00aa00;">🎉 모든 언어에서 TTS가 정상 작동합니다!</p>'}
+                </div>
+            `;
+            
+            summaryEl.style.display = 'block';
+        }
+
+        // 초기화
+        async function init() {
+            await loadVoices();
+            createLanguageTestUI();
+            
+            console.log('🎤 사용 가능한 음성 목록:');
+            availableVoices.forEach(voice => {
+                console.log(`${voice.lang}: ${voice.name}`);
+            });
+        }
+
+        // 페이지 로드 시 초기화
+        window.addEventListener('load', init);
+    </script>
+</body>
+</html>

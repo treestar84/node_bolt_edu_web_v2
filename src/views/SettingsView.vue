@@ -14,7 +14,7 @@
         <div class="settings-container">
           <div class="settings-card">
             <div class="card-header">
-              <h2>기본 정보</h2>
+              <h2>{{$t('settings.basicInfo')}}</h2>
             </div>
             
             <form @submit.prevent="saveSettings" class="settings-form">
@@ -29,7 +29,7 @@
                   disabled
                 />
                 <div class="form-hint">
-                  아이디는 변경할 수 없습니다
+                  {{$t('settings.usernameHint')}}
                 </div>
               </div>
 
@@ -70,7 +70,7 @@
                 <label class="form-label">{{$t('settings.mainImage')}}</label>
                 <FileUploadInput
                   v-model="formData.mainImageUrl"
-                  label="메인 이미지"
+                  :label="$t('settings.mainImage')"
                   :placeholder="$t('settings.mainImagePlaceholder')"
                   file-type="image"
                   :required="false"
@@ -98,7 +98,7 @@
                   class="btn btn-primary"
                   :disabled="authStore.isLoading"
                 >
-                  {{ authStore.isLoading ? '저장 중...' : '설정 저장' }}
+                  {{ authStore.isLoading ? $t('settings.saving') : $t('settings.saveSettings') }}
                 </button>
                 
                 <button 
@@ -106,7 +106,7 @@
                   @click="resetForm"
                   class="btn btn-secondary"
                 >
-                  취소
+                  {{$t('common.cancel')}}
                 </button>
               </div>
             </form>
@@ -114,7 +114,7 @@
 
           <div class="settings-card">
             <div class="card-header">
-              <h2>학습 통계</h2>
+              <h2>{{$t('stats.title')}}</h2>
             </div>
             
             <div class="stats-grid" v-if="authStore.userProgress">
@@ -122,7 +122,7 @@
                 <div class="stat-icon">🧩</div>
                 <div class="stat-content">
                   <div class="stat-value">{{ authStore.userProgress.quizScore }}</div>
-                  <div class="stat-label">퀴즈 점수</div>
+                  <div class="stat-label">{{$t('achievements.quizScore')}}</div>
                 </div>
               </div>
               
@@ -130,7 +130,7 @@
                 <div class="stat-icon">🎯</div>
                 <div class="stat-content">
                   <div class="stat-value">{{ authStore.userProgress.quizStreak }}</div>
-                  <div class="stat-label">연속 정답</div>
+                  <div class="stat-label">{{$t('achievements.quizStreak', {streak: ''})}}</div>
                 </div>
               </div>
               
@@ -138,7 +138,7 @@
                 <div class="stat-icon">🧩</div>
                 <div class="stat-content">
                   <div class="stat-value">{{ authStore.userProgress.puzzleCompletions }}</div>
-                  <div class="stat-label">퍼즐 완성</div>
+                  <div class="stat-label">{{$t('achievements.puzzleCompletions')}}</div>
                 </div>
               </div>
               
@@ -146,7 +146,7 @@
                 <div class="stat-icon">📚</div>
                 <div class="stat-content">
                   <div class="stat-value">{{ authStore.userProgress.wordsLearned }}</div>
-                  <div class="stat-label">학습한 단어</div>
+                  <div class="stat-label">{{$t('achievements.wordsLearned')}}</div>
                 </div>
               </div>
               
@@ -154,7 +154,7 @@
                 <div class="stat-icon">📖</div>
                 <div class="stat-content">
                   <div class="stat-value">{{ authStore.userProgress.booksRead }}</div>
-                  <div class="stat-label">읽은 책</div>
+                  <div class="stat-label">{{$t('achievements.booksRead')}}</div>
                 </div>
               </div>
               
@@ -162,7 +162,7 @@
                 <div class="stat-icon">🏆</div>
                 <div class="stat-content">
                   <div class="stat-value">{{ contentStore.availableBadges.length }}</div>
-                  <div class="stat-label">획득 뱃지</div>
+                  <div class="stat-label">{{$t('settings.earnedBadges')}}</div>
                 </div>
               </div>
             </div>
@@ -170,12 +170,12 @@
 
           <div class="settings-card">
             <div class="card-header">
-              <h2>계정 관리</h2>
+              <h2>{{$t('settings.accountManagement')}}</h2>
             </div>
             
             <div class="account-actions">
               <button @click="handleLogout" class="btn btn-danger">
-                로그아웃
+                {{$t('auth.logout')}}
               </button>
             </div>
           </div>
@@ -188,12 +188,14 @@
 <script setup lang="ts">
 import { reactive, computed, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import Navigation from '@/components/Navigation.vue';
 import FileUploadInput from '@/components/FileUploadInput.vue';
 import { useAuthStore } from '@/stores/auth';
 import { useContentStore } from '@/stores/content';
 
 const router = useRouter();
+const { t } = useI18n();
 const authStore = useAuthStore();
 const contentStore = useContentStore();
 

@@ -7,7 +7,7 @@
         class="tab-button"
         :class="{ active: inputMode === 'upload' }"
       >
-        📁 파일 업로드
+        {{ $t('fileUpload.fileUploadTab') }}
       </button>
       <button 
         type="button"
@@ -15,7 +15,7 @@
         class="tab-button"
         :class="{ active: inputMode === 'url' }"
       >
-        🔗 URL 입력
+        {{ $t('fileUpload.urlInputTab') }}
       </button>
     </div>
 
@@ -36,9 +36,9 @@
         <div v-if="!isUploading && !uploadedFile" class="upload-placeholder">
           <div class="upload-icon">{{ getFileTypeIcon() }}</div>
           <div class="upload-text">
-            <p>클릭하거나 파일을 드래그해서 업로드</p>
+            <p>{{ $t('fileUpload.clickOrDrag') }}</p>
             <p class="upload-hint">{{ getFileTypeHint() }}</p>
-            <p class="upload-hint">서버에 업로드되며, 다른 기기에서도 접근 가능합니다</p>
+            <p class="upload-hint">{{ $t('fileUpload.serverUploadInfo') }}</p>
           </div>
         </div>
 
@@ -46,14 +46,14 @@
           <div class="progress-bar">
             <div class="progress-fill" :style="{ width: `${uploadProgress}%` }"></div>
           </div>
-          <p>업로드 중... {{ uploadProgress }}%</p>
+          <p>{{ $t('fileUpload.uploadProgress', { progress: uploadProgress }) }}</p>
         </div>
 
         <div v-if="uploadedFile && !isUploading" class="upload-success">
           <div class="success-icon">✅</div>
           <p>{{ uploadedFile.name }}</p>
-          <p class="upload-status">{{ modelValue.includes('/images/') || modelValue.includes('/audio/') ? '서버에 업로드됨' : '로컬에 저장됨' }}</p>
-          <button type="button" @click.stop="removeFile" class="remove-button">삭제</button>
+          <p class="upload-status">{{ modelValue.includes('/images/') || modelValue.includes('/audio/') ? $t('fileUpload.serverUploaded') : $t('fileUpload.localSaved') }}</p>
+          <button type="button" @click.stop="removeFile" class="remove-button">{{ $t('common.delete') }}</button>
         </div>
       </div>
 
@@ -85,6 +85,7 @@
 
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useFileUpload } from '@/composables/useFileUpload';
 
 interface Props {
@@ -103,6 +104,7 @@ const props = defineProps<Props>();
 const emit = defineEmits<Emits>();
 
 const { isUploading, uploadProgress, uploadFile, validateFile } = useFileUpload();
+const { t } = useI18n();
 
 const inputMode = ref<'url' | 'upload'>('upload'); // Default to upload
 const fileInput = ref<HTMLInputElement>();
@@ -147,20 +149,20 @@ const processFile = async (file: File) => {
   // Validate file
   const validation = validateFile(file, props.fileType);
   if (!validation.valid) {
-    error.value = validation.error || '유효하지 않은 파일입니다.';
+    error.value = validation.error || t('fileUpload.invalidFile');
     return;
   }
   try {
     uploadedFile.value = file;
     const fileUrl = await uploadFile(file, props.fileType);
     if (!fileUrl || fileUrl === '') {
-      error.value = '파일 업로드에 실패했습니다.';
+      error.value = t('fileUpload.uploadFailed');
       return;
     }
     uploadedFileUrl.value = fileUrl;
     emit('update:modelValue', fileUrl);
   } catch (err) {
-    error.value = '파일 업로드에 실패했습니다.';
+    error.value = t('fileUpload.uploadFailed');
     console.error('Upload error:', err);
   }
 };
@@ -196,10 +198,10 @@ const getFileTypeIcon = () => {
 };
 
 const getFileTypeHint = () => {
-  if (props.fileType === 'image') return 'JPG, PNG, GIF, WebP (최대 500MB)';
-  if (props.fileType === 'audio') return 'MP3, WAV, OGG (최대 500MB)';
-  if (props.fileType === 'video') return 'MP4, AVI, MOV, WMV, WebM (최대 500MB)';
-  return '최대 500MB';
+  if (props.fileType === 'image') return t('forms.fileTypes.image');
+  if (props.fileType === 'audio') return t('forms.fileTypes.audio');
+  if (props.fileType === 'video') return t('forms.fileTypes.video');
+  return t('forms.fileTypes.image');
 };
 </script>
 

@@ -59,8 +59,8 @@
 
         <section class="features-section">
           <div class="section-header">
-            <h2 class="section-title">학습 프로그램</h2>
-            <p class="section-subtitle">아이의 성장에 맞춘 단계별 학습 콘텐츠</p>
+            <h2 class="section-title">{{ $t('home.learningProgram') }}</h2>
+            <p class="section-subtitle">{{ $t('home.learningProgramDesc') }}</p>
           </div>
           
           <div class="features-grid">
@@ -69,7 +69,7 @@
                 <div class="feature-icon">{{ feature.icon }}</div>
                 <h3 class="feature-title">{{ feature.title }}</h3>
                 <p class="feature-description">{{ feature.description }}</p>
-                <div class="feature-count">{{ feature.count }}개</div>
+                <div class="feature-count">{{ $t('admin.itemCount', { count: feature.count }) }}</div>
               </router-link>
             </div>
           </div>
@@ -77,26 +77,26 @@
 
         <section class="stats-section" v-if="authStore.userProgress">
           <div class="section-header">
-            <h2 class="section-title">학습 현황</h2>
-            <p class="section-subtitle">지금까지의 학습 성과를 확인해보세요</p>
+            <h2 class="section-title">{{ $t('dashboard.stats.title') }}</h2>
+            <p class="section-subtitle">{{ $t('dashboard.stats.description') }}</p>
           </div>
           
           <div class="stats-grid">
             <div class="stat-card">
               <div class="stat-value">{{ contentStore.words.length }}</div>
-              <div class="stat-label">학습 단어</div>
+              <div class="stat-label">{{ $t('home.learningWords') }}</div>
             </div>
             <div class="stat-card">
               <div class="stat-value">{{ contentStore.books.length }}</div>
-              <div class="stat-label">그림책</div>
+              <div class="stat-label">{{ $t('home.pictureBooks') }}</div>
             </div>
             <div class="stat-card">
               <div class="stat-value">{{ authStore.userProgress.quizScore }}</div>
-              <div class="stat-label">퀴즈 점수</div>
+              <div class="stat-label">{{ $t('achievements.quizScore') }}</div>
             </div>
             <div class="stat-card">
               <div class="stat-value">{{ authStore.userProgress.puzzleCompletions }}</div>
-              <div class="stat-label">퍼즐 완성</div>
+              <div class="stat-label">{{ $t('achievements.puzzleCompletions') }}</div>
             </div>
           </div>
         </section>
@@ -110,6 +110,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import Navigation from '@/components/Navigation.vue';
 import BadgeDisplay from '@/components/BadgeDisplay.vue';
 import { useAuthStore } from '@/stores/auth';
@@ -117,6 +118,7 @@ import { useContentStore } from '@/stores/content';
 
 const authStore = useAuthStore();
 const contentStore = useContentStore();
+const { t } = useI18n();
 
 
 // 플로팅 카드들 (사용자 저장 이미지)
@@ -186,29 +188,29 @@ onMounted(() => {
 
 const features = computed(() => [
   {
-    title: '단어 학습',
-    description: '이미지를 누르면 음성과 함께 단어를 배워요',
+    title: t('home.features.words.title'),
+    description: t('home.features.words.description'),
     path: '/words',
     count: contentStore.words.length,
     icon: ''
   },
   {
-    title: '퀴즈 게임',
-    description: '음성을 듣고 정답을 찾는 재미있는 퀴즈',
+    title: t('home.features.quiz.title'),
+    description: t('home.features.quiz.description'),
     path: '/quiz',
     count: Math.floor(contentStore.words.length / 3),
     icon: ''
   },
   {
-    title: '퍼즐 맞추기',
-    description: '이미지 조각을 맞춰서 완성하는 퍼즐 게임',
+    title: t('home.features.puzzle.title'),
+    description: t('home.features.puzzle.description'),
     path: '/puzzle',
     count: contentStore.words.length,
     icon: ''
   },
   {
-    title: '그림책',
-    description: '재미있는 그림책 읽기',
+    title: t('home.features.books.title'),
+    description: t('home.features.books.description'),
     path: '/books',
     count: contentStore.books.length,
     icon: ''

@@ -5,9 +5,9 @@
     <main class="main-content">
       <div class="container">
         <div class="dashboard-header">
-          <h1 class="page-title">관리자 대시보드</h1>
+          <h1 class="page-title">{{ $t('admin.dashboard') }}</h1>
           <p class="page-description">
-            유아 학습 앱의 콘텐츠를 관리하고 통계를 확인하세요
+            {{ $t('admin.dashboardDescription') }}
           </p>
         </div>
 
@@ -16,10 +16,10 @@
             <div class="stat-icon">📚</div>
             <div class="stat-content">
               <div class="stat-value">{{ store.currentWords.length }}</div>
-              <div class="stat-label">등록된 단어</div>
+              <div class="stat-label">{{ $t('admin.registeredWords') }}</div>
             </div>
             <router-link to="/admin/words" class="stat-action">
-              관리하기 →
+              {{ $t('admin.manage') }} →
             </router-link>
           </div>
 
@@ -27,10 +27,10 @@
             <div class="stat-icon">📖</div>
             <div class="stat-content">
               <div class="stat-value">{{ store.currentBooks.length }}</div>
-              <div class="stat-label">등록된 책</div>
+              <div class="stat-label">{{ $t('admin.registeredBooks') }}</div>
             </div>
             <router-link to="/admin/books" class="stat-action">
-              관리하기 →
+              {{ $t('admin.manage') }} →
             </router-link>
           </div>
 
@@ -38,7 +38,7 @@
             <div class="stat-icon">🏆</div>
             <div class="stat-content">
               <div class="stat-value">{{ store.quizScore }}</div>
-              <div class="stat-label">총 퀴즈 점수</div>
+              <div class="stat-label">{{ $t('admin.totalQuizScore') }}</div>
             </div>
           </div>
 
@@ -46,7 +46,7 @@
             <div class="stat-icon">🎯</div>
             <div class="stat-content">
               <div class="stat-value">{{ store.quizStreak }}</div>
-              <div class="stat-label">현재 연속 정답</div>
+              <div class="stat-label">{{ $t('admin.currentStreak') }}</div>
             </div>
           </div>
 
@@ -54,13 +54,13 @@
             <div class="stat-icon">🏅</div>
             <div class="stat-content">
               <div class="stat-value">{{ store.availableBadges.length }}</div>
-              <div class="stat-label">획득한 뱃지</div>
+              <div class="stat-label">{{ $t('admin.earnedBadges') }}</div>
             </div>
           </div>
         </div>
 
         <div class="quick-actions">
-          <h2 class="section-title">빠른 작업</h2>
+          <h2 class="section-title">{{ $t('admin.quickActions') }}</h2>
           <div class="actions-grid">
             <router-link to="/admin/words" class="action-card">
               <div class="action-icon">➕</div>

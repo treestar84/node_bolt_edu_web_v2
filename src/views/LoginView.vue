@@ -3,71 +3,71 @@
     <div class="login-container">
       <div class="login-card">
         <div class="login-header">
-          <h1>{{ isRegister ? '회원가입' : '로그인' }}</h1>
-          <p>{{ isRegister ? '새 계정을 만들어보세요' : '계정에 로그인하세요' }}</p>
+          <h1>{{ isRegister ? $t('auth.registerTitle') : $t('auth.loginTitle') }}</h1>
+          <p>{{ isRegister ? $t('auth.registerDesc') : $t('auth.loginDesc') }}</p>
         </div>
 
         <form @submit.prevent="handleSubmit" class="login-form">
           <div class="form-group">
-            <label for="username" class="form-label">아이디</label>
+            <label for="username" class="form-label">{{ $t('auth.username') }}</label>
             <input
               id="username"
               type="text"
               v-model="formData.username"
               class="form-input"
-              placeholder="아이디를 입력하세요"
+              :placeholder="$t('auth.usernamePlaceholder')"
               required
             />
             <div class="form-hint">
-              영문, 숫자, 언더스코어(_) 사용 가능 (3-20자)
+              {{ $t('auth.usernameHint') }}
             </div>
           </div>
 
           <div class="form-group">
-            <label for="password" class="form-label">비밀번호</label>
+            <label for="password" class="form-label">{{ $t('auth.password') }}</label>
             <input
               id="password"
               type="password"
               v-model="formData.password"
               class="form-input"
-              placeholder="비밀번호를 입력하세요"
+              :placeholder="$t('auth.passwordPlaceholder')"
               required
             />
             <div class="form-hint">
-              최소 6자 이상
+              {{ $t('auth.passwordHint') }}
             </div>
           </div>
 
           <div v-if="isRegister" class="register-fields">
             <div class="form-group">
-              <label for="userType" class="form-label">사용자 유형</label>
+              <label for="userType" class="form-label">{{ $t('auth.userType') }}</label>
               <select
                 id="userType"
                 v-model="formData.userType"
                 class="form-input"
                 required
               >
-                <option value="">선택하세요</option>
-                <option value="parent">엄마 (일반 사용자)</option>
-                <option value="teacher">어린이집 선생님</option>
-                <option value="director">원장</option>
+                <option value="">{{ $t('auth.selectUserType') }}</option>
+                <option value="parent">{{ $t('auth.parentUser') }}</option>
+                <option value="teacher">{{ $t('auth.teacherUser') }}</option>
+                <option value="director">{{ $t('auth.directorUser') }}</option>
               </select>
             </div>
 
             <div class="form-group">
-              <label for="childName" class="form-label">자녀 이름</label>
+              <label for="childName" class="form-label">{{ $t('auth.childName') }}</label>
               <input
                 id="childName"
                 type="text"
                 v-model="formData.childName"
                 class="form-input"
-                placeholder="자녀 이름을 입력하세요"
+                :placeholder="$t('auth.childNamePlaceholder')"
                 required
               />
             </div>
 
             <div class="form-group">
-              <label for="childBirthDate" class="form-label">자녀 생년월일</label>
+              <label for="childBirthDate" class="form-label">{{ $t('auth.childBirthDate') }}</label>
               <input
                 id="childBirthDate"
                 type="date"
@@ -77,15 +77,15 @@
                 required
               />
               <div class="form-hint">
-                정확한 생년월일을 입력하면 맞춤형 학습 콘텐츠를 제공받을 수 있습니다
+                {{ $t('auth.birthDateHint') }}
               </div>
             </div>
 
             <div v-if="formData.childBirthDate" class="child-age-display">
               <div class="age-info">
-                <span class="age-label">현재 나이:</span>
-                <span class="age-value">{{ calculatedAge.years }}세 {{ calculatedAge.months }}개월</span>
-                <span class="age-months">({{ calculatedAge.totalMonths }}개월)</span>
+                <span class="age-label">{{ $t('auth.currentAge') }}:</span>
+                <span class="age-value">{{ calculatedAge.years }}{{ $t('settings.age') }} {{ calculatedAge.months }}{{ $t('auth.months') }}</span>
+                <span class="age-months">({{ calculatedAge.totalMonths }}{{ $t('auth.months') }})</span>
               </div>
             </div>
           </div>
@@ -93,26 +93,26 @@
           <div v-if="authStore.error" class="error-message">
             {{ authStore.error }}
             <div v-if="authStore.error.includes('데이터베이스 권한')" class="error-details">
-              <p><strong>해결 방법:</strong></p>
+              <p><strong>{{ $t('auth.solutionTitle') }}</strong></p>
               <ol>
-                <li>Supabase 대시보드에서 RLS 정책을 확인해주세요</li>
-                <li>아래 "연결 테스트" 버튼을 클릭해보세요</li>
-                <li>문제가 지속되면 관리자에게 문의하세요</li>
+                <li>{{ $t('auth.checkRLSPolicy') }}</li>
+                <li>{{ $t('auth.clickConnectionTest') }}</li>
+                <li>{{ $t('auth.contactAdmin') }}</li>
               </ol>
             </div>
             <div v-if="authStore.error.includes('rate limit') || authStore.error.includes('너무 많습니다')" class="error-details">
-              <p><strong>이메일 제한 오류 해결:</strong></p>
+              <p><strong>{{ $t('auth.emailLimitError') }}</strong></p>
               <ol>
                 <li>Supabase 대시보드 → Authentication → Settings</li>
-                <li>"Enable email confirmations" 옵션을 <strong>비활성화</strong></li>
-                <li>5-10분 후 다시 시도해주세요</li>
+                <li>{{ $t('auth.disableEmailConfirm') }}</li>
+                <li>{{ $t('auth.waitAndRetry') }}</li>
               </ol>
             </div>
             <div v-if="authStore.error.includes('계정이 생성되었습니다')" class="success-details">
-              <p><strong>✅ 회원가입 성공!</strong></p>
-              <p>로그인 모드로 전환하여 다시 로그인해주세요.</p>
+              <p><strong>{{ $t('auth.registerSuccess') }}</strong></p>
+              <p>{{ $t('auth.switchToLogin') }}</p>
               <button @click="switchToLogin" class="btn btn-sm btn-primary" type="button">
-                로그인 모드로 전환
+                {{ $t('auth.switchToLoginBtn') }}
               </button>
             </div>
           </div>
@@ -122,7 +122,7 @@
             class="btn btn-primary w-full btn-lg" 
             :disabled="authStore.isLoading"
           >
-            {{ authStore.isLoading ? '처리 중...' : (isRegister ? '회원가입' : '로그인') }}
+            {{ authStore.isLoading ? $t('auth.processing') : (isRegister ? $t('auth.registerButton') : $t('auth.loginButton')) }}
           </button>
         </form>
 
@@ -132,69 +132,69 @@
             class="toggle-button"
             type="button"
           >
-            {{ isRegister ? '이미 계정이 있으신가요? 로그인' : '계정이 없으신가요? 회원가입' }}
+            {{ isRegister ? $t('auth.alreadyHaveAccount') : $t('auth.noAccount') }}
           </button>
           
           <div class="demo-accounts">
-            <h4>테스트 계정</h4>
+            <h4>{{ $t('auth.testAccounts') }}</h4>
             <div class="demo-buttons">
               <button 
                 @click="fillDemoAccount('parent')" 
                 class="demo-btn"
                 type="button"
               >
-                엄마 계정
+                {{ $t('auth.parentAccount') }}
               </button>
               <button 
                 @click="fillDemoAccount('teacher')" 
                 class="demo-btn"
                 type="button"
               >
-                선생님 계정
+                {{ $t('auth.teacherAccount') }}
               </button>
             </div>
           </div>
           
           <!-- Enhanced Debug Information -->
           <div v-if="showDebugInfo" class="debug-info">
-            <h4>🔍 디버그 정보</h4>
+            <h4>🔍 {{ $t('auth.debugInfo') }}</h4>
             <div class="debug-content">
               <div class="debug-section">
-                <h5>환경 설정</h5>
-                <p><strong>Supabase URL:</strong> {{ debugInfo.supabaseUrl ? '✅ 설정됨' : '❌ 없음' }}</p>
-                <p><strong>Supabase Key:</strong> {{ debugInfo.supabaseKey ? '✅ 설정됨' : '❌ 없음' }}</p>
+                <h5>{{ $t('auth.environment') }}</h5>
+                <p><strong>{{ $t('auth.supabaseUrl') }}:</strong> {{ debugInfo.supabaseUrl ? $t('auth.configured') : $t('auth.notConfigured') }}</p>
+                <p><strong>{{ $t('auth.supabaseKey') }}:</strong> {{ debugInfo.supabaseKey ? $t('auth.configured') : $t('auth.notConfigured') }}</p>
               </div>
               
               <div class="debug-section">
-                <h5>인증 상태</h5>
-                <p><strong>현재 사용자:</strong> {{ debugInfo.currentUser || '없음' }}</p>
-                <p><strong>인증 상태:</strong> {{ authStore.isAuthenticated ? '✅ 인증됨' : '❌ 미인증' }}</p>
+                <h5>{{ $t('auth.authStatus') }}</h5>
+                <p><strong>{{ $t('auth.currentUser') }}:</strong> {{ debugInfo.currentUser || $t('auth.noUser') }}</p>
+                <p><strong>{{ $t('auth.authStatus') }}:</strong> {{ authStore.isAuthenticated ? $t('auth.authenticated') : $t('auth.notAuthenticated') }}</p>
               </div>
               
               <div class="debug-section">
-                <h5>오류 정보</h5>
-                <p><strong>마지막 오류:</strong> {{ authStore.error || '없음' }}</p>
+                <h5>{{ $t('auth.errorInfo') }}</h5>
+                <p><strong>{{ $t('auth.lastError') }}:</strong> {{ authStore.error || $t('auth.noUser') }}</p>
               </div>
               
               <div v-if="connectionTestResult" class="debug-section">
-                <h5>연결 테스트 결과</h5>
-                <p><strong>전체 상태:</strong> {{ connectionTestResult.success ? '✅ 성공' : '❌ 실패' }}</p>
-                <p><strong>기본 연결:</strong> {{ connectionTestResult.tests?.basic ? '✅ 성공' : '❌ 실패' }}</p>
-                <p><strong>공개 테이블:</strong> {{ connectionTestResult.tests?.public ? '✅ 접근 가능' : '❌ 접근 불가' }}</p>
-                <p><strong>사용자 테이블:</strong> {{ 
-                  connectionTestResult.tests?.user === true ? '✅ 접근 가능' : 
-                  connectionTestResult.tests?.user === false ? '❌ 접근 불가' : 
-                  '⚠️ 미인증' 
+                <h5>{{ $t('auth.connectionTestResult') }}</h5>
+                <p><strong>{{ $t('auth.overallStatus') }}:</strong> {{ connectionTestResult.success ? '✅ 성공' : '❌ 실패' }}</p>
+                <p><strong>{{ $t('auth.basicConnection') }}:</strong> {{ connectionTestResult.tests?.basic ? '✅ 성공' : '❌ 실패' }}</p>
+                <p><strong>{{ $t('auth.publicTable') }}:</strong> {{ connectionTestResult.tests?.public ? '✅ ' + $t('auth.accessible') : '❌ ' + $t('auth.notAccessible') }}</p>
+                <p><strong>{{ $t('auth.userTable') }}:</strong> {{ 
+                  connectionTestResult.tests?.user === true ? '✅ ' + $t('auth.accessible') : 
+                  connectionTestResult.tests?.user === false ? '❌ ' + $t('auth.notAccessible') : 
+                  '⚠️ ' + $t('auth.unauthenticated') 
                 }}</p>
               </div>
             </div>
             
             <div class="debug-actions">
               <button @click="testConnection" class="debug-btn" type="button" :disabled="isTestingConnection">
-                {{ isTestingConnection ? '테스트 중...' : '🔍 연결 테스트' }}
+                {{ isTestingConnection ? $t('auth.testingConnection') : '🔍 ' + $t('auth.connectionTest') }}
               </button>
               <button @click="clearDebugData" class="debug-btn secondary" type="button">
-                🗑️ 디버그 초기화
+                {{ $t('auth.clearDebugData') }}
               </button>
             </div>
           </div>
@@ -204,7 +204,7 @@
             class="debug-toggle"
             type="button"
           >
-            {{ showDebugInfo ? '디버그 숨기기' : '🔧 디버그 정보 보기' }}
+            {{ showDebugInfo ? $t('auth.hideDebug') : $t('auth.showDebug') }}
           </button>
         </div>
       </div>
@@ -215,12 +215,14 @@
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '@/stores/auth';
 import { useSupabase } from '@/composables/useSupabase';
 
 const router = useRouter();
 const authStore = useAuthStore();
 const { testDatabaseConnection } = useSupabase();
+const { t } = useI18n();
 
 const isRegister = ref(false);
 const showDebugInfo = ref(false);
@@ -334,7 +336,7 @@ const fillDemoAccount = (type: 'parent' | 'teacher') => {
     formData.password = '123456';
     if (isRegister.value) {
       formData.userType = 'parent';
-      formData.childName = '데모아이';
+      formData.childName = t('auth.demoChild');
       formData.childBirthDate = '2021-07-19';
     }
   } else {
@@ -342,7 +344,7 @@ const fillDemoAccount = (type: 'parent' | 'teacher') => {
     formData.password = '123456';
     if (isRegister.value) {
       formData.userType = 'teacher';
-      formData.childName = '데모선생님아이';
+      formData.childName = t('auth.demoTeacher');
       formData.childBirthDate = '2020-07-19';
     }
   }
@@ -358,17 +360,17 @@ const testConnection = async () => {
     
     if (result.success) {
       console.log('✅ Connection test successful:', result);
-      alert('✅ 데이터베이스 연결 성공!\n\n' +
-            `기본 연결: ${result.tests?.basic ? '성공' : '실패'}\n` +
-            `공개 테이블: ${result.tests?.public ? '접근 가능' : '접근 불가'}\n` +
-            `사용자 테이블: ${result.tests?.user === true ? '접근 가능' : result.tests?.user === false ? '접근 불가' : '미인증'}`);
+      alert(t('auth.connectionSuccess') + '\n\n' +
+            `${t('auth.basicConnection')}: ${result.tests?.basic ? t('common.success') : t('common.error')}\n` +
+            `${t('auth.publicTable')}: ${result.tests?.public ? t('auth.accessible') : t('auth.notAccessible')}\n` +
+            `${t('auth.userTable')}: ${result.tests?.user === true ? t('auth.accessible') : result.tests?.user === false ? t('auth.notAccessible') : t('auth.unauthenticated')}`);
     } else {
       console.error('❌ Connection test failed:', result);
-      alert(`❌ 연결 실패!\n\n오류: ${result.error || '알 수 없는 오류'}`);
+      alert(`${t('auth.connectionFailed')}\n\n${t('auth.errorInfo')}: ${result.error || t('auth.unknownError')}`);
     }
   } catch (err) {
     console.error('💥 Connection test error:', err);
-    alert(`💥 연결 테스트 오류: ${err}`);
+    alert(`💥 ${t('auth.connectionTest')} ${t('common.error')}: ${err}`);
   } finally {
     isTestingConnection.value = false;
   }

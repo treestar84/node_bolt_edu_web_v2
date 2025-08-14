@@ -11,13 +11,13 @@
     <span v-if="isLoading" class="loading-spinner" aria-hidden="true">⏳</span>
     <span v-else class="heart-icon" aria-hidden="true">{{ isLiked ? '❤️' : '🤍' }}</span>
     <span v-if="showText" class="like-text">
-      {{ isLiked ? '좋아요됨' : '좋아요' }}
+      {{ isLiked ? $t('likes.likedButton') : $t('likes.likeButton') }}
     </span>
     <span 
       v-if="showCount && likeCount > 0" 
       class="like-count"
       :id="`like-count-${contentId}`"
-      :aria-label="`좋아요 ${likeCount}개`"
+      :aria-label="$t('likes.likeCount', { count: likeCount })"
     >
       {{ likeCount }}
     </span>
@@ -30,6 +30,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useLikes } from '@/composables/useLikes';
 import type { ContentType } from '@/types';
 
@@ -53,6 +54,7 @@ const props = withDefaults(defineProps<Props>(), {
 const emit = defineEmits<Emits>();
 
 const { likes, isLikedByUser, toggleLike, getContentLikeCount, loadLikes } = useLikes();
+const { t } = useI18n();
 const isLoading = ref(false);
 const likeCount = ref(0);
 const feedbackMessage = ref('');
@@ -67,12 +69,12 @@ const isLiked = computed(() => {
 
 const getAriaLabel = () => {
   const contentTypeText = getContentTypeName(props.contentType);
-  const baseText = `${contentTypeText} 좋아요`;
-  const statusText = isLiked.value ? '취소' : '추가';
-  const countText = showCount.value && likeCount.value > 0 ? `, 현재 ${likeCount.value}개` : '';
+  const baseText = `${contentTypeText} ${t('likes.likeButton')}`;
+  const statusText = isLiked.value ? t('likes.likeActions.cancel') : t('likes.likeActions.add');
+  const countText = showCount.value && likeCount.value > 0 ? t('likes.likeActions.currentCount', { count: likeCount.value }) : '';
   
   if (isLoading.value) {
-    return `${baseText} 처리 중`;
+    return `${baseText} ${t('likes.likeActions.processing')}`;
   }
   
   return `${baseText} ${statusText}${countText}`;
@@ -80,11 +82,11 @@ const getAriaLabel = () => {
 
 const getContentTypeName = (type: ContentType): string => {
   const typeNames: Record<ContentType, string> = {
-    word: '단어',
-    book: '그림책',
-    quiz: '퀴즈',
-    puzzle: '퍼즐',
-    coloring: '컬러링'
+    word: t('likes.contentTypes.word'),
+    book: t('likes.contentTypes.book'),
+    quiz: t('likes.contentTypes.quiz'),
+    puzzle: t('likes.contentTypes.puzzle'),
+    coloring: t('likes.contentTypes.coloring')
   };
   return typeNames[type] || type;
 };
@@ -110,10 +112,10 @@ const handleToggle = async () => {
       const contentTypeName = getContentTypeName(props.contentType);
       if (result.isLiked) {
         console.log('✅ 좋아요를 눌렀습니다!');
-        feedbackMessage.value = `${contentTypeName}에 좋아요를 추가했습니다`;
+        feedbackMessage.value = t('likes.likeActions.added', { type: contentTypeName });
       } else {
         console.log('ℹ️ 좋아요를 취소했습니다.');
-        feedbackMessage.value = `${contentTypeName} 좋아요를 취소했습니다`;
+        feedbackMessage.value = t('likes.likeActions.removed', { type: contentTypeName });
       }
       
       // Clear feedback message after a delay

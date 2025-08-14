@@ -1,7 +1,7 @@
 <template>
   <article 
     class="word-card"
-    :aria-label="`단어 카드: ${currentName}`"
+    :aria-label="`${t('words.wordCard')}: ${currentName}`"
     role="button"
     tabindex="0"
     @click="playWordAudio"
@@ -11,7 +11,7 @@
     <div class="card-image">
       <img 
         :src="getImageUrl(word.imageUrl)" 
-        :alt="`${currentName} 이미지`"
+        :alt="`${currentName} ${t('words.image')}`"
         loading="lazy"
       />
       <div class="play-overlay" :class="{ playing: isPlaying }" aria-hidden="true">
@@ -23,7 +23,7 @@
         <h3 class="word-name" :id="`word-name-${word.id}`">{{ currentName }}</h3>
         <span 
           class="word-category"
-          :aria-label="`카테고리: ${$t('categories.'+word.category)}`"
+          :aria-label="`${t('words.category')}: ${$t('categories.'+word.category)}`"
         >
           {{$t('categories.'+word.category)}}
         </span>
@@ -46,6 +46,7 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import type { WordItem } from '@/types';
 import { useAppStore } from '@/stores/app';
 import { useAudio } from '@/composables/useAudio';
@@ -64,15 +65,55 @@ const emit = defineEmits<Emits>();
 
 const store = useAppStore();
 const { isPlaying, playAudio } = useAudio();
+const { t } = useI18n();
 const audioFeedback = ref('');
 
 const currentName = computed(() => {
-  return store.currentLanguage === 'ko' ? props.word.name : props.word.nameEn;
+  // 현재 언어에 맞는 단어명 반환
+  if (store.currentLanguage === 'ko') {
+    return props.word.name;
+  }
+  if (store.currentLanguage === 'en') {
+    return props.word.nameEn;
+  }
+  
+  // 다른 언어인 경우 translations에서 찾기
+  if (props.word.translations) {
+    try {
+      let translations = props.word.translations;
+      
+      // JSON 파싱 (이중 인코딩 처리)
+      if (typeof translations === 'string') {
+        translations = JSON.parse(translations);
+        if (typeof translations === 'string') {
+          translations = JSON.parse(translations);
+        }
+      }
+      
+      if (translations[store.currentLanguage]) {
+        const translation = translations[store.currentLanguage];
+        return translation.name || translation;
+      }
+    } catch (error) {
+      console.warn(t('words.translationParseFailed') + ':', error);
+    }
+  }
+  
+  // 폴백: 영어 -> 한국어
+  return props.word.nameEn || props.word.name;
 });
 
 const currentAudioUrl = computed(() => {
-  const audioUrl = store.currentLanguage === 'ko' ? props.word.audioKo : props.word.audioEn;
-  return getAudioUrl(audioUrl);
+  // 한국어/영어인 경우 기존 오디오 파일 사용
+  if (store.currentLanguage === 'ko' && props.word.audioKo) {
+    return getAudioUrl(props.word.audioKo);
+  }
+  if (store.currentLanguage === 'en' && props.word.audioEn) {
+    return getAudioUrl(props.word.audioEn);
+  }
+  
+  // 다른 언어이거나 오디오 파일이 없는 경우 null 반환 (브라우저 TTS 사용)
+  return null;
 });
 
 const getImageUrl = (url: string): string => {
@@ -92,9 +133,16 @@ const getAudioUrl = (url: string): string => {
 const playWordAudio = async () => {
   try {
     // Provide screen reader feedback
-    audioFeedback.value = `${currentName.value} 음성을 재생합니다`;
+    audioFeedback.value = `${currentName.value} ${t('words.audioPlaying')}`;
     
-    await playAudio(currentAudioUrl.value, currentName.value);
+    // 오디오 파일이 있는 경우 파일 재생, 없는 경우 TTS 사용
+    if (currentAudioUrl.value) {
+      await playAudio(currentAudioUrl.value, currentName.value);
+    } else {
+      // 브라우저 TTS 사용
+      await playTTS(currentName.value, store.currentLanguage);
+    }
+    
     emit('audio-played');
     
     // Clear feedback after a delay
@@ -103,7 +151,7 @@ const playWordAudio = async () => {
     }, 2000);
   } catch (error) {
     console.warn('Audio playback failed:', error);
-    audioFeedback.value = `${currentName.value} 음성 재생에 실패했습니다`;
+    audioFeedback.value = `${currentName.value} ${t('words.audioPlayFailed')}`;
     
     setTimeout(() => {
       audioFeedback.value = '';
@@ -111,6 +159,55 @@ const playWordAudio = async () => {
     
     emit('audio-played'); // Still emit for auto-advance
   }
+};
+
+// 브라우저 TTS 함수
+const playTTS = async (text: string, language: string): Promise<void> => {
+  return new Promise((resolve, reject) => {
+    if (!('speechSynthesis' in window)) {
+      reject(new Error('TTS not supported'));
+      return;
+    }
+    
+    // 기존 음성 정지
+    speechSynthesis.cancel();
+    
+    const utterance = new SpeechSynthesisUtterance(text);
+    
+    // 언어별 TTS 설정
+    const languageMap: Record<string, string> = {
+      ko: 'ko-KR',
+      en: 'en-US', 
+      zh: 'zh-CN',
+      ja: 'ja-JP',
+      es: 'es-ES',
+      fr: 'fr-FR',
+      de: 'de-DE',
+      ar: 'ar-SA',
+      hi: 'hi-IN',
+      pt: 'pt-BR'
+    };
+    
+    utterance.lang = languageMap[language] || 'en-US';
+    utterance.rate = 0.8;
+    utterance.pitch = 1.0;
+    
+    // 사용 가능한 음성 중에서 해당 언어에 맞는 음성 선택
+    const voices = speechSynthesis.getVoices();
+    const preferredVoice = voices.find(voice => 
+      voice.lang.startsWith(language) || 
+      voice.lang.startsWith(utterance.lang)
+    );
+    
+    if (preferredVoice) {
+      utterance.voice = preferredVoice;
+    }
+    
+    utterance.onend = () => resolve();
+    utterance.onerror = (event) => reject(new Error(`TTS error: ${event.error}`));
+    
+    speechSynthesis.speak(utterance);
+  });
 };
 
 const onLiked = (isLiked: boolean) => {

@@ -3,19 +3,19 @@
     <div class="login-container">
       <div class="login-card">
         <div class="login-header">
-          <h1>관리자 로그인</h1>
-          <p>콘텐츠 관리를 위해 로그인해주세요</p>
+          <h1>{{ $t('auth.adminLogin') }}</h1>
+          <p>{{ $t('auth.contentManagementLogin') }}</p>
         </div>
 
         <form @submit.prevent="handleLogin" class="login-form">
           <div class="form-group">
-            <label for="password" class="form-label">비밀번호</label>
+            <label for="password" class="form-label">{{ $t('auth.password') }}</label>
             <input
               id="password"
               type="password"
               v-model="password"
               class="form-input"
-              placeholder="관리자 비밀번호를 입력하세요"
+              :placeholder="$t('auth.adminPasswordPlaceholder')"
               required
             />
           </div>
@@ -25,16 +25,16 @@
           </div>
 
           <button type="submit" class="btn btn-primary w-full btn-lg" :disabled="isLoading">
-            {{ isLoading ? '로그인 중...' : '로그인' }}
+            {{ isLoading ? $t('auth.loggingIn') : $t('auth.login') }}
           </button>
         </form>
 
         <div class="login-info">
           <p class="info-text">
-            <strong>비밀번호:</strong> angelyrlove@naver.com 문의해주세요
+            <strong>{{ $t('auth.password') }}:</strong> {{ $t('auth.contactEmail') }}
           </p>
           <router-link to="/" class="back-link">
-            ← 메인 페이지로 돌아가기
+            {{ $t('auth.backToMain') }}
           </router-link>
         </div>
       </div>
@@ -45,10 +45,12 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import { useAppStore } from '@/stores/app';
 
 const router = useRouter();
 const store = useAppStore();
+const { t } = useI18n();
 
 const password = ref('');
 const errorMessage = ref('');
@@ -64,12 +66,12 @@ const handleLogin = async () => {
     if (success) {
       router.push('/admin/dashboard');
     } else {
-      errorMessage.value = '비밀번호가 올바르지 않습니다.';
+      errorMessage.value = t('auth.passwordIncorrect');
       password.value = '';
     }
   } catch (error) {
     console.error('Login error:', error);
-    errorMessage.value = '로그인 중 오류가 발생했습니다. 다시 시도해주세요.';
+    errorMessage.value = t('auth.loginError');
     password.value = '';
   } finally {
     isLoading.value = false;

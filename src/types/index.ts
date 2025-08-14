@@ -15,6 +15,8 @@ export interface WordItem {
   imageAspectRatio?: number;
   createdAt?: string;
   updatedAt?: string;
+  translations?: string; // JSON 문자열로 저장된 다국어 번역
+  autoTranslated?: boolean; // 자동 번역 여부
 }
 
 export interface BookPage {

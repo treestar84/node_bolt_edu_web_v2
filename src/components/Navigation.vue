@@ -45,7 +45,7 @@
 
           <div class="nav-controls desktop-controls">
             <div class="age-indicator" v-if="authStore.userProfile" role="status" :aria-label="$t('ui.childAge')">
-              <span class="age-badge">{{ authStore.childAge }}세</span>
+              <span class="age-badge">{{ $t('settings.age' + authStore.childAge) }}</span>
             </div>
             
             <div class="theme-toggle">
@@ -61,18 +61,45 @@
             </div>
             
             <div class="language-selector">
-              <button 
-                @click="toggleLanguage"
-                class="language-toggle-btn"
-                :aria-label="$t('ui.language.select')"
-                :title="$t('ui.language.select')"
-                type="button"
-              >
-                <span class="current-language">
-                  {{ store.currentLanguage === 'ko' ? '한글' : 'ENG' }}
-                </span>
-                <span class="language-icon" aria-hidden="true">🌐</span>
-              </button>
+              <div class="language-dropdown" :class="{ open: languageDropdownOpen }">
+                <button 
+                  ref="languageButtonRef"
+                  @click="toggleLanguageDropdown"
+                  class="language-toggle-btn"
+                  :aria-label="$t('ui.language.select')"
+                  :title="`${$t('ui.language.select')} (${readyLanguages.length} ${$t('multiLang.languages')})`"
+                  :aria-expanded="languageDropdownOpen"
+                  type="button"
+                >
+                  <span class="language-flag">{{ currentLanguageInfo.flag }}</span>
+                  <span class="current-language">{{ currentLanguageInfo.name }}</span>
+                  <span class="dropdown-icon" :class="{ rotated: languageDropdownOpen }">▼</span>
+                  <span v-if="readyLanguages.length > 2" class="language-count">{{ readyLanguages.length }}</span>
+                </button>
+                
+                <!-- Teleport를 사용해서 드롭다운을 body 직하에 렌더링 -->
+                <Teleport to="body">
+                  <div 
+                    v-if="languageDropdownOpen" 
+                    class="language-dropdown-menu"
+                    :style="dropdownPosition"
+                  >
+                    <button
+                      v-for="lang in readyLanguages"
+                      :key="lang"
+                      @click="selectLanguage(lang)"
+                      class="language-option"
+                      :class="{ active: store.currentLanguage === lang }"
+                      :aria-pressed="store.currentLanguage === lang"
+                    >
+                      <span class="option-flag">{{ getLanguageFlag(lang) }}</span>
+                      <span class="option-name">{{ getLanguageDisplayName(lang) }}</span>
+                      <span class="option-completeness">{{ getLanguageCompleteness(lang) }}%</span>
+                      <span v-if="store.currentLanguage === lang" class="current-indicator">✓</span>
+                    </button>
+                  </div>
+                </Teleport>
+              </div>
             </div>
             
             <nav class="user-menu" v-if="authStore.isAuthenticated" :aria-label="$t('navigation.userMenu')">
@@ -133,7 +160,7 @@
       <div class="mobile-menu-content">
         <div class="mobile-menu-header">
           <div class="age-indicator" v-if="authStore.userProfile" role="status" :aria-label="$t('ui.childAge')">
-            <span class="age-badge">{{ authStore.childAge }}세</span>
+            <span class="age-badge">{{ authStore.childAge }}{{ $t('settings.age') }}</span>
           </div>
           
           <div class="mobile-controls">
@@ -150,29 +177,25 @@
               </button>
             </div>
             
-            <fieldset class="language-toggle" :aria-label="$t('ui.language.select')">
-              <legend class="sr-only">{{ $t('ui.language.select') }}</legend>
-              <button 
-                @click="() => setLanguage('ko')"
-                class="btn btn-secondary btn-sm"
-                :class="{ active: store.currentLanguage === 'ko' }"
-                :aria-pressed="store.currentLanguage === 'ko'"
-                :aria-label="$t('ui.language.switchToKorean')"
-                type="button"
-              >
-                한글
-              </button>
-              <button 
-                @click="() => setLanguage('en')"
-                class="btn btn-secondary btn-sm"
-                :class="{ active: store.currentLanguage === 'en' }"
-                :aria-pressed="store.currentLanguage === 'en'"
-                :aria-label="$t('ui.language.switchToEnglish')"
-                type="button"
-              >
-                ENG
-              </button>
-            </fieldset>
+            <div class="mobile-language-selector">
+              <h4 class="mobile-section-title">🌍 {{ $t('ui.language.select') }} ({{ readyLanguages.length }}{{ $t('multiLang.languages') }})</h4>
+              <div class="mobile-language-grid">
+                <button
+                  v-for="lang in readyLanguages"
+                  :key="lang"
+                  @click="() => setLanguage(lang)"
+                  class="mobile-language-btn"
+                  :class="{ active: store.currentLanguage === lang }"
+                  :aria-pressed="store.currentLanguage === lang"
+                  type="button"
+                >
+                  <span class="mobile-lang-flag">{{ getLanguageFlag(lang) }}</span>
+                  <span class="mobile-lang-name">{{ getLanguageDisplayName(lang) }}</span>
+                  <span class="mobile-lang-completeness">{{ getLanguageCompleteness(lang) }}%</span>
+                  <span v-if="store.currentLanguage === lang" class="mobile-current-indicator">✓</span>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
         
@@ -205,7 +228,7 @@
               to="/admin" 
               class="btn btn-sm btn-secondary" 
               @click="closeMobileMenu"
-              aria-label="관리자 페이지로 이동"
+              :aria-label="$t('navigation.goToAdmin')"
             >
               {{$t('navigation.admin')}}
             </router-link>
@@ -224,7 +247,7 @@
               to="/admin" 
               class="btn btn-sm btn-secondary" 
               @click="closeMobileMenu"
-              aria-label="관리자 페이지로 이동"
+              :aria-label="$t('navigation.goToAdmin')"
             >
               {{$t('navigation.admin')}}
             </router-link>
@@ -236,18 +259,46 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, nextTick, onMounted, onUnmounted } from 'vue';
+import { computed, ref, nextTick, onMounted, onUnmounted, Teleport } from 'vue';
 import { useAppStore } from '@/stores/app';
 import { useAuthStore } from '@/stores/auth';
 import { useTheme } from '@/composables/useTheme';
-import { getNextLanguage } from '@/utils/i18n';
+import { useAvailableLanguages } from '@/composables/useAvailableLanguages';
+import type { Language } from '@/types';
 
 const store = useAppStore();
 const authStore = useAuthStore();
 const { isDark, toggleTheme } = useTheme();
+const { availableLanguages, readyLanguages, getLanguageDisplayName, getLanguageFlag, getNextLanguage, getLanguageCompleteness } = useAvailableLanguages();
+
+// 디버깅: 언어 상태 모니터링
+onMounted(() => {
+  console.log('🔍 네비게이션 마운트됨 - 언어 상태 확인:');
+  console.log('사용 가능한 언어:', availableLanguages.value);
+  console.log('준비된 언어:', readyLanguages.value);
+  console.log('현재 단어 수:', store.currentWords.length);
+});
 
 const mobileMenuOpen = ref(false);
+const languageDropdownOpen = ref(false);
 const lastFocusedElement = ref<HTMLElement | null>(null);
+const languageButtonRef = ref<HTMLElement | null>(null);
+
+// 드롭다운 위치 계산
+const dropdownPosition = computed(() => {
+  if (!languageButtonRef.value || !languageDropdownOpen.value) {
+    return { display: 'none' };
+  }
+  
+  const rect = languageButtonRef.value.getBoundingClientRect();
+  return {
+    position: 'fixed',
+    top: `${rect.bottom + 8}px`,
+    left: `${rect.right - 220}px`, // 드롭다운 너비에 맞춰 오른쪽 정렬
+    zIndex: 9999,
+    minWidth: '220px'
+  };
+});
 
 const menuItems = computed(() => [
   { key: 'words', path: '/words' },
@@ -259,15 +310,36 @@ const menuItems = computed(() => [
   { key: 'achievements', path: '/achievements' }
 ]);
 
-const setLanguage = async (lang: 'ko' | 'en') => {
+const setLanguage = async (lang: Language) => {
   await store.setLanguage(lang);
 };
 
-// 언어 토글 함수 (한글 ↔ 영어)
+// 언어 드롭다운 토글
+const toggleLanguageDropdown = () => {
+  languageDropdownOpen.value = !languageDropdownOpen.value;
+};
+
+// 언어 선택
+const selectLanguage = async (lang: Language) => {
+  await setLanguage(lang);
+  languageDropdownOpen.value = false;
+};
+
+// 언어 토글 함수 (동적 다국어 지원) - 호환성을 위해 유지
 const toggleLanguage = async () => {
   const nextLang = getNextLanguage(store.currentLanguage);
-  await setLanguage(nextLang as 'ko' | 'en');
+  await setLanguage(nextLang);
 };
+
+// 현재 언어의 표시 정보
+const currentLanguageInfo = computed(() => {
+  const lang = store.currentLanguage;
+  return {
+    flag: getLanguageFlag(lang),
+    name: getLanguageDisplayName(lang),
+    completeness: getLanguageCompleteness(lang)
+  };
+});
 
 const toggleMobileMenu = () => {
   if (!mobileMenuOpen.value) {
@@ -345,12 +417,39 @@ const handleKeydown = (event: KeyboardEvent) => {
   }
 };
 
+// 드롭다운 외부 클릭 시 닫기
+const handleClickOutside = (event: Event) => {
+  if (!languageDropdownOpen.value) return;
+  
+  const target = event.target as Node;
+  const dropdown = document.querySelector('.language-dropdown');
+  const dropdownMenu = document.querySelector('.language-dropdown-menu');
+  
+  // 언어 버튼이나 드롭다운 메뉴 내부 클릭이 아닌 경우 닫기
+  if (dropdown && !dropdown.contains(target) && 
+      dropdownMenu && !dropdownMenu.contains(target)) {
+    languageDropdownOpen.value = false;
+  }
+};
+
+// 창 크기 변경 시 드롭다운 위치 업데이트
+const handleResize = () => {
+  if (languageDropdownOpen.value) {
+    // 위치 재계산을 위해 computed를 다시 트리거
+    nextTick();
+  }
+};
+
 onMounted(() => {
   document.addEventListener('keydown', handleKeydown);
+  document.addEventListener('click', handleClickOutside);
+  window.addEventListener('resize', handleResize);
 });
 
 onUnmounted(() => {
   document.removeEventListener('keydown', handleKeydown);
+  document.removeEventListener('click', handleClickOutside);
+  window.removeEventListener('resize', handleResize);
   // Cleanup: restore body scroll if component is unmounted while menu is open
   if (mobileMenuOpen.value) {
     document.body.style.overflow = '';
@@ -382,12 +481,14 @@ onUnmounted(() => {
   backdrop-filter: blur(16px);
   font-family: 'Inter', 'Pretendard', Arial, sans-serif !important;
   font-weight: 500;
+  overflow: visible; /* 드롭다운 메뉴가 영역을 벗어날 수 있도록 허용 */
 }
 
 .container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 24px;
+  overflow: visible; /* 컨테이너도 드롭다운을 허용 */
 }
 
 .nav-content {
@@ -395,6 +496,7 @@ onUnmounted(() => {
   align-items: center;
   justify-content: space-between;
   padding: 20px 0;
+  overflow: visible; /* nav-content도 드롭다운을 허용 */
 }
 
 .nav-left {
@@ -407,6 +509,7 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   gap: 16px;
+  overflow: visible; /* nav-right도 드롭다운을 허용 */
 }
 
 .nav-brand {
@@ -531,6 +634,7 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   gap: 16px;
+  overflow: visible; /* desktop-controls도 드롭다운을 허용 */
 }
 
 .age-indicator {
@@ -552,6 +656,13 @@ onUnmounted(() => {
 .language-selector {
   display: flex;
   align-items: center;
+  position: relative;
+  z-index: 1000; /* 언어 선택기 자체의 z-index */
+}
+
+.language-dropdown {
+  position: relative;
+  z-index: 1001; /* 드롭다운 컨테이너의 z-index */
 }
 
 .language-toggle-btn {
@@ -569,6 +680,7 @@ onUnmounted(() => {
   transition: all 0.2s ease;
   min-width: 70px;
   justify-content: center;
+  position: relative;
 }
 
 .language-toggle-btn:hover {
@@ -595,6 +707,183 @@ onUnmounted(() => {
 .language-icon {
   font-size: 0.875rem;
   opacity: 0.7;
+}
+
+.language-flag {
+  font-size: 1.2rem;
+}
+
+.language-count {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: var(--color-primary);
+  color: white;
+  font-size: 0.6rem;
+  font-weight: 600;
+  padding: 1px 4px;
+  border-radius: 50%;
+  min-width: 16px;
+  text-align: center;
+  line-height: 1.2;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.dropdown-icon {
+  font-size: 0.75rem;
+  transition: transform 0.2s ease;
+  color: var(--color-text-secondary);
+}
+
+.dropdown-icon.rotated {
+  transform: rotate(180deg);
+}
+
+/* 언어 드롭다운 메뉴 (Teleport로 body에 렌더링됨) */
+.language-dropdown-menu {
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-xl);
+  max-height: 400px;
+  overflow-y: auto;
+  padding: 8px 0;
+  /* 스크롤바 스타일링 */
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) transparent;
+}
+
+.language-dropdown-menu::-webkit-scrollbar {
+  width: 6px;
+}
+
+.language-dropdown-menu::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.language-dropdown-menu::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 3px;
+}
+
+.language-dropdown-menu::-webkit-scrollbar-thumb:hover {
+  background: var(--color-border-dark);
+}
+
+.language-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 16px;
+  background: none;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  font-size: 0.875rem;
+}
+
+.language-option:hover {
+  background: var(--color-bg-secondary);
+}
+
+.language-option.active {
+  background: var(--color-primary-light);
+  color: var(--color-primary-dark);
+}
+
+.option-flag {
+  font-size: 1.1rem;
+  width: 20px;
+  text-align: center;
+}
+
+.option-name {
+  flex: 1;
+  font-weight: 500;
+}
+
+.option-completeness {
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+  padding: 2px 6px;
+  background: var(--color-bg-tertiary);
+  border-radius: 4px;
+}
+
+.current-indicator {
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+/* 모바일 언어 선택 */
+.mobile-language-selector {
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: 12px;
+  margin-bottom: 12px;
+}
+
+.mobile-section-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin: 0 0 8px 0;
+}
+
+.mobile-language-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px;
+}
+
+.mobile-language-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.75rem;
+}
+
+.mobile-language-btn:hover {
+  background: var(--color-bg-hover);
+  border-color: var(--color-primary);
+}
+
+.mobile-language-btn.active {
+  background: var(--color-primary-light);
+  border-color: var(--color-primary);
+  color: var(--color-primary-dark);
+}
+
+.mobile-lang-flag {
+  font-size: 1rem;
+}
+
+.mobile-lang-name {
+  flex: 1;
+  text-align: left;
+  margin-left: 6px;
+  font-weight: 500;
+}
+
+.mobile-lang-completeness {
+  font-size: 0.6rem;
+  color: var(--color-text-secondary);
+  background: var(--color-bg-tertiary);
+  padding: 1px 4px;
+  border-radius: 3px;
+}
+
+.mobile-current-indicator {
+  color: var(--color-primary);
+  font-weight: 600;
+  margin-left: 4px;
 }
 
 .theme-toggle {

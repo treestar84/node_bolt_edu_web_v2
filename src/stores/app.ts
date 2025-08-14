@@ -240,20 +240,26 @@ export const useAppStore = defineStore('app', () => {
 
       console.log('👤 User type:', ownerType);
 
+      const insertData = {
+        name: word.name,
+        name_en: word.nameEn,
+        image_url: word.imageUrl,
+        audio_ko: word.audioKo,
+        audio_en: word.audioEn,
+        category: word.category,
+        min_age: word.minAge || 3,
+        max_age: word.maxAge || 6,
+        owner_type: ownerType,
+        owner_id: ownerId,
+        translations: (word as any).translations ? JSON.stringify((word as any).translations) : null,
+        auto_translated: (word as any).autoTranslated || false
+      };
+      
+      console.log('📝 Inserting word data:', insertData);
+
       const { data, error } = await supabase
         .from('words')
-        .insert({
-          name: word.name,
-          name_en: word.nameEn,
-          image_url: word.imageUrl,
-          audio_ko: word.audioKo,
-          audio_en: word.audioEn,
-          category: word.category,
-          min_age: word.minAge || 3,
-          max_age: word.maxAge || 6,
-          owner_type: ownerType,
-          owner_id: ownerId
-        })
+        .insert(insertData)
         .select()
         .single();
 
@@ -466,7 +472,9 @@ export const useAppStore = defineStore('app', () => {
     ownerType: dbWord.owner_type,
     ownerId: dbWord.owner_id,
     createdAt: dbWord.created_at,
-    updatedAt: dbWord.updated_at
+    updatedAt: dbWord.updated_at,
+    ...(dbWord.translations && { translations: dbWord.translations }),
+    ...(dbWord.auto_translated !== undefined && { autoTranslated: dbWord.auto_translated })
   });
 
   const transformBookFromDB = (dbBook: any): Book => ({
@@ -564,6 +572,7 @@ export const useAppStore = defineStore('app', () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'X-API-Key': import.meta.env.VITE_API_KEY || 'af383c42c29969ab9d1d0c881f9d06f8',
         },
         body: JSON.stringify({ password }),
       });

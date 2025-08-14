@@ -1,8 +1,9 @@
 import { createI18n } from 'vue-i18n';
 import type { Language } from '@/types';
+import { ALL_LANGUAGE_CODES } from '@/constants/languages';
 
-// 지원하는 언어 목록
-export const SUPPORTED_LANGUAGES: Language[] = ['ko', 'en'];
+// 지원하는 언어 목록 (constants/languages.ts에서 가져옴)
+export const SUPPORTED_LANGUAGES: Language[] = ALL_LANGUAGE_CODES;
 
 // 기본 언어
 export const DEFAULT_LANGUAGE: Language = 'ko';

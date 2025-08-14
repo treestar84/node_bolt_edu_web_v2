@@ -126,31 +126,31 @@
               <div class="stat-card quiz">
                 <div class="stat-content">
                   <div class="stat-value">{{ authStore.userProgress.quizScore }}</div>
-                  <div class="stat-label">퀴즈 점수</div>
-                  <div class="stat-sub">연속 {{ authStore.userProgress.quizStreak }}회</div>
+                  <div class="stat-label">{{$t('achievements.quizScore')}}</div>
+                  <div class="stat-sub">{{$t('achievements.quizStreak', {streak: authStore.userProgress.quizStreak})}}</div>
                 </div>
               </div>
 
               <div class="stat-card puzzle">
                 <div class="stat-content">
                   <div class="stat-value">{{ authStore.userProgress.puzzleCompletions }}</div>
-                  <div class="stat-label">퍼즐 완성</div>
+                  <div class="stat-label">{{$t('achievements.puzzleCompletions')}}</div>
                 </div>
               </div>
 
               <div class="stat-card words">
                 <div class="stat-content">
                   <div class="stat-value">{{ authStore.userProgress.wordsLearned }}</div>
-                  <div class="stat-label">학습한 단어</div>
-                  <div class="stat-sub">총 {{ contentStore.words.length }}개 중</div>
+                  <div class="stat-label">{{$t('achievements.wordsLearned')}}</div>
+                  <div class="stat-sub">{{$t('achievements.wordsTotal', {total: contentStore.words.length})}}</div>
                 </div>
               </div>
 
               <div class="stat-card books">
                 <div class="stat-content">
                   <div class="stat-value">{{ authStore.userProgress.booksRead }}</div>
-                  <div class="stat-label">읽은 책</div>
-                  <div class="stat-sub">총 {{ contentStore.books.length }}권 중</div>
+                  <div class="stat-label">{{$t('achievements.booksRead')}}</div>
+                  <div class="stat-sub">{{$t('achievements.booksTotal', {total: contentStore.books.length})}}</div>
                 </div>
               </div>
             </div>
@@ -158,26 +158,26 @@
 
           <!-- 전체 진행률 섹션 - 컴팩트하게 -->
           <section class="progress-section">
-            <h2 class="section-title">전체 진행률</h2>
+            <h2 class="section-title">{{$t('achievements.overallProgress')}}</h2>
             
             <div class="progress-cards">
               <div class="progress-card">
-                <h3 class="progress-title">뱃지 수집률</h3>
+                <h3 class="progress-title">{{$t('achievements.badgeCollectionRate')}}</h3>
                 <div class="circular-progress">
                   <div class="progress-circle" :style="{ '--progress': badgeProgress }">
                     <span class="progress-percentage">{{ Math.round(badgeProgress) }}%</span>
                   </div>
                 </div>
                 <p class="progress-description">
-                  {{ displayedBadges.length }}개 / {{ contentStore.badges.length }}개 뱃지 획득
+                  {{$t('achievements.badgeProgress', {earned: displayedBadges.length, total: contentStore.badges.length})}}
                 </p>
               </div>
 
               <div class="progress-card">
-                <h3 class="progress-title">카테고리별 달성도</h3>
+                <h3 class="progress-title">{{$t('achievements.categoryProgress')}}</h3>
                 <div class="category-progress">
                   <div class="category-item">
-                    <span class="category-label">퀴즈</span>
+                    <span class="category-label">{{$t('achievements.categories.quiz')}}</span>
                     <div class="category-bar">
                       <div 
                         class="category-fill quiz" 
@@ -187,7 +187,7 @@
                     <span class="category-value">{{ getCategoryBadgeCount('quiz') }}/5</span>
                   </div>
                   <div class="category-item">
-                    <span class="category-label">퍼즐</span>
+                    <span class="category-label">{{$t('achievements.categories.puzzle')}}</span>
                     <div class="category-bar">
                       <div 
                         class="category-fill puzzle" 
@@ -197,7 +197,7 @@
                     <span class="category-value">{{ getCategoryBadgeCount('puzzle') }}/5</span>
                   </div>
                   <div class="category-item">
-                    <span class="category-label">단어</span>
+                    <span class="category-label">{{$t('achievements.categories.words')}}</span>
                     <div class="category-bar">
                       <div 
                         class="category-fill words" 
@@ -207,7 +207,7 @@
                     <span class="category-value">{{ getCategoryBadgeCount('words') }}/5</span>
                   </div>
                   <div class="category-item">
-                    <span class="category-label">책</span>
+                    <span class="category-label">{{$t('achievements.categories.books')}}</span>
                     <div class="category-bar">
                       <div 
                         class="category-fill books" 
@@ -223,7 +223,7 @@
 
           <!-- 디버그 정보 (개발용) -->
           <section v-if="showDebugInfo" class="debug-section">
-            <h2 class="section-title">디버그 정보</h2>
+            <h2 class="section-title">{{$t('auth.debugInfo')}}</h2>
             <div class="debug-content">
               <p><strong>사용자 진행도:</strong></p>
               <pre>{{ JSON.stringify(authStore.userProgress, null, 2) }}</pre>
@@ -235,8 +235,8 @@
               <pre>{{ JSON.stringify(contentStore.availableBadges, null, 2) }}</pre>
             </div>
             <div class="debug-actions">
-              <button @click="forceReloadBadges" class="btn btn-secondary">뱃지 강제 새로고침</button>
-              <button @click="checkBadges" class="btn btn-primary">뱃지 확인 실행</button>
+              <button @click="forceReloadBadges" class="btn btn-secondary">{{$t('achievements.forceReloadBadges')}}</button>
+              <button @click="checkBadges" class="btn btn-primary">{{$t('achievements.checkBadges')}}</button>
             </div>
           </section>
           </div>
@@ -259,7 +259,7 @@
           class="debug-toggle"
           style="position: fixed; bottom: 20px; right: 20px; z-index: 1000;"
         >
-          {{ showDebugInfo ? '디버그 숨기기' : '디버그' }}
+          {{ showDebugInfo ? $t('auth.hideDebug') : $t('ui.debug') }}
         </button>
       </div>
     </main>
@@ -268,6 +268,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 import Navigation from '@/components/Navigation.vue';
 import QuizStatsContentView from '@/views/QuizStatsContentView.vue';
 import LikesContentView from '@/views/LikesContentView.vue';
@@ -275,6 +276,7 @@ import { useAuthStore } from '@/stores/auth';
 import { useContentStore } from '@/stores/content';
 import type { Badge } from '@/types';
 
+const { t } = useI18n();
 const authStore = useAuthStore();
 const contentStore = useContentStore();
 const showDebugInfo = ref(false);
@@ -282,9 +284,9 @@ const showDebugInfo = ref(false);
 // 탭 관리
 const activeTab = ref('achievements');
 const tabs = [
-  { key: 'achievements', label: '달성도', icon: '' },
-  { key: 'stats', label: '통계', icon: '' },
-  { key: 'likes', label: '좋아요', icon: '' }
+  { key: 'achievements', label: t('achievements.tabs.achievements'), icon: '' },
+  { key: 'stats', label: t('achievements.tabs.stats'), icon: '' },
+  { key: 'likes', label: t('achievements.tabs.likes'), icon: '' }
 ];
 
 // FIXED: 실제 표시될 뱃지 계산 (여러 방법으로 시도)
@@ -326,10 +328,10 @@ const badgeProgress = computed(() => {
 // 카테고리 이름 변환
 const getCategoryName = (category: string) => {
   const categoryNames: Record<string, string> = {
-    'quiz': '퀴즈',
-    'puzzle': '퍼즐',
-    'words': '단어',
-    'books': '책'
+    'quiz': t('achievements.categories.quiz'),
+    'puzzle': t('achievements.categories.puzzle'),
+    'words': t('achievements.categories.words'),
+    'books': t('achievements.categories.books')
   };
   return categoryNames[category] || category;
 };

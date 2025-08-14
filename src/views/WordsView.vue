@@ -221,7 +221,13 @@ const learnedWordsSet = ref(new Set<string>());
 
 const itemsPerPage = 10;
 
-const categories = computed(() => Object.keys(messages.value[store.currentLanguage].categories));
+const categories = computed(() => {
+  const langMessages = messages.value[store.currentLanguage];
+  if (!langMessages || !langMessages.categories) {
+    return ['all']; // 기본 카테고리만 반환
+  }
+  return Object.keys(langMessages.categories);
+});
 
 const filteredWords = computed(() => {
   let words = selectedCategory.value === 'all' 
