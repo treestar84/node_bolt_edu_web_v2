@@ -3,71 +3,71 @@
     <div class="login-container">
       <div class="login-card">
         <div class="login-header">
-          <h1>{{ isRegister ? $t('auth.registerTitle') : $t('auth.loginTitle') }}</h1>
-          <p>{{ isRegister ? $t('auth.registerDesc') : $t('auth.loginDesc') }}</p>
+          <h1>{{ isRegister ? t('auth.registerTitle') : t('auth.loginTitle') }}</h1>
+          <p>{{ isRegister ? t('auth.registerDesc') : t('auth.loginDesc') }}</p>
         </div>
 
         <form @submit.prevent="handleSubmit" class="login-form">
           <div class="form-group">
-            <label for="username" class="form-label">{{ $t('auth.username') }}</label>
+            <label for="username" class="form-label">{{ t('auth.username') }}</label>
             <input
               id="username"
               type="text"
               v-model="formData.username"
               class="form-input"
-              :placeholder="$t('auth.usernamePlaceholder')"
+              :placeholder="t('auth.usernamePlaceholder')"
               required
             />
             <div class="form-hint">
-              {{ $t('auth.usernameHint') }}
+              {{ t('auth.usernameHint') }}
             </div>
           </div>
 
           <div class="form-group">
-            <label for="password" class="form-label">{{ $t('auth.password') }}</label>
+            <label for="password" class="form-label">{{ t('auth.password') }}</label>
             <input
               id="password"
               type="password"
               v-model="formData.password"
               class="form-input"
-              :placeholder="$t('auth.passwordPlaceholder')"
+              :placeholder="t('auth.passwordPlaceholder')"
               required
             />
             <div class="form-hint">
-              {{ $t('auth.passwordHint') }}
+              {{ t('auth.passwordHint') }}
             </div>
           </div>
 
           <div v-if="isRegister" class="register-fields">
             <div class="form-group">
-              <label for="userType" class="form-label">{{ $t('auth.userType') }}</label>
+              <label for="userType" class="form-label">{{ t('auth.userType') }}</label>
               <select
                 id="userType"
                 v-model="formData.userType"
                 class="form-input"
                 required
               >
-                <option value="">{{ $t('auth.selectUserType') }}</option>
-                <option value="parent">{{ $t('auth.parentUser') }}</option>
-                <option value="teacher">{{ $t('auth.teacherUser') }}</option>
-                <option value="director">{{ $t('auth.directorUser') }}</option>
+                <option value="">{{ t('auth.selectUserType') }}</option>
+                <option value="parent">{{ t('auth.parentUser') }}</option>
+                <option value="teacher">{{ t('auth.teacherUser') }}</option>
+                <option value="director">{{ t('auth.directorUser') }}</option>
               </select>
             </div>
 
             <div class="form-group">
-              <label for="childName" class="form-label">{{ $t('auth.childName') }}</label>
+              <label for="childName" class="form-label">{{ t('auth.childName') }}</label>
               <input
                 id="childName"
                 type="text"
                 v-model="formData.childName"
                 class="form-input"
-                :placeholder="$t('auth.childNamePlaceholder')"
+                :placeholder="t('auth.childNamePlaceholder')"
                 required
               />
             </div>
 
             <div class="form-group">
-              <label for="childBirthDate" class="form-label">{{ $t('auth.childBirthDate') }}</label>
+              <label for="childBirthDate" class="form-label">{{ t('auth.childBirthDate') }}</label>
               <input
                 id="childBirthDate"
                 type="date"
@@ -77,15 +77,15 @@
                 required
               />
               <div class="form-hint">
-                {{ $t('auth.birthDateHint') }}
+                {{ t('auth.birthDateHint') }}
               </div>
             </div>
 
             <div v-if="formData.childBirthDate" class="child-age-display">
               <div class="age-info">
-                <span class="age-label">{{ $t('auth.currentAge') }}:</span>
-                <span class="age-value">{{ calculatedAge.years }}{{ $t('settings.age') }} {{ calculatedAge.months }}{{ $t('auth.months') }}</span>
-                <span class="age-months">({{ calculatedAge.totalMonths }}{{ $t('auth.months') }})</span>
+                <span class="age-label">{{ t('auth.currentAge') }}:</span>
+                <span class="age-value">{{ calculatedAge.years }}{{ t('settings.age') }} {{ calculatedAge.months }}{{ t('auth.months') }}</span>
+                <span class="age-months">({{ calculatedAge.totalMonths }}{{ t('auth.months') }})</span>
               </div>
             </div>
           </div>
@@ -93,26 +93,26 @@
           <div v-if="authStore.error" class="error-message">
             {{ authStore.error }}
             <div v-if="authStore.error.includes('데이터베이스 권한')" class="error-details">
-              <p><strong>{{ $t('auth.solutionTitle') }}</strong></p>
+              <p><strong>{{ t('auth.solutionTitle') }}</strong></p>
               <ol>
-                <li>{{ $t('auth.checkRLSPolicy') }}</li>
-                <li>{{ $t('auth.clickConnectionTest') }}</li>
-                <li>{{ $t('auth.contactAdmin') }}</li>
+                <li>{{ t('auth.checkRLSPolicy') }}</li>
+                <li>{{ t('auth.clickConnectionTest') }}</li>
+                <li>{{ t('auth.contactAdmin') }}</li>
               </ol>
             </div>
             <div v-if="authStore.error.includes('rate limit') || authStore.error.includes('너무 많습니다')" class="error-details">
-              <p><strong>{{ $t('auth.emailLimitError') }}</strong></p>
+              <p><strong>{{ t('auth.emailLimitError') }}</strong></p>
               <ol>
                 <li>Supabase 대시보드 → Authentication → Settings</li>
-                <li>{{ $t('auth.disableEmailConfirm') }}</li>
-                <li>{{ $t('auth.waitAndRetry') }}</li>
+                <li>{{ t('auth.disableEmailConfirm') }}</li>
+                <li>{{ t('auth.waitAndRetry') }}</li>
               </ol>
             </div>
             <div v-if="authStore.error.includes('계정이 생성되었습니다')" class="success-details">
-              <p><strong>{{ $t('auth.registerSuccess') }}</strong></p>
-              <p>{{ $t('auth.switchToLogin') }}</p>
+              <p><strong>{{ t('auth.registerSuccess') }}</strong></p>
+              <p>{{ t('auth.switchToLogin') }}</p>
               <button @click="switchToLogin" class="btn btn-sm btn-primary" type="button">
-                {{ $t('auth.switchToLoginBtn') }}
+                {{ t('auth.switchToLoginBtn') }}
               </button>
             </div>
           </div>
@@ -122,7 +122,7 @@
             class="btn btn-primary w-full btn-lg" 
             :disabled="authStore.isLoading"
           >
-            {{ authStore.isLoading ? $t('auth.processing') : (isRegister ? $t('auth.registerButton') : $t('auth.loginButton')) }}
+            {{ authStore.isLoading ? t('auth.processing') : (isRegister ? t('auth.registerButton') : t('auth.loginButton')) }}
           </button>
         </form>
 
@@ -132,69 +132,69 @@
             class="toggle-button"
             type="button"
           >
-            {{ isRegister ? $t('auth.alreadyHaveAccount') : $t('auth.noAccount') }}
+            {{ isRegister ? t('auth.alreadyHaveAccount') : t('auth.noAccount') }}
           </button>
           
           <div class="demo-accounts">
-            <h4>{{ $t('auth.testAccounts') }}</h4>
+            <h4>{{ t('auth.testAccounts') }}</h4>
             <div class="demo-buttons">
               <button 
                 @click="fillDemoAccount('parent')" 
                 class="demo-btn"
                 type="button"
               >
-                {{ $t('auth.parentAccount') }}
+                {{ t('auth.parentAccount') }}
               </button>
               <button 
                 @click="fillDemoAccount('teacher')" 
                 class="demo-btn"
                 type="button"
               >
-                {{ $t('auth.teacherAccount') }}
+                {{ t('auth.teacherAccount') }}
               </button>
             </div>
           </div>
           
           <!-- Enhanced Debug Information -->
           <div v-if="showDebugInfo" class="debug-info">
-            <h4>🔍 {{ $t('auth.debugInfo') }}</h4>
+            <h4>🔍 {{ t('auth.debugInfo') }}</h4>
             <div class="debug-content">
               <div class="debug-section">
-                <h5>{{ $t('auth.environment') }}</h5>
-                <p><strong>{{ $t('auth.supabaseUrl') }}:</strong> {{ debugInfo.supabaseUrl ? $t('auth.configured') : $t('auth.notConfigured') }}</p>
-                <p><strong>{{ $t('auth.supabaseKey') }}:</strong> {{ debugInfo.supabaseKey ? $t('auth.configured') : $t('auth.notConfigured') }}</p>
+                <h5>{{ t('auth.environment') }}</h5>
+                <p><strong>{{ t('auth.supabaseUrl') }}:</strong> {{ debugInfo.supabaseUrl ? t('auth.configured') : t('auth.notConfigured') }}</p>
+                <p><strong>{{ t('auth.supabaseKey') }}:</strong> {{ debugInfo.supabaseKey ? t('auth.configured') : t('auth.notConfigured') }}</p>
               </div>
               
               <div class="debug-section">
-                <h5>{{ $t('auth.authStatus') }}</h5>
-                <p><strong>{{ $t('auth.currentUser') }}:</strong> {{ debugInfo.currentUser || $t('auth.noUser') }}</p>
-                <p><strong>{{ $t('auth.authStatus') }}:</strong> {{ authStore.isAuthenticated ? $t('auth.authenticated') : $t('auth.notAuthenticated') }}</p>
+                <h5>{{ t('auth.authStatus') }}</h5>
+                <p><strong>{{ t('auth.currentUser') }}:</strong> {{ debugInfo.currentUser || t('auth.noUser') }}</p>
+                <p><strong>{{ t('auth.authStatus') }}:</strong> {{ authStore.isAuthenticated ? t('auth.authenticated') : t('auth.notAuthenticated') }}</p>
               </div>
               
               <div class="debug-section">
-                <h5>{{ $t('auth.errorInfo') }}</h5>
-                <p><strong>{{ $t('auth.lastError') }}:</strong> {{ authStore.error || $t('auth.noUser') }}</p>
+                <h5>{{ t('auth.errorInfo') }}</h5>
+                <p><strong>{{ t('auth.lastError') }}:</strong> {{ authStore.error || t('auth.noUser') }}</p>
               </div>
               
               <div v-if="connectionTestResult" class="debug-section">
-                <h5>{{ $t('auth.connectionTestResult') }}</h5>
-                <p><strong>{{ $t('auth.overallStatus') }}:</strong> {{ connectionTestResult.success ? '✅ 성공' : '❌ 실패' }}</p>
-                <p><strong>{{ $t('auth.basicConnection') }}:</strong> {{ connectionTestResult.tests?.basic ? '✅ 성공' : '❌ 실패' }}</p>
-                <p><strong>{{ $t('auth.publicTable') }}:</strong> {{ connectionTestResult.tests?.public ? '✅ ' + $t('auth.accessible') : '❌ ' + $t('auth.notAccessible') }}</p>
-                <p><strong>{{ $t('auth.userTable') }}:</strong> {{ 
-                  connectionTestResult.tests?.user === true ? '✅ ' + $t('auth.accessible') : 
-                  connectionTestResult.tests?.user === false ? '❌ ' + $t('auth.notAccessible') : 
-                  '⚠️ ' + $t('auth.unauthenticated') 
+                <h5>{{ t('auth.connectionTestResult') }}</h5>
+                <p><strong>{{ t('auth.overallStatus') }}:</strong> {{ connectionTestResult.success ? '✅ 성공' : '❌ 실패' }}</p>
+                <p><strong>{{ t('auth.basicConnection') }}:</strong> {{ connectionTestResult.tests?.basic ? '✅ 성공' : '❌ 실패' }}</p>
+                <p><strong>{{ t('auth.publicTable') }}:</strong> {{ connectionTestResult.tests?.public ? '✅ ' + t('auth.accessible') : '❌ ' + t('auth.notAccessible') }}</p>
+                <p><strong>{{ t('auth.userTable') }}:</strong> {{ 
+                  connectionTestResult.tests?.user === true ? '✅ ' + t('auth.accessible') : 
+                  connectionTestResult.tests?.user === false ? '❌ ' + t('auth.notAccessible') : 
+                  '⚠️ ' + t('auth.unauthenticated') 
                 }}</p>
               </div>
             </div>
             
             <div class="debug-actions">
               <button @click="testConnection" class="debug-btn" type="button" :disabled="isTestingConnection">
-                {{ isTestingConnection ? $t('auth.testingConnection') : '🔍 ' + $t('auth.connectionTest') }}
+                {{ isTestingConnection ? t('auth.testingConnection') : '🔍 ' + t('auth.connectionTest') }}
               </button>
               <button @click="clearDebugData" class="debug-btn secondary" type="button">
-                {{ $t('auth.clearDebugData') }}
+                {{ t('auth.clearDebugData') }}
               </button>
             </div>
           </div>
@@ -204,7 +204,7 @@
             class="debug-toggle"
             type="button"
           >
-            {{ showDebugInfo ? $t('auth.hideDebug') : $t('auth.showDebug') }}
+            {{ showDebugInfo ? t('auth.hideDebug') : t('auth.showDebug') }}
           </button>
         </div>
       </div>

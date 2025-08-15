@@ -1,17 +1,17 @@
 <template>
-  <nav class="navigation" role="navigation" :aria-label="$t('navigation.mainNavigation')">
+  <nav class="navigation" role="navigation" :aria-label="t('navigation.mainNavigation')">
     <div class="container">
       <div class="nav-content">
         <div class="nav-left">
           <router-link 
             to="/" 
             class="nav-brand"
-            :aria-label="$t('navigation.goToHome')"
+            :aria-label="t('navigation.goToHome')"
           >
             <span class="brand-text">{{ authStore.siteName }}</span>
           </router-link>
           
-          <ul class="nav-menu desktop-menu" role="menubar" :aria-label="$t('navigation.desktopMenu')">
+          <ul class="nav-menu desktop-menu" role="menubar" :aria-label="t('navigation.desktopMenu')">
             <li role="none" v-for="item in menuItems" :key="item.path">
               <router-link 
                 :to="item.path" 
@@ -20,7 +20,7 @@
                 role="menuitem"
                 :aria-current="$route.path === item.path ? 'page' : undefined"
               >
-                <span class="nav-text">{{$t('navigation.'+item.key)}}</span>
+                <span class="nav-text">{{t('navigation.'+item.key)}}</span>
               </router-link>
             </li>
           </ul>
@@ -33,7 +33,7 @@
             @keydown.escape="closeMobileMenu"
             class="mobile-menu-btn"
             :class="{ active: mobileMenuOpen }"
-            :aria-label="mobileMenuOpen ? $t('navigation.closeMenu') : $t('navigation.openMenu')"
+            :aria-label="mobileMenuOpen ? t('navigation.closeMenu') : t('navigation.openMenu')"
             :aria-expanded="mobileMenuOpen"
             aria-controls="mobile-menu"
             type="button"
@@ -44,16 +44,16 @@
           </button>
 
           <div class="nav-controls desktop-controls">
-            <div class="age-indicator" v-if="authStore.userProfile" role="status" :aria-label="$t('ui.childAge')">
-              <span class="age-badge">{{ $t('settings.age' + authStore.childAge) }}</span>
+            <div class="age-indicator" v-if="authStore.userProfile" role="status" :aria-label="t('ui.childAge')">
+              <span class="age-badge">{{ t('settings.age' + authStore.childAge) }}</span>
             </div>
             
             <div class="theme-toggle">
               <button 
                 @click="toggleTheme"
                 class="theme-btn"
-                :aria-label="isDark ? $t('ui.theme.switchToLight') : $t('ui.theme.switchToDark')"
-                :title="isDark ? $t('ui.theme.switchToLight') : $t('ui.theme.switchToDark')"
+                :aria-label="isDark ? t('ui.theme.switchToLight') : t('ui.theme.switchToDark')"
+                :title="isDark ? t('ui.theme.switchToLight') : t('ui.theme.switchToDark')"
                 type="button"
               >
                 <span class="theme-icon" aria-hidden="true">{{ isDark ? '☀️' : '🌙' }}</span>
@@ -66,8 +66,8 @@
                   ref="languageButtonRef"
                   @click="toggleLanguageDropdown"
                   class="language-toggle-btn"
-                  :aria-label="$t('ui.language.select')"
-                  :title="`${$t('ui.language.select')} (${readyLanguages.length} ${$t('multiLang.languages')})`"
+                  :aria-label="t('ui.language.select')"
+                  :title="`${t('ui.language.select')} (${readyLanguages.length} ${t('multiLang.languages')})`"
                   :aria-expanded="languageDropdownOpen"
                   type="button"
                 >
@@ -87,7 +87,7 @@
                     <button
                       v-for="lang in readyLanguages"
                       :key="lang"
-                      @click="selectLanguage(lang)"
+                      @click="selectLanguage(lang as Language)"
                       class="language-option"
                       :class="{ active: store.currentLanguage === lang }"
                       :aria-pressed="store.currentLanguage === lang"
@@ -102,20 +102,20 @@
               </div>
             </div>
             
-            <nav class="user-menu" v-if="authStore.isAuthenticated" :aria-label="$t('navigation.userMenu')">
+            <nav class="user-menu" v-if="authStore.isAuthenticated" :aria-label="t('navigation.userMenu')">
               <router-link 
                 to="/settings" 
                 class="btn btn-sm btn-secondary"
-                :aria-label="$t('navigation.goToSettings')"
+                :aria-label="t('navigation.goToSettings')"
               >
-                {{$t('navigation.settings')}}
+                {{t('navigation.settings')}}
               </router-link>
               <router-link 
                 to="/admin" 
                 class="btn btn-sm btn-secondary"
-                :aria-label="$t('navigation.goToAdmin')"
+                :aria-label="t('navigation.goToAdmin')"
               >
-                {{$t('navigation.admin')}}
+                {{t('navigation.admin')}}
               </router-link>
             </nav>
             
@@ -123,16 +123,16 @@
               <router-link 
                 to="/login" 
                 class="btn btn-sm btn-primary"
-                :aria-label="$t('navigation.goToLogin')"
+                :aria-label="t('navigation.goToLogin')"
               >
-                {{$t('navigation.login')}}
+                {{t('navigation.login')}}
               </router-link>
               <router-link 
                 to="/admin" 
                 class="btn btn-sm btn-secondary"
-                :aria-label="$t('navigation.goToAdmin')"
+                :aria-label="t('navigation.goToAdmin')"
               >
-                {{$t('navigation.admin')}}
+                {{t('navigation.admin')}}
               </router-link>
             </div>
           </div>
@@ -155,12 +155,12 @@
       class="mobile-menu" 
       :class="{ open: mobileMenuOpen }"
       :aria-hidden="!mobileMenuOpen"
-      :aria-label="$t('navigation.mobileMenu')"
+      :aria-label="t('navigation.mobileMenu')"
     >
       <div class="mobile-menu-content">
         <div class="mobile-menu-header">
-          <div class="age-indicator" v-if="authStore.userProfile" role="status" :aria-label="$t('ui.childAge')">
-            <span class="age-badge">{{ authStore.childAge }}{{ $t('settings.age') }}</span>
+          <div class="age-indicator" v-if="authStore.userProfile" role="status" :aria-label="t('ui.childAge')">
+            <span class="age-badge">{{ authStore.childAge }}{{ t('settings.age') }}</span>
           </div>
           
           <div class="mobile-controls">
@@ -168,22 +168,22 @@
               <button 
                 @click="toggleTheme"
                 class="theme-btn"
-                :aria-label="isDark ? $t('ui.theme.switchToLight') : $t('ui.theme.switchToDark')"
-                :title="isDark ? $t('ui.theme.switchToLight') : $t('ui.theme.switchToDark')"
+                :aria-label="isDark ? t('ui.theme.switchToLight') : t('ui.theme.switchToDark')"
+                :title="isDark ? t('ui.theme.switchToLight') : t('ui.theme.switchToDark')"
                 type="button"
               >
                 <span class="theme-icon" aria-hidden="true">{{ isDark ? '☀️' : '🌙' }}</span>
-                <span class="theme-text">{{ isDark ? $t('ui.theme.light') : $t('ui.theme.dark') }}</span>
+                <span class="theme-text">{{ isDark ? t('ui.theme.light') : t('ui.theme.dark') }}</span>
               </button>
             </div>
             
             <div class="mobile-language-selector">
-              <h4 class="mobile-section-title">🌍 {{ $t('ui.language.select') }} ({{ readyLanguages.length }}{{ $t('multiLang.languages') }})</h4>
+              <h4 class="mobile-section-title">🌍 {{ t('ui.language.select') }} ({{ readyLanguages.length }}{{ t('multiLang.languages') }})</h4>
               <div class="mobile-language-grid">
                 <button
                   v-for="lang in readyLanguages"
                   :key="lang"
-                  @click="() => setLanguage(lang)"
+                  @click="() => setLanguage(lang as Language)"
                   class="mobile-language-btn"
                   :class="{ active: store.currentLanguage === lang }"
                   :aria-pressed="store.currentLanguage === lang"
@@ -199,7 +199,7 @@
           </div>
         </div>
         
-        <nav class="mobile-menu-items" :aria-label="$t('navigation.mobileMenuItems')">
+        <nav class="mobile-menu-items" :aria-label="t('navigation.mobileMenuItems')">
           <router-link 
             v-for="item in menuItems" 
             :key="item.path"
@@ -210,27 +210,27 @@
             @click="closeMobileMenu"
             @keydown.escape="closeMobileMenu"
           >
-            <span class="nav-text">{{$t('navigation.'+item.key)}}</span>
+            <span class="nav-text">{{t('navigation.'+item.key)}}</span>
           </router-link>
         </nav>
         
         <div class="mobile-menu-footer">
-          <nav class="mobile-auth-buttons" v-if="authStore.isAuthenticated" :aria-label="$t('navigation.userMenu')">
+          <nav class="mobile-auth-buttons" v-if="authStore.isAuthenticated" :aria-label="t('navigation.userMenu')">
             <router-link 
               to="/settings" 
               class="btn btn-sm btn-secondary" 
               @click="closeMobileMenu"
-              :aria-label="$t('navigation.goToSettings')"
+              :aria-label="t('navigation.goToSettings')"
             >
-              {{$t('navigation.settings')}}
+              {{t('navigation.settings')}}
             </router-link>
             <router-link 
               to="/admin" 
               class="btn btn-sm btn-secondary" 
               @click="closeMobileMenu"
-              :aria-label="$t('navigation.goToAdmin')"
+              :aria-label="t('navigation.goToAdmin')"
             >
-              {{$t('navigation.admin')}}
+              {{t('navigation.admin')}}
             </router-link>
           </nav>
           
@@ -239,17 +239,17 @@
               to="/login" 
               class="btn btn-sm btn-primary" 
               @click="closeMobileMenu"
-              :aria-label="$t('navigation.goToLogin')"
+              :aria-label="t('navigation.goToLogin')"
             >
-              {{$t('navigation.login')}}
+              {{t('navigation.login')}}
             </router-link>
             <router-link 
               to="/admin" 
               class="btn btn-sm btn-secondary" 
               @click="closeMobileMenu"
-              :aria-label="$t('navigation.goToAdmin')"
+              :aria-label="t('navigation.goToAdmin')"
             >
-              {{$t('navigation.admin')}}
+              {{t('navigation.admin')}}
             </router-link>
           </div>
         </div>
@@ -259,17 +259,19 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, nextTick, onMounted, onUnmounted, Teleport } from 'vue';
+import { computed, ref, nextTick, onMounted, onUnmounted } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useAppStore } from '@/stores/app';
 import { useAuthStore } from '@/stores/auth';
 import { useTheme } from '@/composables/useTheme';
 import { useAvailableLanguages } from '@/composables/useAvailableLanguages';
 import type { Language } from '@/types';
 
+const { t } = useI18n();
 const store = useAppStore();
 const authStore = useAuthStore();
 const { isDark, toggleTheme } = useTheme();
-const { availableLanguages, readyLanguages, getLanguageDisplayName, getLanguageFlag, getNextLanguage, getLanguageCompleteness } = useAvailableLanguages();
+const { availableLanguages, readyLanguages, getLanguageDisplayName, getLanguageFlag, /* getNextLanguage, */ getLanguageCompleteness } = useAvailableLanguages();
 
 // 디버깅: 언어 상태 모니터링
 onMounted(() => {
@@ -292,7 +294,7 @@ const dropdownPosition = computed(() => {
   
   const rect = languageButtonRef.value.getBoundingClientRect();
   return {
-    position: 'fixed',
+    position: 'fixed' as const,
     top: `${rect.bottom + 8}px`,
     left: `${rect.right - 220}px`, // 드롭다운 너비에 맞춰 오른쪽 정렬
     zIndex: 9999,
@@ -326,10 +328,10 @@ const selectLanguage = async (lang: Language) => {
 };
 
 // 언어 토글 함수 (동적 다국어 지원) - 호환성을 위해 유지
-const toggleLanguage = async () => {
-  const nextLang = getNextLanguage(store.currentLanguage);
-  await setLanguage(nextLang);
-};
+// const toggleLanguage = async () => {
+//   const nextLang = getNextLanguage(store.currentLanguage);
+//   await setLanguage(nextLang as Language);
+// };
 
 // 현재 언어의 표시 정보
 const currentLanguageInfo = computed(() => {

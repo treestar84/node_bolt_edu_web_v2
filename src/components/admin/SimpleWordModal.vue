@@ -4,7 +4,7 @@
       <div class="modal-header">
         <h2>
           <span class="title-icon">📝</span>
-          {{ word ? $t('admin.editWord') : $t('admin.addNewWord') }}
+          {{ word ? t('admin.editWord') : t('admin.addNewWord') }}
         </h2>
         <button @click="handleClose" class="modal-close">×</button>
       </div>
@@ -13,23 +13,23 @@
         <form @submit.prevent="handleSave" class="word-form">
           <!-- 기본 정보 입력 -->
           <div class="form-group">
-            <label class="form-label required">{{ $t('forms.koreanName') }}</label>
+            <label class="form-label required">{{ t('forms.koreanName') }}</label>
             <input
               v-model="formData.korean"
               type="text"
               class="form-input"
-              :placeholder="$t('forms.koreanNamePlaceholder')"
+              :placeholder="t('forms.koreanNamePlaceholder')"
               required
             />
           </div>
 
           <div class="form-group">
-            <label class="form-label required">{{ $t('forms.englishName') }}</label>
+            <label class="form-label required">{{ t('forms.englishName') }}</label>
             <input
               v-model="formData.english"
               type="text"
               class="form-input"
-              :placeholder="$t('forms.englishNamePlaceholder')"
+              :placeholder="t('forms.englishNamePlaceholder')"
               required
             />
           </div>
@@ -77,14 +77,14 @@
           <!-- 고급 번역 옵션 (자동 번역 활성화 시에만 표시) -->
           <div v-if="formData.autoTranslate" class="form-group advanced-options">
             <div class="advanced-header" @click="showAdvanced = !showAdvanced">
-              <span>⚙️ {{ $t('admin.advancedOptions') }}</span>
+              <span>⚙️ {{ t('admin.advancedOptions') }}</span>
               <span class="toggle-icon">{{ showAdvanced ? '▼' : '▶' }}</span>
             </div>
             
             <div v-if="showAdvanced" class="advanced-content">
-              <label class="form-label">{{ $t('admin.translationService') }}</label>
+              <label class="form-label">{{ t('admin.translationService') }}</label>
               <select v-model="formData.translationService" class="form-input">
-                <option value="browser">🆓 {{ $t('admin.browserTranslation') }} (무료)</option>
+                <option value="browser">🆓 {{ t('admin.browserTranslation') }} (무료)</option>
                 <option value="google">🔵 Google Translate</option>
                 <option value="microsoft">🟢 Microsoft Translator</option>
                 <option value="papago">🟡 Naver Papago</option>
@@ -98,21 +98,21 @@
           <!-- 카테고리 및 연령 -->
           <div class="form-row">
             <div class="form-group half">
-              <label class="form-label required">{{ $t('forms.category') }}</label>
+              <label class="form-label required">{{ t('forms.category') }}</label>
               <select v-model="formData.category" class="form-input" required>
-                <option value="animals">{{ $t('categories.animals') }}</option>
-                <option value="fruits">{{ $t('categories.fruits') }}</option>
-                <option value="vehicles">{{ $t('categories.vehicles') }}</option>
-                <option value="objects">{{ $t('categories.objects') }}</option>
-                <option value="nature">{{ $t('categories.nature') }}</option>
-                <option value="toys">{{ $t('categories.toys') }}</option>
-                <option value="clothes">{{ $t('categories.clothes') }}</option>
-                <option value="other">{{ $t('categories.other') }}</option>
+                <option value="animals">{{ t('categories.animals') }}</option>
+                <option value="fruits">{{ t('categories.fruits') }}</option>
+                <option value="vehicles">{{ t('categories.vehicles') }}</option>
+                <option value="objects">{{ t('categories.objects') }}</option>
+                <option value="nature">{{ t('categories.nature') }}</option>
+                <option value="toys">{{ t('categories.toys') }}</option>
+                <option value="clothes">{{ t('categories.clothes') }}</option>
+                <option value="other">{{ t('categories.other') }}</option>
               </select>
             </div>
 
             <div class="form-group half">
-              <label class="form-label">{{ $t('forms.appropriateAge') }}</label>
+              <label class="form-label">{{ t('forms.appropriateAge') }}</label>
               <div class="age-range">
                 <select v-model="formData.minAge" class="form-input small">
                   <option v-for="age in [3,4,5,6]" :key="age" :value="age">{{ age }}세</option>
@@ -127,21 +127,21 @@
 
           <!-- 선택적 이미지 업로드 -->
           <div class="form-group">
-            <label class="form-label optional">{{ $t('forms.image') }}</label>
+            <label class="form-label optional">{{ t('forms.image') }}</label>
             <FileUploadInput
               v-model="formData.imageUrl"
-              :label="$t('forms.image')"
+              :label="t('forms.image')"
               file-type="image"
-              :placeholder="$t('forms.imagePlaceholder')"
+              :placeholder="t('forms.imagePlaceholder')"
             />
-            <p class="form-hint">{{ $t('forms.autoFetchInfo') }}</p>
+            <p class="form-hint">{{ t('forms.autoFetchInfo') }}</p>
           </div>
 
           <!-- 처리 상태 표시 -->
           <div v-if="isProcessing" class="processing-status">
             <div class="status-header">
               <span class="status-icon">⚡</span>
-              <span>{{ $t('multiLang.processing') }}</span>
+              <span>{{ t('multiLang.processing') }}</span>
             </div>
             <div class="progress-bar">
               <div class="progress-fill" :style="{ width: processingProgress + '%' }"></div>
@@ -153,7 +153,7 @@
 
       <div class="modal-footer">
         <button type="button" @click="handleClose" class="btn btn-secondary">
-          {{ $t('common.cancel') }}
+          {{ t('common.cancel') }}
         </button>
         <button 
           type="button" 
@@ -162,7 +162,7 @@
           :disabled="!canSave || isProcessing"
         >
           <span v-if="isProcessing" class="spinner"></span>
-          {{ isProcessing ? $t('common.processing') : (word ? $t('common.save') : $t('admin.addNewWord')) }}
+          {{ isProcessing ? t('common.processing') : (word ? t('common.save') : t('admin.addNewWord')) }}
         </button>
       </div>
     </div>
@@ -171,6 +171,7 @@
 
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 import FileUploadInput from '@/components/FileUploadInput.vue';
 import { useMultiLangProcessor } from '@/composables/useMultiLangProcessor';
 import { useAutoImageFetch } from '@/composables/useAutoImageFetch';
@@ -194,6 +195,7 @@ interface Emits {
 const emit = defineEmits<Emits>();
 
 // Composables
+const { t } = useI18n();
 const processor = useMultiLangProcessor();
 const imageService = useAutoImageFetch();
 
@@ -212,7 +214,7 @@ const formData = ref({
 const showAdvanced = ref(false);
 const isProcessing = ref(false);
 const processingProgress = ref(0);
-const currentProcessingStep = ref('');
+const currentProcessingStep = ref<string | null>('');
 
 // Computed
 const canSave = computed(() => {
@@ -229,7 +231,7 @@ const getServiceDescription = (service: string): string => {
     microsoft: 'Microsoft Translator - 월 200만자 무료',
     papago: 'Naver Papago - 일 1만자 무료, 한국어 특화'
   };
-  return descriptions[service] || '';
+  return descriptions[service as keyof typeof descriptions] || '';
 };
 
 const handleSave = async () => {
@@ -251,10 +253,10 @@ const handleSave = async () => {
       // 이미지가 없으면 자동 검색
       let imageUrl = formData.value.imageUrl;
       if (!imageUrl) {
-        imageUrl = await imageService.fetchAndUploadImage(
+        imageUrl = (await imageService.fetchAndUploadImage(
           formData.value.korean,
           formData.value.english
-        );
+        )) || '';
       }
       
       currentProcessingStep.value = '다국어 번역 중...';
@@ -288,7 +290,7 @@ const handleSave = async () => {
         maxAge: formData.value.maxAge,
         ownerType: props.isSystemAdmin ? 'global' : 'user',
         // 다국어 데이터 추가
-        translations: result.translations,
+        translations: JSON.stringify(result.translations),
         autoTranslated: true
       };
     } else {
@@ -298,10 +300,10 @@ const handleSave = async () => {
       
       let imageUrl = formData.value.imageUrl;
       if (!imageUrl) {
-        imageUrl = await imageService.fetchAndUploadImage(
+        imageUrl = (await imageService.fetchAndUploadImage(
           formData.value.korean,
           formData.value.english
-        );
+        )) || '';
       }
       
       processingProgress.value = 100;
@@ -327,7 +329,7 @@ const handleSave = async () => {
     
   } catch (error) {
     console.error('❌ 단어 저장 실패:', error);
-    currentProcessingStep.value = '오류 발생: ' + (error instanceof Error ? error.message : '알 수 없는 오류');
+                    currentProcessingStep.value = (error instanceof Error ? '오류 발생: ' + error.message : '오류 발생: 알 수 없는 오류');
   } finally {
     setTimeout(() => {
       isProcessing.value = false;

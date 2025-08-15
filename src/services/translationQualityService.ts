@@ -6,10 +6,8 @@ import type {
   TranslationQualityFeedback,
   UserTranslationValidation,
   QualityValidationSettings,
-  LanguagePairQuality,
   TranslationQualityDatabase,
   SupportedLanguageCode,
-  TranslationProvider,
   EnhancedTranslationResult,
   TranslationResult
 } from '@/types/multilingual';
@@ -44,8 +42,8 @@ export class TranslationQualityService {
     const breakdown = {
       providerReliability: this.calculateProviderReliability(translation.translatedBy),
       languagePairQuality: this.calculateLanguagePairQuality(sourceLang, targetLang),
-      contextComplexity: this.calculateContextComplexity(sourceText, translation.translatedText),
-      lengthAppropriateness: this.calculateLengthAppropriateness(sourceText, translation.translatedText, sourceLang, targetLang)
+      contextComplexity: this.calculateContextComplexity(sourceText, translation.name),
+      lengthAppropriateness: this.calculateLengthAppropriateness(sourceText, translation.name, sourceLang, targetLang)
     };
 
     // 가중 평균으로 전체 점수 계산
@@ -257,7 +255,7 @@ export class TranslationQualityService {
    * 신뢰도 레벨 결정
    */
   private determineConfidenceLevel(overall: number, breakdown: any): 'high' | 'medium' | 'low' {
-    const minScore = Math.min(...Object.values(breakdown));
+    const minScore = Math.min(...Object.values(breakdown).map(v => Number(v)));
     
     if (overall >= 85 && minScore >= 70) return 'high';
     if (overall >= 70 && minScore >= 50) return 'medium';
@@ -356,7 +354,6 @@ export class TranslationQualityService {
    * 대안 번역 제안
    */
   async suggestAlternatives(
-    sourceText: string,
     currentTranslation: string,
     sourceLang: SupportedLanguageCode,
     targetLang: SupportedLanguageCode
@@ -416,7 +413,7 @@ export class TranslationQualityService {
     return {
       ...translation,
       qualityScore,
-      validationStatus: this.determineValidationStatus(qualityScore, feedback),
+      validationStatus: this.determineValidationStatus(qualityScore, feedback || undefined),
       alternatives: feedback?.alternatives || [],
       userCorrections: feedback?.userValidations || [],
       qualityFlags: this.generateQualityFlags(qualityScore, translation)
@@ -455,7 +452,7 @@ export class TranslationQualityService {
     qualityScore: TranslationQualityScore,
     feedback?: TranslationQualityFeedback
   ): 'unvalidated' | 'auto_validated' | 'user_validated' | 'rejected' {
-    if (feedback?.userValidations.length > 0) {
+    if (feedback?.userValidations && feedback.userValidations.length > 0) {
       const lastValidation = feedback.userValidations[feedback.userValidations.length - 1];
       return lastValidation.correctedTranslation === lastValidation.originalTranslation 
         ? 'user_validated' 

@@ -1,4 +1,4 @@
-import { ref } from 'vue';
+import { ref, readonly } from 'vue';
 
 export interface TouchFeedbackOptions {
   haptic?: boolean;

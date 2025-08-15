@@ -7,7 +7,7 @@
         class="tab-button"
         :class="{ active: inputMode === 'upload' }"
       >
-        {{ $t('fileUpload.fileUploadTab') }}
+        {{ t('fileUpload.fileUploadTab') }}
       </button>
       <button 
         type="button"
@@ -15,7 +15,7 @@
         class="tab-button"
         :class="{ active: inputMode === 'url' }"
       >
-        {{ $t('fileUpload.urlInputTab') }}
+        {{ t('fileUpload.urlInputTab') }}
       </button>
     </div>
 
@@ -36,9 +36,9 @@
         <div v-if="!isUploading && !uploadedFile" class="upload-placeholder">
           <div class="upload-icon">{{ getFileTypeIcon() }}</div>
           <div class="upload-text">
-            <p>{{ $t('fileUpload.clickOrDrag') }}</p>
+            <p>{{ t('fileUpload.clickOrDrag') }}</p>
             <p class="upload-hint">{{ getFileTypeHint() }}</p>
-            <p class="upload-hint">{{ $t('fileUpload.serverUploadInfo') }}</p>
+            <p class="upload-hint">{{ t('fileUpload.serverUploadInfo') }}</p>
           </div>
         </div>
 
@@ -46,14 +46,14 @@
           <div class="progress-bar">
             <div class="progress-fill" :style="{ width: `${uploadProgress}%` }"></div>
           </div>
-          <p>{{ $t('fileUpload.uploadProgress', { progress: uploadProgress }) }}</p>
+          <p>{{ t('fileUpload.uploadProgress', { progress: uploadProgress }) }}</p>
         </div>
 
         <div v-if="uploadedFile && !isUploading" class="upload-success">
           <div class="success-icon">✅</div>
           <p>{{ uploadedFile.name }}</p>
-          <p class="upload-status">{{ modelValue.includes('/images/') || modelValue.includes('/audio/') ? $t('fileUpload.serverUploaded') : $t('fileUpload.localSaved') }}</p>
-          <button type="button" @click.stop="removeFile" class="remove-button">{{ $t('common.delete') }}</button>
+          <p class="upload-status">{{ modelValue.includes('/images/') || modelValue.includes('/audio/') ? t('fileUpload.serverUploaded') : t('fileUpload.localSaved') }}</p>
+          <button type="button" @click.stop="removeFile" class="remove-button">{{ t('common.delete') }}</button>
         </div>
       </div>
 

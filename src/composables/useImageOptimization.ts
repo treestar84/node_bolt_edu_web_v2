@@ -1,4 +1,4 @@
-import { ref, computed } from 'vue';
+import { ref, readonly } from 'vue';
 
 export interface ImageOptimizationOptions {
   quality?: number;
@@ -50,8 +50,6 @@ export function useImageOptimization() {
     const {
       quality = getOptimalQuality(),
       format = getBestFormat(),
-      sizes = ['320w', '640w', '1024w'],
-      loading = 'lazy'
     } = options;
 
     // URL이 이미 최적화된 경우 (예: CDN URL)

@@ -11,13 +11,13 @@
     <span v-if="isLoading" class="loading-spinner" aria-hidden="true">⏳</span>
     <span v-else class="heart-icon" aria-hidden="true">{{ isLiked ? '❤️' : '🤍' }}</span>
     <span v-if="showText" class="like-text">
-      {{ isLiked ? $t('likes.likedButton') : $t('likes.likeButton') }}
+      {{ isLiked ? t('likes.likedButton') : t('likes.likeButton') }}
     </span>
     <span 
       v-if="showCount && likeCount > 0" 
       class="like-count"
       :id="`like-count-${contentId}`"
-      :aria-label="$t('likes.likeCount', { count: likeCount })"
+      :aria-label="t('likes.likeCount', { count: likeCount })"
     >
       {{ likeCount }}
     </span>

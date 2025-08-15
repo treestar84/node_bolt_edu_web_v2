@@ -3,19 +3,19 @@
     <div class="login-container">
       <div class="login-card">
         <div class="login-header">
-          <h1>{{ $t('auth.adminLogin') }}</h1>
-          <p>{{ $t('auth.contentManagementLogin') }}</p>
+          <h1>{{ t('auth.adminLogin') }}</h1>
+          <p>{{ t('auth.contentManagementLogin') }}</p>
         </div>
 
         <form @submit.prevent="handleLogin" class="login-form">
           <div class="form-group">
-            <label for="password" class="form-label">{{ $t('auth.password') }}</label>
+            <label for="password" class="form-label">{{ t('auth.password') }}</label>
             <input
               id="password"
               type="password"
               v-model="password"
               class="form-input"
-              :placeholder="$t('auth.adminPasswordPlaceholder')"
+              :placeholder="t('auth.adminPasswordPlaceholder')"
               required
             />
           </div>
@@ -25,16 +25,16 @@
           </div>
 
           <button type="submit" class="btn btn-primary w-full btn-lg" :disabled="isLoading">
-            {{ isLoading ? $t('auth.loggingIn') : $t('auth.login') }}
+            {{ isLoading ? t('auth.loggingIn') : t('auth.login') }}
           </button>
         </form>
 
         <div class="login-info">
           <p class="info-text">
-            <strong>{{ $t('auth.password') }}:</strong> {{ $t('auth.contactEmail') }}
+            <strong>{{ t('auth.password') }}:</strong> {{ t('auth.contactEmail') }}
           </p>
           <router-link to="/" class="back-link">
-            {{ $t('auth.backToMain') }}
+            {{ t('auth.backToMain') }}
           </router-link>
         </div>
       </div>

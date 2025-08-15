@@ -6,7 +6,7 @@ import { useI18n } from 'vue-i18n';
 import { getTranslationQualityService } from '@/services/translationQualityService';
 import type {
   TranslationQualityScore,
-  TranslationQualityFeedback,
+  // TranslationQualityFeedback,
   UserTranslationValidation,
   QualityValidationSettings,
   EnhancedTranslationResult,
@@ -99,7 +99,7 @@ export function useTranslationQuality() {
     sourceText: string,
     currentTranslation: string,
     sourceLang: SupportedLanguageCode,
-    targetLang: SupportedLanguageCode
+    _targetLang: SupportedLanguageCode
   ): Promise<string[]> => {
     if (!settings.showAlternatives) {
       return [];
@@ -110,10 +110,9 @@ export function useTranslationQuality() {
 
     try {
       const alternatives = await qualityService.suggestAlternatives(
-        sourceText,
-        currentTranslation,
-        sourceLang,
-        targetLang
+        sourceText as any,
+        currentTranslation as any,
+        sourceLang as SupportedLanguageCode
       );
 
       console.log(`🔄 대안 번역 ${alternatives.length}개 제안됨`);
@@ -188,7 +187,7 @@ export function useTranslationQuality() {
 
     try {
       // 번역 ID 생성
-      const { sourceText, translation, sourceLang, targetLang } = currentValidation.value;
+      const { sourceText, translation: _translation, sourceLang, targetLang } = currentValidation.value;
       const translationId = generateTranslationId(sourceText, sourceLang, targetLang);
 
       // 검증 데이터 저장
@@ -304,7 +303,7 @@ export function useTranslationQuality() {
    * 사용자 친화적인 품질 설명 생성
    */
   const getQualityDescription = (qualityScore: TranslationQualityScore): string => {
-    const { grade, confidence, overall } = qualityScore;
+    const { grade, confidence, overall: _overall } = qualityScore;
     
     const descriptions: Record<string, Record<string, string>> = {
       excellent: {

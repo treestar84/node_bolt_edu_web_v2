@@ -5,15 +5,15 @@
     <main class="main-content">
       <div class="container">
         <div class="page-header">
-          <h1 class="page-title">{{ $t('admin.words') }}</h1>
+          <h1 class="page-title">{{ t('admin.words') }}</h1>
           <div class="header-actions">
             <div class="admin-type-indicator" v-if="isSystemAdmin">
-              <span class="admin-badge">{{ $t('admin.systemAdmin') }}</span>
+              <span class="admin-badge">{{ t('admin.systemAdmin') }}</span>
             </div>
             <div class="add-word-controls">
               <button @click="startAddWord" class="btn btn-primary btn-add-word">
                 <span>➕</span>
-                {{ $t('admin.addNewWord') }}
+                {{ t('admin.addNewWord') }}
               </button>
             </div>
           </div>
@@ -42,21 +42,21 @@
     <div v-if="showDeleteModal" class="modal-overlay" @click="showDeleteModal = false">
       <div class="modal-content" @click.stop>
         <div class="modal-header">
-          <h2>{{ $t('admin.deleteWord') }}</h2>
+          <h2>{{ t('admin.deleteWord') }}</h2>
           <button @click="showDeleteModal = false" class="modal-close">×</button>
         </div>
         
         <div class="delete-content">
-          <p>{{ $t('admin.confirmDelete') }} "<strong>{{ wordToDelete?.name }}</strong>"?</p>
-          <p class="delete-warning">{{ $t('admin.deleteWarning') }}</p>
+          <p>{{ t('admin.confirmDelete') }} "<strong>{{ wordToDelete?.name }}</strong>"?</p>
+          <p class="delete-warning">{{ t('admin.deleteWarning') }}</p>
         </div>
 
         <div class="modal-actions">
           <button @click="showDeleteModal = false" class="btn btn-secondary">
-            {{ $t('common.cancel') }}
+            {{ t('common.cancel') }}
           </button>
           <button @click="confirmDelete" class="btn btn-danger" :disabled="isLoading">
-            {{ isLoading ? $t('admin.deleting') : $t('common.delete') }}
+            {{ isLoading ? t('admin.deleting') : t('common.delete') }}
           </button>
         </div>
       </div>
@@ -66,6 +66,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
+import { useI18n } from 'vue-i18n';
 import AdminHeader from '@/components/AdminHeader.vue';
 import WordsTable from '@/components/admin/WordsTable.vue';
 import SimpleWordModal from '@/components/admin/SimpleWordModal.vue';
@@ -74,6 +75,7 @@ import { useAuthStore } from '@/stores/auth';
 import { useAutoImageFetch } from '@/composables/useAutoImageFetch';
 import type { WordItem } from '@/types';
 
+const { t } = useI18n();
 const store = useAppStore();
 const authStore = useAuthStore();
 const { searchError, fetchAndUploadImage, clearError } = useAutoImageFetch();
@@ -96,7 +98,7 @@ const wordsForTable = computed(() => {
     id: word.id,
     name: word.name,
     nameEn: word.nameEn,
-    imageUrl: word.imageUrl,
+    imageUrl: word.imageUrl || '',
     audioUrl: word.audioKo || word.audioEn || '',
     category: word.category,
     ageGroup: word.minAge, // minAge를 ageGroup으로 매핑
@@ -116,10 +118,8 @@ const editWord = (word: any) => {
   const originalWord = store.currentWords.find(w => w.id === word.id);
   if (originalWord) {
     editingWord.value = originalWord;
-    // 다국어 데이터가 있으면 다국어 모드, 없으면 전통 모드
-    modalMode.value = WordCompatibilityHelper.hasMultilingualData(originalWord) ? 'multilang' : 'traditional';
     showStepModal.value = true;
-    console.log(`📝 Editing word in ${modalMode.value} mode:`, originalWord.name);
+    console.log(`📝 Editing word:`, originalWord.name);
   }
 };
 
@@ -174,11 +174,11 @@ const saveWord = async (wordData: any) => {
 
     // 다국어 데이터가 있으면 추가 (JSON으로 저장)
     if (wordData.translations) {
-      finalWordData.translations = JSON.stringify(wordData.translations);
-      finalWordData.autoTranslated = wordData.autoTranslated || false;
-      finalWordData.primaryLanguage = wordData.primaryLanguage || 'ko';
-      finalWordData.secondaryLanguage = wordData.secondaryLanguage || 'en';
-      finalWordData.autoTranslatedLanguages = JSON.stringify(wordData.autoTranslatedLanguages || []);
+      (finalWordData as any).translations = JSON.stringify(wordData.translations);
+      (finalWordData as any).autoTranslated = wordData.autoTranslated || false;
+      (finalWordData as any).primaryLanguage = wordData.primaryLanguage || 'ko';
+      (finalWordData as any).secondaryLanguage = wordData.secondaryLanguage || 'en';
+      (finalWordData as any).autoTranslatedLanguages = JSON.stringify(wordData.autoTranslatedLanguages || []);
     }
 
     if (editingWord.value) {
@@ -192,7 +192,7 @@ const saveWord = async (wordData: any) => {
     closeModals();
   } catch (err: any) {
     console.error('❌ Error saving word:', err);
-    error.value = err.message || $t('admin.saveError');
+    error.value = err.message || t('admin.saveError');
   } finally {
     isLoading.value = false;
   }
@@ -220,7 +220,7 @@ const confirmDelete = async () => {
     wordToDelete.value = null;
   } catch (err: any) {
     console.error('❌ Error deleting word:', err);
-    error.value = err.message || $t('admin.deleteError');
+    error.value = err.message || t('admin.deleteError');
   } finally {
     isLoading.value = false;
   }

@@ -9,8 +9,8 @@
     <!-- 메인 입력 폼 -->
     <div class="main-form" v-if="languageSelection.primary && languageSelection.secondary">
       <div class="form-header">
-        <h2 class="form-title">{{ $t('multiLang.formTitle') }}</h2>
-        <p class="form-subtitle">{{ $t('multiLang.formSubtitle') }}</p>
+        <h2 class="form-title">{{ t('multiLang.formTitle') }}</h2>
+        <p class="form-subtitle">{{ t('multiLang.formSubtitle') }}</p>
       </div>
 
       <div class="input-section">
@@ -18,25 +18,25 @@
         <div class="basic-info">
           <div class="form-row">
             <div class="form-group">
-              <label for="category">{{ $t('admin.words.category') }}</label>
+              <label for="category">{{ t('admin.words.category') }}</label>
               <select 
                 id="category"
                 v-model="formData.category"
                 class="form-control"
                 required
               >
-                <option value="animals">{{ $t('categories.animals') }}</option>
-                <option value="colors">{{ $t('categories.colors') }}</option>
-                <option value="food">{{ $t('categories.food') }}</option>
-                <option value="family">{{ $t('categories.family') }}</option>
-                <option value="toys">{{ $t('categories.toys') }}</option>
-                <option value="nature">{{ $t('categories.nature') }}</option>
-                <option value="general">{{ $t('categories.general') }}</option>
+                <option value="animals">{{ t('categories.animals') }}</option>
+                <option value="colors">{{ t('categories.colors') }}</option>
+                <option value="food">{{ t('categories.food') }}</option>
+                <option value="family">{{ t('categories.family') }}</option>
+                <option value="toys">{{ t('categories.toys') }}</option>
+                <option value="nature">{{ t('categories.nature') }}</option>
+                <option value="general">{{ t('categories.general') }}</option>
               </select>
             </div>
             
             <div class="form-group age-group">
-              <label>{{ $t('admin.words.ageRange') }}</label>
+              <label>{{ t('admin.words.ageRange') }}</label>
               <div class="age-range">
                 <select v-model="formData.minAge" class="form-control small">
                   <option v-for="age in [3,4,5,6,7,8]" :key="age" :value="age">{{ age }}세</option>
@@ -57,7 +57,7 @@
             <div class="input-header">
               <span class="flag">{{ getPrimaryConfig().flag }}</span>
               <label class="input-label">
-                {{ $t('multiLang.primaryInput') }}
+                {{ t('multiLang.primaryInput') }}
                 <span class="language-name">({{ getPrimaryConfig().nativeName }})</span>
               </label>
             </div>
@@ -91,7 +91,7 @@
               </div>
             </div>
             <div class="input-help">
-              {{ $t('multiLang.primaryInputHelp') || '이 언어로 입력한 단어가 기준이 됩니다' }}
+              {{ t('multiLang.primaryInputHelp') || '이 언어로 입력한 단어가 기준이 됩니다' }}
             </div>
           </div>
 
@@ -100,7 +100,7 @@
             <div class="input-header">
               <span class="flag">{{ getSecondaryConfig().flag }}</span>
               <label class="input-label">
-                {{ $t('multiLang.secondaryInput') }}
+                {{ t('multiLang.secondaryInput') }}
                 <span class="language-name">({{ getSecondaryConfig().nativeName }})</span>
               </label>
             </div>
@@ -134,7 +134,7 @@
               </div>
             </div>
             <div class="input-help">
-              {{ $t('multiLang.secondaryInputHelp') || '번역의 정확도를 높이는 기준 언어입니다' }}
+              {{ t('multiLang.secondaryInputHelp') || '번역의 정확도를 높이는 기준 언어입니다' }}
             </div>
           </div>
         </div>
@@ -144,11 +144,11 @@
           <div class="auto-process-card">
             <div class="card-header">
               <div class="icon">✨</div>
-              <div class="title">{{ $t('multiLang.readyToProcess') || '자동 처리 준비 완료' }}</div>
+              <div class="title">{{ t('multiLang.readyToProcess') || '자동 처리 준비 완료' }}</div>
             </div>
             <div class="card-content">
               <p class="description">
-                {{ $t('multiLang.processDescription') || '입력하신 2개 언어를 바탕으로 나머지 8개 언어 번역, 이미지 검색, TTS 음성을 자동으로 생성합니다.' }}
+                {{ t('multiLang.processDescription') || '입력하신 2개 언어를 바탕으로 나머지 8개 언어 번역, 이미지 검색, TTS 음성을 자동으로 생성합니다.' }}
               </p>
               <div class="process-preview">
                 <div class="process-step">
@@ -177,7 +177,7 @@
               >
                 <span v-if="!isProcessing" class="btn-icon">🚀</span>
                 <span v-else class="spinner"></span>
-                {{ isProcessing ? $t('multiLang.processing') : $t('multiLang.startProcessing') }}
+                {{ isProcessing ? t('multiLang.processing') : t('multiLang.startProcessing') }}
               </button>
             </div>
           </div>
@@ -187,7 +187,7 @@
         <div class="input-guide" v-else-if="!canStartAutoProcess">
           <div class="guide-header">
             <span class="icon">💡</span>
-            <span class="title">{{ $t('multiLang.inputGuide') || '입력 가이드' }}</span>
+            <span class="title">{{ t('multiLang.inputGuide') || '입력 가이드' }}</span>
           </div>
           <div class="guide-steps">
             <div class="guide-step" :class="{ completed: languageSelection.primary && languageSelection.secondary }">
@@ -214,9 +214,9 @@
     <div class="language-guide" v-else>
       <div class="guide-content">
         <div class="guide-icon">🌍</div>
-        <h3 class="guide-title">{{ $t('multiLang.selectLanguagesFirst') || '먼저 언어를 선택해주세요' }}</h3>
+        <h3 class="guide-title">{{ t('multiLang.selectLanguagesFirst') || '먼저 언어를 선택해주세요' }}</h3>
         <p class="guide-description">
-          {{ $t('multiLang.languageSelectionDescription') || '모국어와 공용어를 선택하면 단어 입력 폼이 나타납니다. 선택하신 언어에 최적화된 입력 환경을 제공합니다.' }}
+          {{ t('multiLang.languageSelectionDescription') || '모국어와 공용어를 선택하면 단어 입력 폼이 나타납니다. 선택하신 언어에 최적화된 입력 환경을 제공합니다.' }}
         </p>
         <div class="guide-benefits">
           <div class="benefit">
@@ -239,6 +239,7 @@
 
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 import LanguageSelector from './LanguageSelector.vue';
 import { SUPPORTED_LANGUAGES, type SupportedLanguageCode } from '@/constants/languages';
 import { useMultiLangAudio } from '@/composables/useMultiLangAudio';
@@ -260,6 +261,8 @@ const props = withDefaults(defineProps<Props>(), {
   }),
   disabled: false
 });
+
+const { t } = useI18n();
 
 // Emits
 interface Emits {

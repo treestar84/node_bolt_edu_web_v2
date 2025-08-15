@@ -130,11 +130,11 @@ export function useTranslationValidator() {
    * 언어별 특수 검증
    */
   const performLanguageSpecificChecks = (
-    original: string,
+    _original: string,
     translated: string,
-    fromLang: SupportedLanguageCode,
+    _fromLang: SupportedLanguageCode,
     toLang: SupportedLanguageCode,
-    warnings: string[],
+    _warnings: string[],
     suggestions: string[]
   ) => {
     // 한국어 관련 검증

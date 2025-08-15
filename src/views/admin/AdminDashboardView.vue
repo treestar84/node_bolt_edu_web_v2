@@ -5,9 +5,9 @@
     <main class="main-content">
       <div class="container">
         <div class="dashboard-header">
-          <h1 class="page-title">{{ $t('admin.dashboard') }}</h1>
+          <h1 class="page-title">{{ t('admin.dashboard') }}</h1>
           <p class="page-description">
-            {{ $t('admin.dashboardDescription') }}
+            {{ t('admin.dashboardDescription') }}
           </p>
         </div>
 
@@ -16,10 +16,10 @@
             <div class="stat-icon">📚</div>
             <div class="stat-content">
               <div class="stat-value">{{ store.currentWords.length }}</div>
-              <div class="stat-label">{{ $t('admin.registeredWords') }}</div>
+              <div class="stat-label">{{ t('admin.registeredWords') }}</div>
             </div>
             <router-link to="/admin/words" class="stat-action">
-              {{ $t('admin.manage') }} →
+              {{ t('admin.manage') }} →
             </router-link>
           </div>
 
@@ -27,10 +27,10 @@
             <div class="stat-icon">📖</div>
             <div class="stat-content">
               <div class="stat-value">{{ store.currentBooks.length }}</div>
-              <div class="stat-label">{{ $t('admin.registeredBooks') }}</div>
+              <div class="stat-label">{{ t('admin.registeredBooks') }}</div>
             </div>
             <router-link to="/admin/books" class="stat-action">
-              {{ $t('admin.manage') }} →
+              {{ t('admin.manage') }} →
             </router-link>
           </div>
 
@@ -38,7 +38,7 @@
             <div class="stat-icon">🏆</div>
             <div class="stat-content">
               <div class="stat-value">{{ store.quizScore }}</div>
-              <div class="stat-label">{{ $t('admin.totalQuizScore') }}</div>
+              <div class="stat-label">{{ t('admin.totalQuizScore') }}</div>
             </div>
           </div>
 
@@ -46,7 +46,7 @@
             <div class="stat-icon">🎯</div>
             <div class="stat-content">
               <div class="stat-value">{{ store.quizStreak }}</div>
-              <div class="stat-label">{{ $t('admin.currentStreak') }}</div>
+              <div class="stat-label">{{ t('admin.currentStreak') }}</div>
             </div>
           </div>
 
@@ -54,13 +54,13 @@
             <div class="stat-icon">🏅</div>
             <div class="stat-content">
               <div class="stat-value">{{ store.availableBadges.length }}</div>
-              <div class="stat-label">{{ $t('admin.earnedBadges') }}</div>
+              <div class="stat-label">{{ t('admin.earnedBadges') }}</div>
             </div>
           </div>
         </div>
 
         <div class="quick-actions">
-          <h2 class="section-title">{{ $t('admin.quickActions') }}</h2>
+          <h2 class="section-title">{{ t('admin.quickActions') }}</h2>
           <div class="actions-grid">
             <router-link to="/admin/words" class="action-card">
               <div class="action-icon">➕</div>
@@ -173,9 +173,11 @@
 
 <script setup lang="ts">
 import { onMounted } from 'vue';
+import { useI18n } from 'vue-i18n';
 import AdminHeader from '@/components/AdminHeader.vue';
 import { useAppStore } from '@/stores/app';
 
+const { t } = useI18n();
 const store = useAppStore();
 
 const getCategoryName = (category: string) => {

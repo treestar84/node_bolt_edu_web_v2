@@ -5,22 +5,22 @@
     <main class="main-content">
       <div class="container">
         <div class="page-header">
-          <h1 class="page-title">{{ $t('likes.title') }}</h1>
+          <h1 class="page-title">{{ t('likes.title') }}</h1>
           <p class="page-description">
-            {{ $t('likes.description') }}
+            {{ t('likes.description') }}
           </p>
         </div>
 
         <div v-if="isLoading" class="loading-state">
           <div class="spinner"></div>
-          <p>{{ $t('likes.loading') }}</p>
+          <p>{{ t('likes.loading') }}</p>
         </div>
 
         <div v-else-if="error" class="error-state">
           <div class="error-icon">❌</div>
-          <h3>{{ $t('likes.error') }}</h3>
+          <h3>{{ t('likes.error') }}</h3>
           <p>{{ error }}</p>
-          <button @click="loadData" class="btn btn-primary">{{ $t('likes.retry') }}</button>
+          <button @click="loadData" class="btn btn-primary">{{ t('likes.retry') }}</button>
         </div>
 
         <div v-else class="likes-content">
@@ -30,13 +30,13 @@
               @click="activeTab = 'my-likes'"
               :class="['tab-btn', { active: activeTab === 'my-likes' }]"
             >
-              {{ $t('likes.myLikes') }}
+              {{ t('likes.myLikes') }}
             </button>
             <button 
               @click="activeTab = 'ranking'"
               :class="['tab-btn', { active: activeTab === 'ranking' }]"
             >
-              {{ $t('likes.ranking') }}
+              {{ t('likes.ranking') }}
             </button>
           </div>
 
@@ -46,7 +46,7 @@
             <section class="likes-section">
               <h2 class="section-title">
                 <span class="section-icon">📚</span>
-                {{ $t('likes.contentType.words') }}
+                {{ t('likes.contentType.words') }}
                 <span class="section-count">({{ likedWordItems.length }}개)</span>
               </h2>
 
@@ -77,7 +77,7 @@
 
               <div v-else class="empty-section">
                 <div class="empty-icon">📖</div>
-                <h3>{{ $t('likes.noLikes') }}</h3>
+                <h3>{{ t('likes.noLikes') }}</h3>
                 <p>단어 학습 페이지에서 좋아하는 단어에 좋아요를 눌러보세요.</p>
                 <router-link to="/words" class="btn btn-primary">단어 학습하러 가기</router-link>
               </div>
@@ -87,7 +87,7 @@
             <section class="likes-section">
               <h2 class="section-title">
                 <span class="section-icon">📚</span>
-                {{ $t('likes.contentType.books') }}
+                {{ t('likes.contentType.books') }}
                 <span class="section-count">({{ likedBookItems.length }}개)</span>
               </h2>
 
@@ -126,7 +126,7 @@
 
               <div v-else class="empty-section">
                 <div class="empty-icon">📚</div>
-                <h3>{{ $t('likes.noLikes') }}</h3>
+                <h3>{{ t('likes.noLikes') }}</h3>
                 <p>그림책 페이지에서 좋아하는 책에 좋아요를 눌러보세요.</p>
                 <router-link to="/books" class="btn btn-primary">그림책 보러 가기</router-link>
               </div>
@@ -172,7 +172,7 @@
                   class="ranking-item"
                 >
                   <div class="rank-number">
-                    <span class="rank">{{ index + 1 }}{{ $t('likes.rank').replace('{rank}', '') }}</span>
+                    <span class="rank">{{ index + 1 }}{{ t('likes.rank').replace('{rank}', '') }}</span>
                   </div>
                   <div class="content-info">
                     <template v-if="selectedContentType === 'word' && !pair.word">
@@ -201,14 +201,14 @@
                           {{ pair.word ? pair.word.name : (pair.book ? pair.book.title : '알 수 없음') }}
                         </h4>
                         <p class="content-meta">
-                          {{ $t('likes.contentType.' + selectedContentType) }}
+                          {{ t('likes.contentType.' + selectedContentType) }}
                         </p>
                       </div>
                     </template>
                   </div>
                   <div class="like-stats">
                     <span class="like-count">
-                      ❤️ {{ $t('likes.likeCount').replace('{count}', pair.item.likeCount.toString()) }}
+                      ❤️ {{ t('likes.likeCount').replace('{count}', pair.item.likeCount.toString()) }}
                     </span>
                   </div>
                 </div>
@@ -216,7 +216,7 @@
 
               <div v-else class="empty-ranking">
                 <div class="empty-icon">📊</div>
-                <h3>{{ $t('likes.emptyRanking') }}</h3>
+                <h3>{{ t('likes.emptyRanking') }}</h3>
                 <p>아직 {{ selectedPeriod === 'all' ? '전체' : selectedPeriod === 'monthly' ? '이번 달' : '이번 주' }} 랭킹 데이터가 없습니다.</p>
               </div>
             </div>

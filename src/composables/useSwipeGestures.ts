@@ -1,4 +1,4 @@
-import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted, readonly } from 'vue';
 
 export interface SwipeDirection {
   left: boolean;
@@ -95,7 +95,7 @@ export function useSwipeGestures(
   };
 
   // 터치 종료
-  const handleTouchEnd = (event: TouchEvent) => {
+  const handleTouchEnd = (_event: TouchEvent) => {
     if (!isSwiping.value) return;
 
     const finalVelocity = swipeVelocity.value;
@@ -149,18 +149,18 @@ export function useSwipeGestures(
   onMounted(() => {
     const element = target || document;
     
-    element.addEventListener('touchstart', handleTouchStart, { passive });
-    element.addEventListener('touchmove', handleTouchMove, { passive });
-    element.addEventListener('touchend', handleTouchEnd, { passive });
+    element.addEventListener('touchstart', handleTouchStart as EventListener, { passive });
+    element.addEventListener('touchmove', handleTouchMove as EventListener, { passive });
+    element.addEventListener('touchend', handleTouchEnd as EventListener, { passive });
   });
 
   // 정리
   onUnmounted(() => {
     const element = target || document;
     
-    element.removeEventListener('touchstart', handleTouchStart);
-    element.removeEventListener('touchmove', handleTouchMove);
-    element.removeEventListener('touchend', handleTouchEnd);
+    element.removeEventListener('touchstart', handleTouchStart as EventListener);
+    element.removeEventListener('touchmove', handleTouchMove as EventListener);
+    element.removeEventListener('touchend', handleTouchEnd as EventListener);
   });
 
   return {

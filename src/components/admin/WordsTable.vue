@@ -22,7 +22,7 @@
         class="table-row"
       >
         <div class="cell image-cell">
-          <img :src="getImageUrl(word.imageUrl)" :alt="word.name" />
+          <img :src="getImageUrl(word.imageUrl || '')" :alt="word.name" />
         </div>
         <div class="cell word-cell">
           <div class="word-names">

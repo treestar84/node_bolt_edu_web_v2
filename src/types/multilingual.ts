@@ -34,6 +34,8 @@ export interface TranslationResult {
   confidence: number;
   /** 번역 방식 */
   translatedBy: 'user' | 'auto' | 'hybrid';
+  /** 번역 출처 */
+  source: 'manual' | 'auto';
   /** 커스텀 업로드 음성 URL (선택사항) */
   audioUrl: string;
   /** 커스텀 음성 사용 여부 */
@@ -46,6 +48,8 @@ export interface TranslationResult {
   provider?: 'google' | 'deepl' | 'azure';
   /** 번역 시간 (milliseconds) */
   translationTime?: number;
+  /** 검증 결과 */
+  validation?: TranslationQualityScore | null;
 }
 
 export interface MultiLangWordItem {
@@ -157,6 +161,14 @@ export interface AutoProcessingStatus {
       supportedLanguages: string[];
     };
   };
+  /** 처리 결과 */
+  results: {
+    imageUrl: string;
+    translations: Record<string, TranslationResult>;
+    audioSupport: Record<string, boolean>;
+  };
+  /** 에러 메시지 목록 */
+  errors: string[];
   /** 에러 정보 */
   error?: {
     phase: string;

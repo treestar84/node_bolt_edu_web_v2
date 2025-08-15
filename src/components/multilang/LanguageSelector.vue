@@ -5,8 +5,8 @@
       <div class="section-header">
         <h3 class="section-title">
           <span class="icon">🌟</span>
-          {{ $t('multiLang.primaryLanguage') }}
-          <span class="subtitle">{{ $t('multiLang.primarySubtitle') }}</span>
+          {{ t('multiLang.primaryLanguage') }}
+          <span class="subtitle">{{ t('multiLang.primarySubtitle') }}</span>
         </h3>
       </div>
       
@@ -32,14 +32,14 @@
           <div v-if="primaryLanguage === lang.code" class="selected-indicator">
             <span class="checkmark">✓</span>
           </div>
-          <span v-if="lang.isPopular" class="popular-badge">{{ $t('multiLang.popular') }}</span>
+          <span v-if="lang.isPopular" class="popular-badge">{{ t('multiLang.popular') }}</span>
         </button>
         
         <!-- 기타 언어 버튼 -->
         <details class="other-languages" v-if="otherLanguages.length > 0">
           <summary class="other-languages-toggle">
             <span class="icon">🌍</span>
-            <span class="text">{{ $t('multiLang.moreLanguages') }}</span>
+            <span class="text">{{ t('multiLang.moreLanguages') }}</span>
             <span class="count">({{ otherLanguages.length }})</span>
           </summary>
           
@@ -72,8 +72,8 @@
       <div class="section-header">
         <h3 class="section-title">
           <span class="icon">🌐</span>
-          {{ $t('multiLang.secondaryLanguage') }}
-          <span class="subtitle">{{ $t('multiLang.secondarySubtitle') }}</span>
+          {{ t('multiLang.secondaryLanguage') }}
+          <span class="subtitle">{{ t('multiLang.secondarySubtitle') }}</span>
         </h3>
       </div>
       
@@ -101,7 +101,7 @@
             v-if="lang.code === 'en' && primaryLanguage !== 'en'" 
             class="recommended-badge"
           >
-            {{ $t('multiLang.recommended') }}
+            {{ t('multiLang.recommended') }}
           </span>
         </button>
       </div>
@@ -110,7 +110,7 @@
     <!-- 선택 요약 및 미리보기 -->
     <div class="selection-summary" v-if="primaryLanguage && secondaryLanguage">
       <div class="summary-header">
-        <h4>{{ $t('multiLang.selectionSummary') }}</h4>
+        <h4>{{ t('multiLang.selectionSummary') }}</h4>
       </div>
       
       <div class="summary-content">
@@ -118,7 +118,7 @@
           <div class="pair-item primary-item">
             <span class="flag large">{{ getPrimaryConfig().flag }}</span>
             <div class="info">
-              <span class="role">{{ $t('multiLang.primaryRole') }}</span>
+              <span class="role">{{ t('multiLang.primaryRole') }}</span>
               <span class="name">{{ getPrimaryConfig().nativeName }}</span>
               <div class="quality-indicator">
                 <div class="tts-quality" :class="`quality-${getTTSQuality(primaryLanguage)}`">
@@ -140,13 +140,13 @@
           
           <div class="arrow-connector">
             <span class="arrow">→</span>
-            <span class="auto-text">{{ $t('multiLang.autoTranslate') }}</span>
+            <span class="auto-text">{{ t('multiLang.autoTranslate') }}</span>
           </div>
           
           <div class="pair-item secondary-item">
             <span class="flag large">{{ getSecondaryConfig().flag }}</span>
             <div class="info">
-              <span class="role">{{ $t('multiLang.secondaryRole') }}</span>
+              <span class="role">{{ t('multiLang.secondaryRole') }}</span>
               <span class="name">{{ getSecondaryConfig().nativeName }}</span>
               <div class="quality-indicator">
                 <div class="tts-quality" :class="`quality-${getTTSQuality(secondaryLanguage)}`">
@@ -170,8 +170,8 @@
         <div class="auto-complete-preview">
           <div class="preview-header">
             <span class="icon">🤖</span>
-            <span class="text">{{ $t('multiLang.willAutoComplete') }}</span>
-            <span class="count">{{ remainingLanguagesCount }}{{ $t('multiLang.languages') }}</span>
+            <span class="text">{{ t('multiLang.willAutoComplete') }}</span>
+            <span class="count">{{ remainingLanguagesCount }}{{ t('multiLang.languages') }}</span>
           </div>
           
           <div class="remaining-languages">
@@ -198,7 +198,7 @@
         class="message warning"
       >
         <span class="icon">⚠️</span>
-        <span class="text">{{ $t('multiLang.sameLanguageWarning') }}</span>
+        <span class="text">{{ t('multiLang.sameLanguageWarning') }}</span>
       </div>
       
       <div 
@@ -207,7 +207,7 @@
       >
         <span class="icon">📊</span>
         <span class="text">
-          {{ $t('multiLang.lowTranslationQuality', { 
+          {{ t('multiLang.lowTranslationQuality', { 
             quality: Math.round(translationQuality * 100) 
           }) }}
         </span>
@@ -218,7 +218,7 @@
         class="message success"
       >
         <span class="icon">✨</span>
-        <span class="text">{{ $t('multiLang.excellentCombination') }}</span>
+        <span class="text">{{ t('multiLang.excellentCombination') }}</span>
       </div>
     </div>
   </div>
@@ -226,6 +226,7 @@
 
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { 
   SUPPORTED_LANGUAGES, 
   POPULAR_LANGUAGES,
@@ -248,6 +249,8 @@ const props = withDefaults(defineProps<Props>(), {
   modelValue: () => ({ primary: 'ko', secondary: 'en' }),
   disabled: false
 });
+
+const { t } = useI18n();
 
 // Emits
 interface Emits {

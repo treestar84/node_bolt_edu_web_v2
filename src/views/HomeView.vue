@@ -22,21 +22,21 @@
           <!-- 콘텐츠 레이어 -->
           <div class="hero-content">
             <div class="hero-badge">
-              {{ $t('home.ageCustomized', { age: authStore.childAge }) }}
+              {{ t('home.ageCustomized', { age: authStore.childAge }) }}
             </div>
             <h1 class="hero-title fade-in">
-              {{ $t('home.title') }}
+              {{ t('home.title') }}
             </h1>
             <p class="hero-description fade-in">
-              {{ $t('home.description') }}
+              {{ t('home.description') }}
             </p>
 
             <div class="hero-actions fade-in">
               <router-link to="/words" class="btn btn-primary btn-lg">
-                {{ $t('home.startWords') }}
+                {{ t('home.startWords') }}
               </router-link>
               <router-link to="/quiz" class="btn btn-secondary btn-lg">
-                {{ $t('home.startQuiz') }}
+                {{ t('home.startQuiz') }}
               </router-link>
             </div>
           </div>
@@ -59,8 +59,8 @@
 
         <section class="features-section">
           <div class="section-header">
-            <h2 class="section-title">{{ $t('home.learningProgram') }}</h2>
-            <p class="section-subtitle">{{ $t('home.learningProgramDesc') }}</p>
+            <h2 class="section-title">{{ t('home.learningProgram') }}</h2>
+            <p class="section-subtitle">{{ t('home.learningProgramDesc') }}</p>
           </div>
           
           <div class="features-grid">
@@ -69,7 +69,7 @@
                 <div class="feature-icon">{{ feature.icon }}</div>
                 <h3 class="feature-title">{{ feature.title }}</h3>
                 <p class="feature-description">{{ feature.description }}</p>
-                <div class="feature-count">{{ $t('admin.itemCount', { count: feature.count }) }}</div>
+                <div class="feature-count">{{ t('admin.itemCount', { count: feature.count }) }}</div>
               </router-link>
             </div>
           </div>
@@ -77,26 +77,26 @@
 
         <section class="stats-section" v-if="authStore.userProgress">
           <div class="section-header">
-            <h2 class="section-title">{{ $t('dashboard.stats.title') }}</h2>
-            <p class="section-subtitle">{{ $t('dashboard.stats.description') }}</p>
+            <h2 class="section-title">{{ t('dashboard.stats.title') }}</h2>
+            <p class="section-subtitle">{{ t('dashboard.stats.description') }}</p>
           </div>
           
           <div class="stats-grid">
             <div class="stat-card">
               <div class="stat-value">{{ contentStore.words.length }}</div>
-              <div class="stat-label">{{ $t('home.learningWords') }}</div>
+              <div class="stat-label">{{ t('home.learningWords') }}</div>
             </div>
             <div class="stat-card">
               <div class="stat-value">{{ contentStore.books.length }}</div>
-              <div class="stat-label">{{ $t('home.pictureBooks') }}</div>
+              <div class="stat-label">{{ t('home.pictureBooks') }}</div>
             </div>
             <div class="stat-card">
               <div class="stat-value">{{ authStore.userProgress.quizScore }}</div>
-              <div class="stat-label">{{ $t('achievements.quizScore') }}</div>
+              <div class="stat-label">{{ t('achievements.quizScore') }}</div>
             </div>
             <div class="stat-card">
               <div class="stat-value">{{ authStore.userProgress.puzzleCompletions }}</div>
-              <div class="stat-label">{{ $t('achievements.puzzleCompletions') }}</div>
+              <div class="stat-label">{{ t('achievements.puzzleCompletions') }}</div>
             </div>
           </div>
         </section>
@@ -137,7 +137,7 @@ const generateFloatingCards = () => {
     .filter(word => word.imageUrl)
     .slice(0, 6)
     .map(word => ({
-      image: getImageUrl(word.imageUrl),
+      image: getImageUrl(word.imageUrl || ''),
       alt: word.name
     }));
   
@@ -161,7 +161,7 @@ const generateBackgroundImages = () => {
   const userImages = contentStore.words
     .filter(word => word.imageUrl)
     .slice(0, 3)
-    .map(word => getImageUrl(word.imageUrl));
+    .map(word => getImageUrl(word.imageUrl || ''));
   
   if (userImages.length > 0) {
     // 사용자가 등록한 이미지가 있으면 그것을 사용

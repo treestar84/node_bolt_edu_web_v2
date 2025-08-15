@@ -121,6 +121,11 @@ const routes = [
     name: 'QuizStats',
     component: () => import('@/views/QuizStatsView.vue'),
     meta: { requiresAuth: true }
+  },
+  {
+    path: '/tts-test',
+    name: 'TTSTest',
+    component: () => import('@/views/TTSTestView.vue')
   }
 ];
 

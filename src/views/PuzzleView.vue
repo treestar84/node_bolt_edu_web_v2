@@ -7,9 +7,9 @@
         <!-- Puzzle Selection Screen -->
         <div v-if="gameState === 'selection'" class="puzzle-selection">
           <div class="page-header">
-            <h1 class="page-title">{{$t('puzzle.title')}}</h1>
+            <h1 class="page-title">{{t('puzzle.title')}}</h1>
             <p class="page-description">
-              {{$t('puzzle.select')}}
+              {{t('puzzle.select')}}
             </p>
           </div>
 
@@ -21,17 +21,17 @@
               class="puzzle-option-card"
             >
               <div class="option-image">
-                <img :src="getImageUrl(option.imageUrl)" :alt="option.name" :style="{ aspectRatio: puzzleAspectRatio }" />
+                <img :src="getImageUrl(option.imageUrl || '')" :alt="option.name" :style="{ aspectRatio: puzzleAspectRatio }" />
                 <div class="play-overlay">
                   <span class="play-icon">🧩</span>
-                  <span class="play-text">{{$t('puzzle.start')}}</span>
+                  <span class="play-text">{{t('puzzle.start')}}</span>
                 </div>
               </div>
               <div class="option-info">
                 <h3 class="option-name">{{ getCurrentName(option) }}</h3>
                 <div class="difficulty-info">
                   <div class="difficulty-badge">
-                    {{ $t('puzzle.pieceCount', { count: getPuzzlePieceCount(option) }) }}
+                    {{ t('puzzle.pieceCount', { count: getPuzzlePieceCount(option) }) }}
                   </div>
                   <div v-if="option.imageAspectRatio" class="aspect-ratio-info">
                     {{ option.imageWidth }}×{{ option.imageHeight }}
@@ -43,21 +43,21 @@
           </div>
 
           <div class="difficulty-selector">
-            <h3>{{$t('puzzle.chooseLevel')}}</h3>
+            <h3>{{t('puzzle.chooseLevel')}}</h3>
             <div class="difficulty-buttons">
               <button 
                 @click="puzzleDifficulty = '3x2'"
                 class="btn"
                 :class="puzzleDifficulty === '3x2' ? 'btn-primary' : 'btn-secondary'"
               >
-                🟢 {{$t('puzzle.easy')}}
+                🟢 {{t('puzzle.easy')}}
               </button>
               <button 
                 @click="puzzleDifficulty = '3x3'"
                 class="btn"
                 :class="puzzleDifficulty === '3x3' ? 'btn-primary' : 'btn-secondary'"
               >
-                🟡 {{$t('puzzle.normal')}}
+                🟡 {{t('puzzle.normal')}}
               </button>
             </div>
           </div>
@@ -67,11 +67,11 @@
         <div v-else-if="gameState === 'playing'" class="puzzle-game">
           <div class="game-header">
             <button @click="goHome" class="btn btn-secondary home-btn">
-              🏠 {{$t('puzzle.goHome')}}
+              🏠 {{t('puzzle.goHome')}}
             </button>
-            <h2 class="puzzle-title">{{ getCurrentName(selectedPuzzle!) }} {{$t('puzzle.title')}}</h2>
+            <h2 class="puzzle-title">{{ getCurrentName(selectedPuzzle!) }} {{t('puzzle.title')}}</h2>
             <button @click="resetPuzzle" class="btn btn-secondary reset-btn">
-              🔄 {{$t('puzzle.playAgain')}}
+              🔄 {{t('puzzle.playAgain')}}
             </button>
           </div>
 
@@ -111,7 +111,7 @@
 
             <!-- Puzzle Pieces - 실제로 잘린 이미지 조각들 -->
             <div class="puzzle-pieces-container">
-              <h3 class="pieces-title">{{$t('puzzle.piece')}}</h3>
+              <h3 class="pieces-title">{{t('puzzle.piece')}}</h3>
               <div class="puzzle-pieces">
                 <div 
                   v-for="piece in shuffledPieces" 
@@ -128,7 +128,7 @@
                     <div 
                       :style="getPieceImageStyle(piece.correctPosition)"
                       class="piece-image"
-                      :title="`${$t('puzzle.piece')} ${piece.correctPosition + 1}`"
+                      :title="`${t('puzzle.piece')} ${piece.correctPosition + 1}`"
                     ></div>
                   </div>
                   <div class="piece-number">{{ piece.correctPosition + 1 }}</div>
@@ -145,16 +145,16 @@
               <div class="celebration-icon">🎉</div>
               <div class="confetti" v-for="i in 30" :key="i" :style="getConfettiStyle(i)"></div>
             </div>
-            <h2 class="completion-title">{{$t('puzzle.complete')}}</h2>
-            <h3 class="completion-subtitle">{{ getCurrentName(selectedPuzzle!) }} {{$t('puzzle.complete')}}</h3>
+            <h2 class="completion-title">{{t('puzzle.complete')}}</h2>
+            <h3 class="completion-subtitle">{{ getCurrentName(selectedPuzzle!) }} {{t('puzzle.complete')}}</h3>
             
             <div class="completed-puzzle">
-              <img :src="getImageUrl(selectedPuzzle!.imageUrl)" :alt="getCurrentName(selectedPuzzle!)" :style="{ aspectRatio: puzzleAspectRatio }" />
+              <img :src="getImageUrl(selectedPuzzle!.imageUrl || '')" :alt="getCurrentName(selectedPuzzle!)" :style="{ aspectRatio: puzzleAspectRatio }" />
             </div>
 
             <div v-if="newBadgeUnlocked" class="new-badge-notification">
               <div class="badge-unlock-icon">🏆</div>
-              <div class="badge-unlock-text">{{$t('quiz.badge')}}</div>
+              <div class="badge-unlock-text">{{t('quiz.badge')}}</div>
               <div class="unlocked-badge">
                 <span class="unlocked-badge-icon">{{ newBadgeUnlocked.icon }}</span>
                 <span class="unlocked-badge-name">{{ newBadgeUnlocked.name }}</span>
@@ -163,10 +163,10 @@
 
             <div class="completion-actions">
               <button @click="playAgain" class="btn btn-primary btn-lg">
-                🧩 {{$t('puzzle.playAgain')}}
+                🧩 {{t('puzzle.playAgain')}}
               </button>
               <button @click="goHome" class="btn btn-secondary btn-lg">
-                🏠 {{$t('puzzle.goHome')}}
+                🏠 {{t('puzzle.goHome')}}
               </button>
             </div>
           </div>
@@ -174,10 +174,10 @@
 
         <div v-if="store.currentWords.length === 0" class="empty-state">
           <div class="empty-icon"></div>
-          <h3>{{$t('puzzle.noImage')}}</h3>
-          <p>{{$t('puzzle.addWord')}}</p>
+          <h3>{{t('puzzle.noImage')}}</h3>
+          <p>{{t('puzzle.addWord')}}</p>
           <router-link to="/admin/words" class="btn btn-primary">
-            {{$t('puzzle.addWord')}}
+            {{t('puzzle.addWord')}}
           </router-link>
         </div>
       </div>
@@ -187,6 +187,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch, nextTick } from 'vue';
+import { useI18n } from 'vue-i18n';
 import Navigation from '@/components/Navigation.vue';
 import { useAppStore } from '@/stores/app';
 import { useAuthStore } from '@/stores/auth';
@@ -199,6 +200,7 @@ interface PuzzleSlot {
   piecePosition?: number; // 어떤 조각이 놓였는지 저장
 }
 
+const { t } = useI18n();
 const store = useAppStore();
 const authStore = useAuthStore();
 const contentStore = useContentStore();
@@ -367,7 +369,7 @@ const getPieceImageStyle = (pieceIndex: number) => {
   return {
     width: '100%',
     height: '100%',
-    backgroundImage: `url(${getImageUrl(selectedPuzzle.value!.imageUrl)})`,
+    backgroundImage: `url(${getImageUrl(selectedPuzzle.value!.imageUrl || '')})`,
     backgroundSize: `${cols * 100}% ${rows * 100}%`,
     backgroundPosition: `${xPercent}% ${yPercent}%`,
     backgroundRepeat: 'no-repeat',
@@ -394,7 +396,7 @@ const initializePuzzle = () => {
   for (let i = 0; i < totalPieces.value; i++) {
     pieces.push({
       id: `piece-${i}`,
-      image: getImageUrl(selectedPuzzle.value.imageUrl),
+      image: getImageUrl(selectedPuzzle.value.imageUrl || ''),
       correctPosition: i,
       placed: false
     });

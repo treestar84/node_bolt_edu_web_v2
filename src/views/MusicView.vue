@@ -7,9 +7,9 @@
         <!-- 악기 선택 화면 -->
         <div v-if="music.gameState.value === 'selection'" class="music-selection">
           <div class="page-header">
-            <h1 class="page-title">{{$t('music.title')}}</h1>
+            <h1 class="page-title">{{t('music.title')}}</h1>
             <p class="page-description">
-              {{$t('music.description')}}
+              {{t('music.description')}}
             </p>
           </div>
 
@@ -25,12 +25,12 @@
                 <span class="icon">{{ instrument.icon }}</span>
               </div>
               <div class="instrument-info">
-                <h3 class="instrument-name">{{ $t(instrument.name) }}</h3>
-                <p class="instrument-description">{{ $t(instrument.description) }}</p>
+                <h3 class="instrument-name">{{ t(instrument.name) }}</h3>
+                <p class="instrument-description">{{ t(instrument.description) }}</p>
               </div>
               <div class="play-overlay">
                 <span class="play-icon"></span>
-                <span class="play-text">{{$t('music.play')}}</span>
+                <span class="play-text">{{t('music.play')}}</span>
               </div>
             </div>
           </div>
@@ -40,29 +40,29 @@
         <div v-else-if="music.gameState.value === 'piano'" class="piano-game">
           <div class="game-header">
             <button @click="music.goBack" class="btn btn-secondary back-btn">
-              ← {{$t('common.back')}}
+              ← {{t('common.back')}}
             </button>
             <div class="header-center">
-              <h2 class="instrument-title">{{$t('music.piano.name')}}</h2>
+              <h2 class="instrument-title">{{t('music.piano.name')}}</h2>
               <div class="mode-toggle">
                 <button 
                   @click="music.setMode('free')"
                   class="mode-btn"
                   :class="{ active: music.playMode.value === 'free' }"
                 >
-                  {{$t('music.freePlay')}}
+                  {{t('music.freePlay')}}
                 </button>
                 <button 
                   @click="music.setMode('guide')"
                   class="mode-btn"
                   :class="{ active: music.playMode.value === 'guide' }"
                 >
-                  {{$t('music.guideMode')}}
+                  {{t('music.guideMode')}}
                 </button>
               </div>
             </div>
             <button @click="music.stopAllSounds" class="btn btn-secondary stop-btn">
-              {{$t('music.stop')}}
+              {{t('music.stop')}}
             </button>
           </div>
 
@@ -76,13 +76,13 @@
         <div v-else-if="music.gameState.value === 'car-sounds'" class="drum-game">
           <div class="game-header">
             <button @click="music.goBack" class="btn btn-secondary back-btn">
-              ← {{$t('common.back')}}
+              ← {{t('common.back')}}
             </button>
             <div class="header-center">
-              <h2 class="instrument-title">{{$t('music.drums.name')}}</h2>
+              <h2 class="instrument-title">{{t('music.drums.name')}}</h2>
             </div>
             <button @click="music.stopAllSounds" class="btn btn-secondary stop-btn">
-              {{$t('music.stop')}}
+              {{t('music.stop')}}
             </button>
           </div>
 
@@ -96,13 +96,13 @@
         <div v-else-if="music.gameState.value === 'violin'" class="violin-game">
           <div class="game-header">
             <button @click="music.goBack" class="btn btn-secondary back-btn">
-              ← {{$t('common.back')}}
+              ← {{t('common.back')}}
             </button>
             <div class="header-center">
-              <h2 class="instrument-title">{{$t('music.violin.name')}}</h2>
+              <h2 class="instrument-title">{{t('music.violin.name')}}</h2>
             </div>
             <button @click="music.stopAllSounds" class="btn btn-secondary stop-btn">
-              {{$t('music.stop')}}
+              {{t('music.stop')}}
             </button>
           </div>
 
@@ -118,12 +118,14 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import Navigation from '@/components/Navigation.vue';
 import PianoInstrument from '@/components/PianoInstrument.vue';
 import DrumKit from '@/components/DrumKit.vue';
 import ViolinInstrument from '@/components/ViolinInstrument.vue';
 import { useMusic } from '@/composables/useMusic';
 
+const { t } = useI18n();
 const music = useMusic();
 
 // 악기 목록

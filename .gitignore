@@ -58,3 +58,8 @@ config/production.json
 # Temporary files
 *.tmp
 *.temp
+
+# Gemini suggested additions
+.bolt/
+.claude/
+swagger.json

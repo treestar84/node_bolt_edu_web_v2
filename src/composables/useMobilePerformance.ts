@@ -1,4 +1,4 @@
-import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted, readonly } from 'vue';
 
 export interface PerformanceMetrics {
   fps: number;
@@ -27,7 +27,7 @@ export function useMobilePerformance() {
 
   let rafId = 0;
   let frameCount = 0;
-  let lastFrameTime = performance.now();
+  
   let fpsCalcStart = performance.now();
 
   // FPS 측정
@@ -126,7 +126,7 @@ export function useMobilePerformance() {
     );
     
     // 최적화 필요 여부 결정
-    shouldOptimize.value = (
+    shouldOptimize.value = Boolean(
       isLowEndDevice.value ||
       metrics.value.networkSpeed === '2g' ||
       metrics.value.networkSpeed === 'slow-2g' ||
@@ -193,7 +193,7 @@ export function useMobilePerformance() {
         const observer = new PerformanceObserver((entryList) => {
           const entries = entryList.getEntries();
           entries.forEach((entry) => {
-            console.log('FID:', Math.round(entry.processingStart - entry.startTime));
+            console.log('FID:', Math.round((entry as any).processingStart - entry.startTime));
           });
         });
         

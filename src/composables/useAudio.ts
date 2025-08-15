@@ -194,69 +194,168 @@ export function useAudio() {
       
       let textToSpeak = fallbackText || extractTextFromAudioUrl(audioUrl);
       
-      if (!textToSpeak || !('speechSynthesis' in window)) {
-        console.log('❌ TTS not available or no text');
-        reject(new Error('TTS not available'));
+      if (!textToSpeak) {
+        console.log('❌ No text available for TTS');
+        reject(new Error('No text available'));
         return;
       }
 
-      const utterance = new SpeechSynthesisUtterance(textToSpeak);
-      let hasCompleted = false;
-
-      const handleTTSComplete = () => {
-        if (hasCompleted) return;
-        hasCompleted = true;
-        
-        console.log('✅ TTS completed');
-        isPlaying.value = false;
-        
-        if (onEnded) {
-          console.log('🔄 Calling onEnded callback from TTS');
-          onEnded();
-        }
-        resolve(2);
-      };
-
-      // Configure TTS
-      const isKorean = /[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/.test(textToSpeak);
-      
-      if (isKorean) {
-        utterance.lang = 'ko-KR';
-        utterance.rate = 0.7;
-        utterance.pitch = 1.1;
-      } else {
-        utterance.lang = 'en-US';
-        utterance.rate = 0.8;
-        utterance.pitch = 1.2;
+      // Enhanced TTS availability check
+      if (!('speechSynthesis' in window)) {
+        console.log('❌ SpeechSynthesis not supported');
+        reject(new Error('TTS not supported'));
+        return;
       }
-      
-      utterance.volume = 0.8;
 
-      utterance.onstart = () => {
-        console.log('🗣️ TTS started');
-        isPlaying.value = true;
+      // Wait for voices to load (important for tablets)
+      const waitForVoices = () => {
+        return new Promise<void>((voiceResolve) => {
+          const voices = speechSynthesis.getVoices();
+          if (voices.length > 0) {
+            voiceResolve();
+          } else {
+            // Wait for voiceschanged event
+            const handleVoicesChanged = () => {
+              speechSynthesis.removeEventListener('voiceschanged', handleVoicesChanged);
+              voiceResolve();
+            };
+            speechSynthesis.addEventListener('voiceschanged', handleVoicesChanged);
+            
+            // Fallback timeout
+            setTimeout(() => {
+              speechSynthesis.removeEventListener('voiceschanged', handleVoicesChanged);
+              voiceResolve();
+            }, 2000);
+          }
+        });
       };
 
-      utterance.onend = () => {
-        console.log('🗣️ TTS ended');
-        handleTTSComplete();
-      };
+      waitForVoices().then(() => {
+        const utterance = new SpeechSynthesisUtterance(textToSpeak);
+        let hasCompleted = false;
 
-      utterance.onerror = (error) => {
-        console.log('🚨 TTS error:', error);
-        handleTTSComplete(); // Still complete even on error
-      };
+        const handleTTSComplete = () => {
+          if (hasCompleted) return;
+          hasCompleted = true;
+          
+          console.log('✅ TTS completed');
+          isPlaying.value = false;
+          
+          if (onEnded) {
+            console.log('🔄 Calling onEnded callback from TTS');
+            onEnded();
+          }
+          resolve(2);
+        };
 
-      // Safety timeout for TTS (max 10 seconds)
-      setTimeout(() => {
-        if (!hasCompleted) {
-          console.log('⚠️ TTS safety timeout triggered');
-          speechSynthesis.cancel();
+        // Enhanced voice selection for better tablet compatibility
+        const selectVoice = () => {
+          const voices = speechSynthesis.getVoices();
+          const isKorean = /[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/.test(textToSpeak);
+          
+          if (isKorean) {
+            // Try to find Korean voice
+            const koreanVoices = voices.filter(voice => 
+              voice.lang.startsWith('ko') || 
+              voice.name.toLowerCase().includes('korean') ||
+              voice.name.toLowerCase().includes('yuna') ||
+              voice.name.toLowerCase().includes('nayoung')
+            );
+            
+            if (koreanVoices.length > 0) {
+              utterance.voice = koreanVoices[0];
+              utterance.lang = 'ko-KR';
+            } else {
+              utterance.lang = 'ko-KR';
+            }
+            utterance.rate = 0.6; // Slower for Korean
+            utterance.pitch = 1.0;
+          } else {
+            // Try to find English voice
+            const englishVoices = voices.filter(voice => 
+              voice.lang.startsWith('en') ||
+              voice.name.toLowerCase().includes('english')
+            );
+            
+            if (englishVoices.length > 0) {
+              utterance.voice = englishVoices[0];
+              utterance.lang = 'en-US';
+            } else {
+              utterance.lang = 'en-US';
+            }
+            utterance.rate = 0.7; // Slower for better clarity
+            utterance.pitch = 1.1;
+          }
+        };
+
+        selectVoice();
+        utterance.volume = 0.9; // Slightly higher volume for tablets
+
+        // Enhanced event handling for tablets
+        utterance.onstart = () => {
+          console.log('🗣️ TTS started');
+          isPlaying.value = true;
+        };
+
+        utterance.onend = () => {
+          console.log('🗣️ TTS ended normally');
           handleTTSComplete();
-        }
-      }, 10000);
+        };
 
-      speechSynthesis.speak(utterance);
+        utterance.onerror = (error) => {
+          console.log('🚨 TTS error:', error.error);
+          
+          // On tablets, sometimes we get errors but TTS still works
+          // Wait a bit before completing to see if speech actually happens
+          setTimeout(() => {
+            if (!hasCompleted) {
+              handleTTSComplete();
+            }
+          }, 500);
+        };
+
+        utterance.onpause = () => {
+          console.log('⏸️ TTS paused');
+        };
+
+        utterance.onresume = () => {
+          console.log('▶️ TTS resumed');
+        };
+
+        // Clear any existing speech
+        speechSynthesis.cancel();
+        
+        // Small delay to ensure cancel is processed
+        setTimeout(() => {
+          // Safety timeout for TTS (max 15 seconds for tablets)
+          const safetyTimeout = setTimeout(() => {
+            if (!hasCompleted) {
+              console.log('⚠️ TTS safety timeout triggered');
+              speechSynthesis.cancel();
+              handleTTSComplete();
+            }
+          }, 15000);
+
+          try {
+            console.log('🗣️ Starting TTS with text:', textToSpeak);
+            speechSynthesis.speak(utterance);
+            
+            // Additional check for tablets - some don't fire events properly
+            setTimeout(() => {
+              if (!hasCompleted && !speechSynthesis.speaking && !speechSynthesis.pending) {
+                console.log('🔄 TTS seems to have completed without event');
+                clearTimeout(safetyTimeout);
+                handleTTSComplete();
+              }
+            }, 3000);
+            
+          } catch (error) {
+            console.error('🚨 TTS speak() failed:', error);
+            clearTimeout(safetyTimeout);
+            reject(error);
+          }
+        }, 100);
+      });
     });
   };
 
@@ -298,12 +397,87 @@ export function useAudio() {
     isPlaying.value = false;
   };
 
+  // TTS 진단 도구 (디버깅용)
+  const diagnoseTTS = () => {
+    console.log('🔍 TTS Diagnosis Start');
+    
+    const result = {
+      speechSynthesisSupported: 'speechSynthesis' in window,
+      voicesCount: 0,
+      availableVoices: [] as any[],
+      koreanVoices: [] as any[],
+      englishVoices: [] as any[],
+      browserInfo: navigator.userAgent
+    };
+
+    if (result.speechSynthesisSupported) {
+      const voices = speechSynthesis.getVoices();
+      result.voicesCount = voices.length;
+      result.availableVoices = voices.map(v => ({
+        name: v.name,
+        lang: v.lang,
+        localService: v.localService,
+        default: v.default
+      }));
+      
+      result.koreanVoices = voices.filter(v => 
+        v.lang.startsWith('ko') || 
+        v.name.toLowerCase().includes('korean')
+      );
+      
+      result.englishVoices = voices.filter(v => 
+        v.lang.startsWith('en')
+      );
+    }
+
+    console.log('📊 TTS Diagnosis Result:', result);
+    return result;
+  };
+
+  // 강제 TTS 테스트 (태블릿 디버깅용)
+  const testTTS = (text: string = '테스트') => {
+    console.log('🧪 Testing TTS with text:', text);
+    return tryTTSFallback('', text);
+  };
+
+  // 사용자 상호작용 후 TTS 활성화
+  const activateTTSOnUserInteraction = () => {
+    const activateTTS = async () => {
+      try {
+        // 빈 음성으로 TTS 활성화
+        const utterance = new SpeechSynthesisUtterance(' ');
+        utterance.volume = 0.01;
+        speechSynthesis.speak(utterance);
+        
+        console.log('✅ TTS activated on user interaction');
+      } catch (error) {
+        console.warn('⚠️ TTS activation failed:', error);
+      }
+    };
+
+    // 다양한 사용자 이벤트에 리스너 추가
+    const events = ['click', 'touchstart', 'keydown'];
+    const activateOnce = () => {
+      activateTTS();
+      events.forEach(event => {
+        document.removeEventListener(event, activateOnce);
+      });
+    };
+
+    events.forEach(event => {
+      document.addEventListener(event, activateOnce, { once: true });
+    });
+  };
+
   return {
     isPlaying,
     audioDuration,
     playAudio,
     stopAudio,
     unlockAudio,
-    isAudioUnlocked
+    isAudioUnlocked,
+    diagnoseTTS,
+    testTTS,
+    activateTTSOnUserInteraction
   };
 }

@@ -2,7 +2,7 @@ export interface WordItem {
   id: string;
   name: string;
   nameEn: string;
-  imageUrl: string;
+  imageUrl: string | null;
   audioKo: string;
   audioEn: string;
   category: string;

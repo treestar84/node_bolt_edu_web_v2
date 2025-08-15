@@ -3,7 +3,7 @@
     <div class="modal-content step-modal" @click.stop>
       <div class="modal-header">
         <div class="modal-title-section">
-          <h2>{{ isEditing ? $t('admin.editBook') : $t('admin.addNewBook') }}</h2>
+          <h2>{{ isEditing ? t('admin.editBook') : t('admin.addNewBook') }}</h2>
           <div class="step-indicator">
             <div 
               v-for="(_, index) in steps" 
@@ -39,73 +39,73 @@
         <!-- Step 3: File Upload (simplified for now) -->
         <div v-if="currentStep === 3" class="step-content">
           <div class="step-header">
-            <h3 class="step-title">📁 {{ $t('admin.steps.fileUpload') }}</h3>
+            <h3 class="step-title">📁 {{ t('admin.steps.fileUpload') }}</h3>
             <p class="step-description">필요한 파일들을 업로드해주세요</p>
           </div>
           
           <div v-if="formData.isVideoMode" class="video-upload-section">
             <div class="form-group">
-              <label class="form-label">{{ $t('forms.storyVideo') }}</label>
+              <label class="form-label">{{ t('forms.storyVideo') }}</label>
               <FileUploadInput
                 v-model="fileData.videoUrl"
-                :label="$t('forms.storyVideo')"
+                :label="t('forms.storyVideo')"
                 file-type="video"
-                :placeholder="$t('forms.storyVideoPlaceholder')"
+                :placeholder="t('forms.storyVideoPlaceholder')"
                 @uploaded="handleVideoUpload"
               />
             </div>
             
             <div v-if="fileData.generatedCover" class="generated-cover">
-              <label class="form-label">{{ $t('forms.generatedCover') }}</label>
+              <label class="form-label">{{ t('forms.generatedCover') }}</label>
               <img :src="fileData.generatedCover" alt="Generated cover" class="cover-preview" />
             </div>
           </div>
           
           <div v-else class="traditional-upload-section">
             <div class="form-group">
-              <label class="form-label">{{ $t('forms.coverImage') }}</label>
+              <label class="form-label">{{ t('forms.coverImage') }}</label>
               <FileUploadInput
                 v-model="fileData.coverImage"
-                :label="$t('forms.coverImage')"
+                :label="t('forms.coverImage')"
                 file-type="image"
-                :placeholder="$t('forms.coverImagePlaceholder')"
+                :placeholder="t('forms.coverImagePlaceholder')"
               />
             </div>
             
             <div class="pages-section">
               <div class="pages-header">
-                <h4>{{ $t('forms.pages') }}</h4>
+                <h4>{{ t('forms.pages') }}</h4>
                 <button type="button" @click="addPage" class="btn btn-sm btn-secondary">
-                  {{ $t('forms.addPage') }}
+                  {{ t('forms.addPage') }}
                 </button>
               </div>
               
               <div v-for="(page, index) in pageData" :key="index" class="page-item">
                 <div class="page-header">
-                  <span class="page-number">{{ $t('common.page') }} {{ index + 1 }}</span>
+                  <span class="page-number">{{ t('common.page') }} {{ index + 1 }}</span>
                   <button type="button" @click="removePage(index)" class="btn btn-sm btn-danger">
-                    {{ $t('forms.removePage') }}
+                    {{ t('forms.removePage') }}
                   </button>
                 </div>
                 
                 <div class="page-uploads">
                   <div class="form-group">
-                    <label class="form-label">{{ $t('forms.pageImage') }}</label>
+                    <label class="form-label">{{ t('forms.pageImage') }}</label>
                     <FileUploadInput
                       v-model="page.imageUrl"
-                      :label="$t('forms.pageImage')"
+                      :label="t('forms.pageImage')"
                       file-type="image"
-                      :placeholder="$t('forms.pageImagePlaceholder')"
+                      :placeholder="t('forms.pageImagePlaceholder')"
                     />
                   </div>
                   
                   <div class="form-group">
-                    <label class="form-label">{{ $t('forms.pageAudio') }}</label>
+                    <label class="form-label">{{ t('forms.pageAudio') }}</label>
                     <FileUploadInput
                       v-model="page.audioUrl"
-                      :label="$t('forms.pageAudio')"
+                      :label="t('forms.pageAudio')"
                       file-type="audio"
-                      :placeholder="$t('forms.pageAudioPlaceholder')"
+                      :placeholder="t('forms.pageAudioPlaceholder')"
                     />
                   </div>
                 </div>
@@ -122,13 +122,13 @@
               @click="prevStep" 
               class="btn btn-secondary"
             >
-              {{ $t('common.prev') }}
+              {{ t('common.prev') }}
             </button>
           </div>
           
           <div class="footer-right">
             <button type="button" @click="$emit('close')" class="btn btn-secondary">
-              {{ $t('common.cancel') }}
+              {{ t('common.cancel') }}
             </button>
             
             <button 
@@ -138,7 +138,7 @@
               class="btn btn-primary"
               :disabled="!canProceedToNextStep"
             >
-              {{ $t('common.next') }}
+              {{ t('common.next') }}
             </button>
             
             <button 
@@ -147,7 +147,7 @@
               class="btn btn-primary"
               :disabled="isSaving"
             >
-              {{ isSaving ? $t('common.processing') : $t('common.save') }}
+              {{ isSaving ? t('common.processing') : t('common.save') }}
             </button>
           </div>
         </div>
@@ -158,6 +158,7 @@
 
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 import BookFormStep1 from './BookFormStep1.vue';
 import BookFormStep2 from './BookFormStep2.vue';
 import FileUploadInput from '@/components/FileUploadInput.vue';
@@ -169,6 +170,7 @@ interface Props {
   isSystemAdmin: boolean;
 }
 
+const { t } = useI18n();
 const props = defineProps<Props>();
 const emit = defineEmits<{
   close: [];

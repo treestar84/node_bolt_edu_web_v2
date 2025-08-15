@@ -5,9 +5,9 @@
         <div class="step-header">
           <h2>
             <span class="title-icon">🌍</span>
-            {{ word ? $t('multiLang.editWord') : $t('multiLang.formTitle') }}
+            {{ word ? t('multiLang.editWord') : t('multiLang.formTitle') }}
           </h2>
-          <p class="subtitle">{{ $t('multiLang.formSubtitle') }}</p>
+          <p class="subtitle">{{ t('multiLang.formSubtitle') }}</p>
           <div class="step-indicator">
             <div class="steps">
               <div 
@@ -52,18 +52,19 @@
         <div v-if="currentStep === 3" class="step-content">
           <div class="customization-section">
             <div class="section-header">
-              <h3>{{ $t('multiLang.customization') }}</h3>
+              <h3>{{ t('multiLang.customization') }}</h3>
               <p class="section-description">원하는 경우 번역된 내용이나 이미지를 수정할 수 있습니다.</p>
             </div>
 
             <div class="customization-content">
               <!-- 이미지 커스터마이징 -->
               <div class="custom-group">
-                <h4>{{ $t('multiLang.customImage') }}</h4>
+                <h4>{{ t('multiLang.customImage') }}</h4>
                 <FileUploadInput
                   v-model="processedData.imageUrl"
-                  type="image"
-                  :placeholder="$t('forms.imagePlaceholder')"
+                  label=""
+                  fileType="image"
+                  :placeholder="t('forms.imagePlaceholder')"
                   @upload-complete="onImageUpload"
                 />
                 <div v-if="processedData.imageUrl" class="current-image">
@@ -73,7 +74,7 @@
 
               <!-- 번역 수정 (품질 검증 포함) -->
               <div class="custom-group">
-                <h4>{{ $t('multiLang.translationEdit') }}</h4>
+                <h4>{{ t('multiLang.translationEdit') }}</h4>
                 <div class="translation-grid">
                   <div 
                     v-for="(translation, langCode) in processedData.translations" 
@@ -82,8 +83,8 @@
                   >
                     <div class="translation-header">
                       <label class="translation-label">
-                        <span class="flag">{{ SUPPORTED_LANGUAGES[langCode]?.flag }}</span>
-                        <span class="language-name">{{ SUPPORTED_LANGUAGES[langCode]?.nativeName }}</span>
+                        <span class="flag">{{ SUPPORTED_LANGUAGES[langCode as SupportedLanguageCode]?.flag }}</span>
+                        <span class="language-name">{{ SUPPORTED_LANGUAGES[langCode as SupportedLanguageCode]?.nativeName }}</span>
                       </label>
                       
                       <!-- 품질 지표 -->
@@ -102,20 +103,20 @@
                         v-model="translation.name"
                         type="text"
                         class="translation-input"
-                        :class="getTranslationInputClass(langCode)"
-                        @input="onTranslationEdit(langCode, $event)"
-                        @blur="validateTranslation(langCode)"
+                        :class="getTranslationInputClass(langCode as string)"
+                        @input="onTranslationEdit(langCode as string, $event)"
+                        @blur="validateTranslation(langCode as string)"
                       />
                       
                       <div class="translation-actions">
                         <!-- TTS 테스트 버튼 -->
                         <button
-                          @click="testTTS(langCode, translation.name)"
+                          @click="testTTS(langCode as string, translation.name)"
                           :disabled="isTesting"
                           class="tts-test-button"
                           :class="{ testing: testingLanguage === langCode }"
                           type="button"
-                          :title="$t('multiLang.testPronunciation')"
+                          :title="t('multiLang.testPronunciation')"
                         >
                           <span v-if="testingLanguage === langCode" class="spinner"></span>
                           <span v-else>🔊</span>
@@ -123,23 +124,23 @@
                         
                         <!-- 품질 검증 버튼 -->
                         <button
-                          v-if="shouldShowValidationButton(langCode)"
-                          @click="openValidationModal(langCode)"
+                          v-if="shouldShowValidationButton(langCode as string)"
+                          @click="openValidationModal(langCode as string)"
                           class="validation-button"
-                          :class="getValidationButtonClass(langCode)"
+                          :class="getValidationButtonClass(langCode as string)"
                           type="button"
-                          :title="$t('quality.validateTranslation')"
+                          :title="t('quality.validateTranslation')"
                         >
-                          <span class="validation-icon">{{ getValidationIcon(langCode) }}</span>
+                          <span class="validation-icon">{{ getValidationIcon(langCode as string) }}</span>
                         </button>
                         
                         <!-- 대안 제안 버튼 -->
                         <button
                           v-if="translationAlternatives[langCode]?.length > 0"
-                          @click="showAlternatives(langCode)"
+                          @click="showAlternatives(langCode as string)"
                           class="alternatives-button"
                           type="button"
-                          :title="$t('quality.showAlternatives')"
+                          :title="t('quality.showAlternatives')"
                         >
                           <span class="alternatives-icon">💡</span>
                           <span class="alternatives-count">{{ translationAlternatives[langCode].length }}</span>
@@ -149,11 +150,11 @@
                     
                     <!-- 품질 경고 메시지 -->
                     <div 
-                      v-if="getQualityWarning(langCode)" 
+                      v-if="getQualityWarning(langCode as string)" 
                       class="quality-warning"
                     >
                       <span class="warning-icon">⚠️</span>
-                      <span class="warning-text">{{ getQualityWarning(langCode) }}</span>
+                      <span class="warning-text">{{ getQualityWarning(langCode as string) }}</span>
                     </div>
                     
                     <!-- 대안 번역 표시 -->
@@ -162,14 +163,14 @@
                       class="alternatives-dropdown"
                     >
                       <div class="alternatives-header">
-                        <span>{{ $t('quality.suggestedAlternatives') }}</span>
-                        <button @click="hideAlternatives(langCode)" class="close-alternatives">×</button>
+                        <span>{{ t('quality.suggestedAlternatives') }}</span>
+                        <button @click="hideAlternatives(langCode as string)" class="close-alternatives">×</button>
                       </div>
                       <div class="alternatives-list">
                         <button
                           v-for="(alternative, index) in translationAlternatives[langCode]"
                           :key="index"
-                          @click="selectAlternative(langCode, alternative)"
+                          @click="selectAlternative(langCode as string, alternative)"
                           class="alternative-option"
                           type="button"
                         >
@@ -183,21 +184,21 @@
 
               <!-- 기본 설정 -->
               <div class="custom-group">
-                <h4>{{ $t('forms.category') }}</h4>
+                <h4>{{ t('forms.category') }}</h4>
                 <select v-model="processedData.category" class="form-control">
-                  <option value="animals">{{ $t('categories.animals') }}</option>
-                  <option value="fruits">{{ $t('categories.fruits') }}</option>
-                  <option value="vehicles">{{ $t('categories.vehicles') }}</option>
-                  <option value="objects">{{ $t('categories.objects') }}</option>
-                  <option value="nature">{{ $t('categories.nature') }}</option>
-                  <option value="toys">{{ $t('categories.toys') }}</option>
-                  <option value="clothes">{{ $t('categories.clothes') }}</option>
-                  <option value="other">{{ $t('categories.other') }}</option>
+                  <option value="animals">{{ t('categories.animals') }}</option>
+                  <option value="fruits">{{ t('categories.fruits') }}</option>
+                  <option value="vehicles">{{ t('categories.vehicles') }}</option>
+                  <option value="objects">{{ t('categories.objects') }}</option>
+                  <option value="nature">{{ t('categories.nature') }}</option>
+                  <option value="toys">{{ t('categories.toys') }}</option>
+                  <option value="clothes">{{ t('categories.clothes') }}</option>
+                  <option value="other">{{ t('categories.other') }}</option>
                 </select>
               </div>
 
               <div class="custom-group">
-                <h4>{{ $t('forms.appropriateAge') }}</h4>
+                <h4>{{ t('forms.appropriateAge') }}</h4>
                 <div class="age-range">
                   <select v-model="processedData.minAge" class="form-control small">
                     <option v-for="age in [3,4,5,6,7,8]" :key="age" :value="age">{{ age }}세</option>
@@ -216,14 +217,14 @@
         <div v-if="currentStep === 4" class="step-content">
           <div class="confirmation-section">
             <div class="confirmation-header">
-              <h3>{{ $t('multiLang.finalConfirmation') }}</h3>
+              <h3>{{ t('multiLang.finalConfirmation') }}</h3>
               <p class="confirmation-description">모든 설정이 완료되었습니다. 다음 내용으로 단어를 저장합니다.</p>
             </div>
 
             <div class="confirmation-content">
               <!-- 이미지 미리보기 -->
               <div class="preview-group">
-                <h4>{{ $t('forms.image') }}</h4>
+                <h4>{{ t('forms.image') }}</h4>
                 <div class="image-preview">
                   <img :src="processedData.imageUrl" alt="Word image" class="final-preview-image" />
                 </div>
@@ -231,18 +232,18 @@
 
               <!-- 번역 요약 -->
               <div class="preview-group">
-                <h4>{{ $t('multiLang.translationSummary') }}</h4>
+                <h4>{{ t('multiLang.translationSummary') }}</h4>
                 <div class="translation-summary">
                   <div 
                     v-for="(translation, langCode) in processedData.translations" 
                     :key="langCode"
                     class="summary-item"
                   >
-                    <span class="flag">{{ SUPPORTED_LANGUAGES[langCode]?.flag }}</span>
-                    <span class="language-name">{{ SUPPORTED_LANGUAGES[langCode]?.nativeName }}:</span>
+                    <span class="flag">{{ SUPPORTED_LANGUAGES[langCode as SupportedLanguageCode]?.flag }}</span>
+                    <span class="language-name">{{ SUPPORTED_LANGUAGES[langCode as SupportedLanguageCode]?.nativeName }}:</span>
                     <span class="translation-text">{{ translation.name }}</span>
                     <button
-                      @click="testTTS(langCode, translation.name)"
+                      @click="testTTS(langCode as string, translation.name)"
                       :disabled="isTesting"
                       class="tts-button small"
                       :class="{ testing: testingLanguage === langCode }"
@@ -256,19 +257,19 @@
 
               <!-- 기본 정보 요약 -->
               <div class="preview-group">
-                <h4>{{ $t('forms.summary.title') }}</h4>
+                <h4>{{ t('forms.summary.title') }}</h4>
                 <div class="basic-info-summary">
                   <div class="info-item">
-                    <span class="label">{{ $t('forms.category') }}:</span>
-                    <span class="value">{{ $t(`categories.${processedData.category}`) }}</span>
+                    <span class="label">{{ t('forms.category') }}:</span>
+                    <span class="value">{{ t(`categories.${processedData.category}`) }}</span>
                   </div>
                   <div class="info-item">
-                    <span class="label">{{ $t('forms.appropriateAge') }}:</span>
+                    <span class="label">{{ t('forms.appropriateAge') }}:</span>
                     <span class="value">{{ processedData.minAge }}~{{ processedData.maxAge }}세</span>
                   </div>
                   <div class="info-item">
-                    <span class="label">{{ $t('admin.ownership.type') }}:</span>
-                    <span class="value">{{ processedData.ownerType === 'global' ? $t('admin.ownership.global') : $t('admin.ownership.user') }}</span>
+                    <span class="label">{{ t('admin.ownership.type') }}:</span>
+                    <span class="value">{{ processedData.ownerType === 'global' ? t('admin.ownership.global') : t('admin.ownership.user') }}</span>
                   </div>
                 </div>
               </div>
@@ -285,7 +286,7 @@
           class="btn btn-secondary"
           :disabled="isProcessing"
         >
-          {{ $t('common.back') }}
+          {{ t('common.back') }}
         </button>
         
         <button 
@@ -295,7 +296,7 @@
           class="btn btn-primary"
           :disabled="!canProceedStep1"
         >
-          {{ $t('common.next') }}
+          {{ t('common.next') }}
         </button>
 
         <button 
@@ -304,7 +305,7 @@
           @click="nextStep" 
           class="btn btn-primary"
         >
-          {{ $t('multiLang.proceedToSave') }}
+          {{ t('multiLang.proceedToSave') }}
         </button>
         
         <button 
@@ -315,7 +316,7 @@
           :disabled="isSaving"
         >
           <span v-if="isSaving" class="spinner"></span>
-          {{ isSaving ? $t('common.processing') : $t('multiLang.saveWord') }}
+          {{ isSaving ? t('common.processing') : t('multiLang.saveWord') }}
         </button>
       </div>
     </div>
@@ -337,24 +338,25 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, nextTick } from 'vue';
+import { ref, computed, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 import MultiLangWordForm from '@/components/multilang/MultiLangWordForm.vue';
 import TranslationProgress from '@/components/multilang/TranslationProgress.vue';
 import TranslationQualityIndicator from '@/components/multilang/TranslationQualityIndicator.vue';
 import TranslationValidationModal from '@/components/multilang/TranslationValidationModal.vue';
 import FileUploadInput from '@/components/FileUploadInput.vue';
-import { SUPPORTED_LANGUAGES, type SupportedLanguageCode } from '@/constants/languages';
+import { SUPPORTED_LANGUAGES } from '@/constants/languages';
 import { useMultiLangAudio } from '@/composables/useMultiLangAudio';
 import { useMultiLangProcessor } from '@/composables/useMultiLangProcessor';
 import { useTranslationQuality } from '@/composables/useTranslationQuality';
 import { WordCompatibilityHelper } from '@/utils/wordCompatibility';
 import type { 
   MultiLangFormData, 
-  AutoProcessingStatus, 
   MultiLangWordItem, 
   TranslationResult,
   TranslationQualityScore,
-  UserTranslationValidation
+  UserTranslationValidation,
+  SupportedLanguageCode
 } from '@/types/multilingual';
 import type { WordItem } from '@/types';
 
@@ -376,6 +378,7 @@ interface Emits {
 const emit = defineEmits<Emits>();
 
 // Composables
+const { t } = useI18n();
 const { speakText } = useMultiLangAudio();
 const processor = useMultiLangProcessor();
 const { 
@@ -386,8 +389,8 @@ const {
   confirmTranslationCorrect,
   isQualitySuitableForChildren,
   getParentalGuidanceMessage,
-  getQualityColor,
-  getQualityIcon
+  
+  
 } = useTranslationQuality();
 
 // Refs
@@ -447,10 +450,10 @@ const processedData = ref<MultiLangWordItem>({
 
 // Computed
 const steps = computed(() => [
-  { title: $t('multiLang.languageAndInput') || '언어 선택 및 입력' },
-  { title: $t('multiLang.autoProcessing') || '자동 처리' },
-  { title: $t('multiLang.customization') || '커스터마이징' },
-  { title: $t('multiLang.finalConfirmation') || '최종 확인' }
+  { title: t('multiLang.languageAndInput') || '언어 선택 및 입력' },
+  { title: t('multiLang.autoProcessing') || '자동 처리' },
+  { title: t('multiLang.customization') || '커스터마이징' },
+  { title: t('multiLang.finalConfirmation') || '최종 확인' }
 ]);
 
 const canProceedStep1 = computed(() => {
@@ -512,15 +515,9 @@ const handleStartProcessing = async (data: MultiLangFormData & { languages: { pr
 // 이 메서드는 이제 handleStartProcessing에서 처리되므로 삭제
 // const handleProcessingComplete = ... (removed)
 
-const handleProcessingError = (error: any) => {
-  console.error('❌ Processing error:', error);
-  isProcessing.value = false;
-  // Could show an error modal or message
-};
 
-const goToCustomization = () => {
-  currentStep.value = 3;
-};
+
+
 
 const nextStep = () => {
   if (currentStep.value < steps.value.length) {
@@ -541,7 +538,7 @@ const onImageUpload = (imageUrl: string) => {
 
 const onTranslationEdit = (langCode: string, event: Event) => {
   const target = event.target as HTMLInputElement;
-  if (processedData.value.translations[langCode]) {
+  if (processedData.value.translations && processedData.value.translations[langCode]) {
     processedData.value.translations[langCode].name = target.value;
     console.log(`📝 Translation edited: ${langCode} = "${target.value}"`);
   }
@@ -576,8 +573,8 @@ const handleSave = async () => {
     const wordToSave: MultiLangWordItem = {
       ...processedData.value,
       // Ensure backward compatibility
-      name: processedData.value.translations[processedData.value.primaryLanguage!]?.name || processedData.value.name,
-      nameEn: processedData.value.translations[processedData.value.secondaryLanguage!]?.name || processedData.value.nameEn,
+      name: processedData.value.translations?.[processedData.value.primaryLanguage!]?.name || processedData.value.name,
+      nameEn: processedData.value.translations?.[processedData.value.secondaryLanguage!]?.name || processedData.value.nameEn,
     };
     
     emit('save', wordToSave);
@@ -598,19 +595,18 @@ const handleClose = () => {
  * 번역 품질 검증
  */
 const validateTranslation = async (langCode: string) => {
-  const translation = processedData.value.translations[langCode];
+  const translation = processedData.value.translations?.[langCode];
   if (!translation || !translation.name) return;
 
   try {
     // Mock translation result for quality calculation
     const mockTranslationResult: TranslationResult = {
-      originalText: formDataWithLanguages.value.primaryText,
-      translatedText: translation.name,
-      sourceLanguage: formDataWithLanguages.value.languages.primary,
-      targetLanguage: langCode,
+      name: translation.name,
       confidence: translation.confidence || 0.8,
       translatedBy: translation.translatedBy || 'auto',
-      timestamp: Date.now()
+      source: translation.source || 'manual',
+      audioUrl: translation.audioUrl || '',
+      isCustomAudio: translation.isCustomAudio || false,
     };
 
     // 품질 점수 계산
@@ -644,7 +640,7 @@ const validateTranslation = async (langCode: string) => {
  * 품질 검증 모달 열기
  */
 const openValidationModal = async (langCode: string) => {
-  const translation = processedData.value.translations[langCode];
+  const translation = processedData.value.translations?.[langCode];
   if (!translation) return;
 
   currentValidationLang.value = langCode;
@@ -690,11 +686,11 @@ const handleValidationSubmit = async (validation: UserTranslationValidation) => 
     const langCode = currentValidationLang.value;
     
     // 수정된 번역으로 업데이트
-    if (processedData.value.translations[langCode]) {
+    if (processedData.value.translations && processedData.value.translations[langCode]) {
       processedData.value.translations[langCode].name = validation.correctedTranslation;
       
       // 수정 후 품질 재계산
-      await validateTranslation(langCode);
+      await validateTranslation(langCode as string);
     }
     
     validationModalOpen.value = false;
@@ -717,14 +713,14 @@ const hideAlternatives = (langCode: string) => {
  * 대안 번역 선택
  */
 const selectAlternative = async (langCode: string, alternative: string) => {
-  if (processedData.value.translations[langCode]) {
+  if (processedData.value.translations && processedData.value.translations[langCode]) {
     processedData.value.translations[langCode].name = alternative;
     
     // 대안 선택 후 품질 재계산
-    await validateTranslation(langCode);
+    await validateTranslation(langCode as string);
     
     // 대안 목록 숨기기
-    hideAlternatives(langCode);
+    hideAlternatives(langCode as string);
     
     console.log(`🔄 ${langCode} 대안 번역 선택: "${alternative}"`);
   }
@@ -801,10 +797,11 @@ const getQualityWarning = (langCode: string): string | null => {
  * 현재 검증 중인 번역 텍스트 가져오기
  */
 const getCurrentTranslation = (): string => {
-  if (!currentValidationLang.value || !processedData.value.translations[currentValidationLang.value]) {
+  if (!currentValidationLang.value || !processedData.value.translations) {
     return '';
   }
-  return processedData.value.translations[currentValidationLang.value].name;
+  const translation = processedData.value.translations[currentValidationLang.value];
+  return translation ? translation.name : '';
 };
 
 /**
@@ -812,8 +809,9 @@ const getCurrentTranslation = (): string => {
  */
 const validateAllTranslations = async () => {
   const translations = processedData.value.translations;
+  if (!translations) return;
   const promises = Object.keys(translations).map(langCode => 
-    validateTranslation(langCode)
+    validateTranslation(langCode as string)
   );
   
   await Promise.allSettled(promises);
@@ -906,7 +904,7 @@ watch(() => formData.value.maxAge, (newMax) => {
 
 // 번역 처리 완료 후 품질 검증 실행
 watch(() => processedData.value.translations, async (newTranslations) => {
-  if (Object.keys(newTranslations).length > 0 && currentStep.value === 3) {
+  if (newTranslations && Object.keys(newTranslations).length > 0 && currentStep.value === 3) {
     // 500ms 지연 후 품질 검증 실행 (UI 업데이트 완료 대기)
     setTimeout(async () => {
       await validateAllTranslations();

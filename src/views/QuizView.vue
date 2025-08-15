@@ -5,15 +5,15 @@
     <main class="main-content">
       <div class="container">
         <div class="quiz-header">
-          <h1 class="page-title">{{$t('quiz.title')}}</h1>
+          <h1 class="page-title">{{t('quiz.title')}}</h1>
         </div>
 
         <div v-if="!gameStarted" class="game-start">
           <div class="start-card">
-            <h2>{{$t('quiz.start')}}</h2>
-            <p>{{$t('quiz.findAnswer')}}</p>
+            <h2>{{t('quiz.start')}}</h2>
+            <p>{{t('quiz.findAnswer')}}</p>
             <button @click="startGame" class="btn btn-primary btn-lg">
-              {{$t('quiz.startGame')}}
+              {{t('quiz.startGame')}}
             </button>
           </div>
         </div>
@@ -22,10 +22,10 @@
           <!-- 콤팩트한 퀴즈 질문 패널 -->
           <div class="quiz-question-compact">
             <div class="question-content">
-              <h2>{{$t('quiz.findAnswer')}}</h2>
+              <h2>{{t('quiz.findAnswer')}}</h2>
               <button @click="playQuizAudio" class="audio-button-compact" :class="{ playing: isPlaying }">
                 <span class="audio-icon">🔊</span>
-                <span class="audio-text">{{$t('quiz.listen')}}</span>
+                <span class="audio-text">{{t('quiz.listen')}}</span>
               </button>
             </div>
           </div>
@@ -43,7 +43,7 @@
                 incorrect: showResult && selectedAnswer === option.id && option.id !== currentQuiz.correctAnswerId
               }"
             >
-              <img :src="getImageUrl(option.imageUrl)" :alt="option.name" />
+              <img :src="getImageUrl(option.imageUrl || '')" :alt="option.name" />
               <div class="option-name">
                 {{ store.currentLanguage === 'ko' ? option.name : option.nameEn }}
               </div>
@@ -53,12 +53,12 @@
           <div v-if="showResult" class="quiz-result">
             <div v-if="isCorrect" class="result-correct">
               <div class="celebration-container">
-                <div class="celebration-text">{{$t('quiz.correct')}}</div>
+                <div class="celebration-text">{{t('quiz.correct')}}</div>
                 <div class="confetti" v-for="i in 20" :key="i" :style="getConfettiStyle(i)"></div>
               </div>
-              <h3>{{$t('quiz.correct')}}</h3>
+              <h3>{{t('quiz.correct')}}</h3>
               <div v-if="newBadgeUnlocked" class="new-badge-notification">
-                <div class="badge-unlock-text">{{$t('quiz.badge')}}</div>
+                <div class="badge-unlock-text">{{t('quiz.badge')}}</div>
                 <div class="unlocked-badge">
                   <span class="unlocked-badge-icon">{{ newBadgeUnlocked.icon }}</span>
                   <span class="unlocked-badge-name">{{ newBadgeUnlocked.name }}</span>
@@ -66,16 +66,16 @@
               </div>
             </div>
             <div v-else class="result-incorrect">
-              <h3>{{$t('quiz.wrong')}}</h3>
+              <h3>{{t('quiz.wrong')}}</h3>
             </div>
           </div>
         </div>
 
         <div v-else class="no-words">
-          <h3>{{$t('quiz.notEnough')}}</h3>
-          <p>{{$t('quiz.needThree')}}</p>
+          <h3>{{t('quiz.notEnough')}}</h3>
+          <p>{{t('quiz.needThree')}}</p>
           <router-link to="/words" class="btn btn-primary">
-            {{$t('quiz.goWords')}}
+            {{t('quiz.goWords')}}
           </router-link>
         </div>
 
@@ -83,11 +83,11 @@
         <div class="quiz-footer-stats">
           <div class="quiz-stats">
             <div class="stat">
-              <span class="stat-label">{{$t('quiz.score')}}</span>
+              <span class="stat-label">{{t('quiz.score')}}</span>
               <span class="stat-value">{{ authStore.userProgress?.quizScore || 0 }}</span>
             </div>
             <div class="stat">
-              <span class="stat-label">{{$t('quiz.streak')}}</span>
+              <span class="stat-label">{{t('quiz.streak')}}</span>
               <span class="stat-value">{{ authStore.userProgress?.quizStreak || 0 }}</span>
             </div>
           </div>
@@ -99,6 +99,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
+import { useI18n } from 'vue-i18n';
 import Navigation from '@/components/Navigation.vue';
 import { useAppStore } from '@/stores/app';
 import { useAuthStore } from '@/stores/auth';
@@ -108,6 +109,7 @@ import { useQuizTracking } from '@/composables/useQuizTracking';
 import { useGameSounds } from '@/composables/useGameSounds';
 import type { Quiz, Badge } from '@/types';
 
+const { t } = useI18n();
 const store = useAppStore();
 const authStore = useAuthStore();
 const contentStore = useContentStore();

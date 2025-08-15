@@ -1,7 +1,7 @@
 // 번역 기능을 위한 composable - 무료 API 우선 사용으로 비용 최소화
 import { ref, computed } from 'vue';
 import { getTranslationService } from '@/services/translationService';
-import type { SupportedLanguageCode } from '@/constants/languages';
+import type { SupportedLanguageCode } from '@/types/multilingual';
 import type { TranslationResult } from '@/services/translationService';
 
 export function useTranslation() {

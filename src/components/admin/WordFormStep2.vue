@@ -33,7 +33,7 @@
               </div>
               
               <div v-else class="image-preview">
-                <img :src="getImageUrl(localFormData.imageUrl)" alt="Preview" />
+                <img :src="getImageUrl(localFormData.imageUrl || '')" alt="Preview" />
                 <div class="image-overlay">
                   <button type="button" class="change-btn">이미지 변경</button>
                 </div>

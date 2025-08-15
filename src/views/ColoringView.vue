@@ -7,15 +7,15 @@
         <!-- 색칠공부 선택 화면 -->
         <div v-if="coloring.gameState.value === 'selection'" class="coloring-selection">
           <div class="page-header">
-            <h1 class="page-title">{{$t('coloring.title')}}</h1>
+            <h1 class="page-title">{{t('coloring.title')}}</h1>
             <p class="page-description">
-              {{$t('coloring.description')}}
+              {{t('coloring.description')}}
             </p>
             
             <!-- 갤러리 버튼 -->
             <div v-if="authStore.isAuthenticated" class="header-actions">
               <a href="/coloring/gallery" class="btn btn-secondary gallery-btn">
-            🖼️ {{$t('coloring.gallery')}}
+            🖼️ {{t('coloring.gallery')}}
           </a>
             </div>
           </div>
@@ -29,16 +29,16 @@
               class="coloring-option-card"
             >
               <div class="option-image">
-                <img :src="getImageUrl(word.imageUrl)" :alt="getCurrentName(word)" />
+                <img :src="getImageUrl(word.imageUrl || '')" :alt="getCurrentName(word)" />
                 <div class="coloring-overlay">
                   <span class="coloring-icon">🎨</span>
-                  <span class="coloring-text">{{$t('coloring.start')}}</span>
+                  <span class="coloring-text">{{t('coloring.start')}}</span>
                 </div>
               </div>
               <div class="option-info">
                 <h3 class="option-name">{{ getCurrentName(word) }}</h3>
                 <div class="difficulty-badge">
-                  {{$t('coloring.easy')}}
+                  {{t('coloring.easy')}}
                 </div>
               </div>
             </div>
@@ -49,15 +49,15 @@
         <div v-else-if="coloring.gameState.value === 'coloring'" class="coloring-game">
           <div class="game-header">
             <button @click="coloring.goHome" class="btn btn-secondary back-btn">
-              ← {{$t('common.back')}}
+              ← {{t('common.back')}}
             </button>
             <div class="header-center">
-              <h2 class="coloring-title">{{ coloring.getCurrentName(coloring.selectedWord.value!) }} {{$t('coloring.title')}}</h2>
+              <h2 class="coloring-title">{{ coloring.getCurrentName(coloring.selectedWord.value!) }} {{t('coloring.title')}}</h2>
               <div class="progress-container">
                 <div class="progress-bar">
                   <div class="progress-fill" :style="{ width: coloring.coloringProgress.value + '%' }"></div>
                 </div>
-                <span class="progress-text">{{ coloring.coloringProgress.value }}% {{$t('coloring.completed')}}</span>
+                <span class="progress-text">{{ coloring.coloringProgress.value }}% {{t('coloring.completed')}}</span>
               </div>
               <div class="completion-controls">
                 <button 
@@ -65,19 +65,19 @@
                   class="btn btn-success complete-btn"
                   :disabled="coloring.coloringProgress.value < 5"
                 >
-                  ✅ {{$t('coloring.finished')}}
+                  ✅ {{t('coloring.finished')}}
                 </button>
               </div>
             </div>
             <button @click="coloring.canvas.clearCanvas" class="btn btn-secondary clear-btn">
-              🗑️ {{$t('coloring.clear')}}
+              🗑️ {{t('coloring.clear')}}
             </button>
           </div>
 
           <div class="coloring-container">
             <!-- 색상 팔레트 -->
             <div class="color-palette">
-              <h3 class="palette-title">{{$t('coloring.colors')}}</h3>
+              <h3 class="palette-title">{{t('coloring.colors')}}</h3>
               <div class="color-grid">
                 <div 
                   v-for="color in coloring.colorPalette" 
@@ -94,7 +94,7 @@
               
               <!-- 브러쉬 크기 조절 -->
               <div class="brush-size">
-                <h4>{{$t('coloring.brushSize')}}</h4>
+                <h4>{{t('coloring.brushSize')}}</h4>
                 <div class="brush-options">
                   <button 
                     v-for="size in coloring.brushSizes" 
@@ -174,17 +174,17 @@
               <!-- 컨트롤 버튼 -->
               <div class="canvas-controls">
                 <button @click="coloring.canvas.undo" class="btn btn-secondary" :disabled="!coloring.canvas.canUndo()">
-                  ↶ {{$t('coloring.undo')}}
+                  ↶ {{t('coloring.undo')}}
                 </button>
                 <button @click="handleSaveArtwork" class="btn btn-primary" :disabled="isSaving">
-                  <span v-if="isSaving">💾 {{$t('common.processing')}}</span>
-                  <span v-else>💾 {{$t('coloring.save')}}</span>
+                  <span v-if="isSaving">💾 {{t('common.processing')}}</span>
+                  <span v-else>💾 {{t('coloring.save')}}</span>
                 </button>
                 <button @click="coloring.shareArtwork" class="btn btn-secondary">
-                  📤 {{$t('coloring.share')}}
+                  📤 {{t('coloring.share')}}
                 </button>
                 <router-link v-if="authStore.isAuthenticated" to="/coloring/gallery" class="btn btn-info">
-                  🖼️ {{$t('coloring.gallery')}}
+                  🖼️ {{t('coloring.gallery')}}
                 </router-link>
               </div>
             </div>
@@ -207,14 +207,14 @@
             <div class="celebration-container">
               <div class="completion-badge">
                 <div class="badge-circle">
-                  <div class="badge-text">{{$t('coloring.completed')}}!</div>
+                  <div class="badge-text">{{t('coloring.completed')}}!</div>
                   <div class="badge-progress">{{ coloring.coloringProgress.value }}%</div>
                 </div>
               </div>
             </div>
             
-            <h2 class="completion-title animate-in">🌟 {{$t('coloring.excellent')}} 🌟</h2>
-            <h3 class="completion-subtitle animate-in delay-1">{{ coloring.getCurrentName(coloring.selectedWord.value!) }} {{$t('coloring.finished')}}!</h3>
+            <h2 class="completion-title animate-in">🌟 {{t('coloring.excellent')}} 🌟</h2>
+            <h3 class="completion-subtitle animate-in delay-1">{{ coloring.getCurrentName(coloring.selectedWord.value!) }} {{t('coloring.finished')}}!</h3>
             
             <div class="completed-artwork animate-in delay-2">
               <div class="artwork-frame">
@@ -222,23 +222,23 @@
                 <div class="artwork-shine"></div>
               </div>
               <p style="margin-top: 10px; font-size: 0.9rem; color: #666;">
-                {{$t('coloring.frameHint')}}
+                {{t('coloring.frameHint')}}
               </p>
             </div>
 
             <div class="completion-actions animate-in delay-3">
               <button @click="handleSaveArtwork" class="btn btn-success btn-lg pulse" :disabled="isSaving">
-                <span v-if="isSaving">💾 {{$t('common.processing')}}</span>
-                <span v-else>💾 {{$t('coloring.saveArtwork')}}</span>
+                <span v-if="isSaving">💾 {{t('common.processing')}}</span>
+                <span v-else>💾 {{t('coloring.saveArtwork')}}</span>
               </button>
               <router-link v-if="authStore.isAuthenticated" to="/coloring/gallery" class="btn btn-info btn-lg">
-                🖼️ {{$t('coloring.gallery')}}
+                🖼️ {{t('coloring.gallery')}}
               </router-link>
               <button @click="coloring.startNewColoring" class="btn btn-primary btn-lg">
-                🎨 {{$t('coloring.colorAnother')}}
+                🎨 {{t('coloring.colorAnother')}}
               </button>
               <button @click="coloring.goHome" class="btn btn-secondary btn-lg">
-                🏠 {{$t('common.back')}}
+                🏠 {{t('common.back')}}
               </button>
             </div>
           </div>
@@ -247,8 +247,8 @@
         <!-- 빈 상태 -->
         <div v-if="coloringWords.length === 0" class="empty-state">
           <div class="empty-icon">🎨</div>
-          <h3>{{$t('coloring.noImages')}}</h3>
-          <p>{{$t('coloring.needImagesHint')}}</p>
+          <h3>{{t('coloring.noImages')}}</h3>
+          <p>{{t('coloring.needImagesHint')}}</p>
           <div class="debug-info" style="margin: 20px 0; padding: 15px; background: #f0f0f0; border-radius: 8px; font-size: 0.9rem; text-align: left;">
             <div><strong>전체 단어 수:</strong> {{ store.currentWords.length }}</div>
             <div><strong>업로드된 이미지가 있는 단어:</strong> {{ store.currentWords.filter(w => w.imageUrl?.startsWith('/uploads/')).length }}</div>
@@ -261,7 +261,7 @@
             </div>
           </div>
           <router-link to="/admin/words" class="btn btn-primary">
-            {{$t('coloring.addWordsBtn')}}
+            {{t('coloring.addWordsBtn')}}
           </router-link>
         </div>
       </div>
@@ -271,11 +271,13 @@
 
 <script setup lang="ts">
 import { computed, onMounted, nextTick, watch, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import Navigation from '@/components/Navigation.vue';
 import { useAppStore } from '@/stores/app';
 import { useAuthStore } from '@/stores/auth';
 import { useColoring } from '@/composables/useColoring';
 
+const { t } = useI18n();
 const store = useAppStore();
 const authStore = useAuthStore();
 const coloring = useColoring();
@@ -328,7 +330,7 @@ const coloringWords = computed(() => {
         id: word.id,
         name: word.name,
         imageUrl: word.imageUrl,
-        type: word.imageUrl.startsWith('/uploads/') ? 'uploaded' : 'external'
+        type: (word.imageUrl || '').startsWith('/uploads/') ? 'uploaded' : 'external'
       });
     }
     return hasImage;

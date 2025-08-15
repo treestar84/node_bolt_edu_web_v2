@@ -87,7 +87,7 @@
 
     <!-- 곡 선택 패널 (하단으로 이동, 축소) -->
     <div class="song-selection-panel compact">
-      <h4 class="panel-title">🎵 {{ $t('music.violin.selectSong') }}</h4>
+      <h4 class="panel-title">🎵 {{ t('music.violin.selectSong') }}</h4>
       <div class="song-grid">
         <button
           v-for="song in songs"
@@ -112,6 +112,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useMusic } from '@/composables/useMusic';
 import ViolinStats from '@/components/music/ViolinStats.vue';
 
@@ -123,6 +124,7 @@ interface Song {
   bpm: number;
 }
 
+const { t } = useI18n();
 const music = useMusic();
 
 // 상태 관리

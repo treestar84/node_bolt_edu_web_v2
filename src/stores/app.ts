@@ -8,7 +8,7 @@ export const useAppStore = defineStore('app', () => {
   const { supabase } = useSupabase();
   
   // Language state - i18n 시스템과 동기화
-  const currentLanguage = ref<Language>(getCurrentLanguage());
+  const currentLanguage = ref<Language>(getCurrentLanguage() as Language);
   
   // Words state - 공용 콘텐츠 우선 로드
   const currentWords = ref<WordItem[]>([]);

@@ -1,7 +1,7 @@
 // 사용 가능한 언어를 동적으로 감지하는 composable
-import { computed, ref } from 'vue';
+import { computed } from 'vue';
 import { useAppStore } from '@/stores/app';
-import type { Language } from '@/types';
+import type { SupportedLanguageCode as Language } from '@/types/multilingual';
 import { SUPPORTED_LANGUAGES, ALL_LANGUAGE_CODES } from '@/constants/languages';
 
 export function useAvailableLanguages() {
@@ -29,7 +29,7 @@ export function useAvailableLanguages() {
           console.log(`🌐 단어 "${word.name}" 다국어 데이터 발견:`, typeof word.translations);
         }
         try {
-          let translations = word.translations;
+          let translations: Record<string, { name: string } | string> | string | undefined = word.translations;
           
           // 이중 JSON 인코딩 처리 (string -> string -> object)
           if (typeof translations === 'string') {
@@ -41,7 +41,7 @@ export function useAvailableLanguages() {
           }
           
           if (index < 3) { // 처음 3개만 자세히 로그
-            console.log(`📖 파싱된 번역 (${typeof translations}):`, Object.keys(translations));
+            console.log(`📖 파싱된 번역 (${typeof translations}):`, Object.keys(translations as any));
           }
           
           // translations 객체의 키들이 언어 코드인지 확인
@@ -50,7 +50,8 @@ export function useAvailableLanguages() {
               if (ALL_LANGUAGE_CODES.includes(langCode as any)) {
                 languages.add(langCode as Language);
                 if (index < 3) { // 처음 3개만 자세히 로그
-                  console.log(`✅ 언어 추가: ${langCode} = "${translations[langCode]?.name || translations[langCode]}"`);
+                  const translationEntry = (translations as Record<string, any>)[langCode];
+                  console.log(`✅ 언어 추가: ${langCode} = "${translationEntry?.name || translationEntry}"`);
                 }
               }
             });
@@ -82,7 +83,7 @@ export function useAvailableLanguages() {
    * 언어의 표시명 가져오기
    */
   const getLanguageDisplayName = (langCode: Language): string => {
-    const config = SUPPORTED_LANGUAGES[langCode as any];
+    const config = SUPPORTED_LANGUAGES[langCode];
     if (config) {
       // 한국어와 영어는 짧은 표시명 사용
       if (langCode === 'ko') return '한글';
@@ -96,7 +97,7 @@ export function useAvailableLanguages() {
    * 언어의 국기 이모지 가져오기
    */
   const getLanguageFlag = (langCode: Language): string => {
-    const config = SUPPORTED_LANGUAGES[langCode as any];
+    const config = SUPPORTED_LANGUAGES[langCode];
     return config?.flag || '🌐';
   };
 
@@ -123,7 +124,7 @@ export function useAvailableLanguages() {
             }
           }
           
-          if (translations[langCode]) {
+          if (translations[langCode as keyof typeof translations]) {
             count++;
           }
         } catch (error) {

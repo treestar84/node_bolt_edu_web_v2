@@ -4,7 +4,7 @@
       <div class="modal-header">
         <h2>
           <span class="modal-icon">✓</span>
-          {{ $t('quality.validation.title') }}
+          {{ t('quality.validation.title') }}
         </h2>
         <button @click="handleClose" class="modal-close">×</button>
       </div>
@@ -13,15 +13,15 @@
         <!-- 현재 번역 정보 -->
         <div class="translation-info">
           <div class="info-row">
-            <span class="info-label">{{ $t('quality.validation.originalText') }}:</span>
+            <span class="info-label">{{ t('quality.validation.originalText') }}:</span>
             <span class="info-value">{{ sourceText }}</span>
           </div>
           <div class="info-row">
-            <span class="info-label">{{ $t('quality.validation.currentTranslation') }}:</span>
+            <span class="info-label">{{ t('quality.validation.currentTranslation') }}:</span>
             <span class="info-value">{{ currentTranslation }}</span>
           </div>
           <div class="info-row">
-            <span class="info-label">{{ $t('quality.validation.languagePair') }}:</span>
+            <span class="info-label">{{ t('quality.validation.languagePair') }}:</span>
             <span class="info-value">
               {{ SUPPORTED_LANGUAGES[sourceLang]?.nativeName }} → {{ SUPPORTED_LANGUAGES[targetLang]?.nativeName }}
             </span>
@@ -40,7 +40,7 @@
 
         <!-- 대안 번역 제안 -->
         <div v-if="alternatives.length > 0" class="alternatives-section">
-          <h3>{{ $t('quality.validation.suggestedAlternatives') }}</h3>
+          <h3>{{ t('quality.validation.suggestedAlternatives') }}</h3>
           <div class="alternatives-list">
             <button
               v-for="(alternative, index) in alternatives"
@@ -59,40 +59,40 @@
         <!-- 번역 수정 폼 -->
         <div class="validation-form">
           <div class="form-group">
-            <label class="form-label">{{ $t('quality.validation.correctedTranslation') }}</label>
+            <label class="form-label">{{ t('quality.validation.correctedTranslation') }}</label>
             <textarea
               v-model="validationData.correctedTranslation"
               class="form-textarea"
-              :placeholder="$t('quality.validation.correctionPlaceholder')"
+              :placeholder="t('quality.validation.correctionPlaceholder')"
               rows="3"
             ></textarea>
           </div>
 
           <div class="form-group">
-            <label class="form-label">{{ $t('quality.validation.correctionReason') }}</label>
+            <label class="form-label">{{ t('quality.validation.correctionReason') }}</label>
             <select v-model="validationData.correctionReason" class="form-select">
-              <option value="">{{ $t('quality.validation.selectReason') }}</option>
-              <option value="grammar">{{ $t('quality.validation.reasons.grammar') }}</option>
-              <option value="vocabulary">{{ $t('quality.validation.reasons.vocabulary') }}</option>
-              <option value="context">{{ $t('quality.validation.reasons.context') }}</option>
-              <option value="cultural">{{ $t('quality.validation.reasons.cultural') }}</option>
-              <option value="other">{{ $t('quality.validation.reasons.other') }}</option>
+              <option value="">{{ t('quality.validation.selectReason') }}</option>
+              <option value="grammar">{{ t('quality.validation.reasons.grammar') }}</option>
+              <option value="vocabulary">{{ t('quality.validation.reasons.vocabulary') }}</option>
+              <option value="context">{{ t('quality.validation.reasons.context') }}</option>
+              <option value="cultural">{{ t('quality.validation.reasons.cultural') }}</option>
+              <option value="other">{{ t('quality.validation.reasons.other') }}</option>
             </select>
           </div>
 
           <div class="form-group">
-            <label class="form-label">{{ $t('quality.validation.correctionNote') }} ({{ $t('common.optional') }})</label>
+            <label class="form-label">{{ t('quality.validation.correctionNote') }} ({{ t('common.optional') }})</label>
             <textarea
               v-model="validationData.correctionNote"
               class="form-textarea"
-              :placeholder="$t('quality.validation.notePlaceholder')"
+              :placeholder="t('quality.validation.notePlaceholder')"
               rows="2"
             ></textarea>
           </div>
 
           <!-- 사용자 프로필 정보 -->
           <div class="user-profile-section">
-            <h4>{{ $t('quality.validation.userProfile') }}</h4>
+            <h4>{{ t('quality.validation.userProfile') }}</h4>
             <div class="profile-options">
               <div class="form-check">
                 <input
@@ -102,17 +102,17 @@
                   class="form-checkbox"
                 >
                 <label for="nativeSpeaker" class="form-check-label">
-                  {{ $t('quality.validation.nativeSpeaker') }}
+                  {{ t('quality.validation.nativeSpeaker') }}
                 </label>
               </div>
 
               <div class="form-group">
-                <label class="form-label">{{ $t('quality.validation.languageProficiency') }}</label>
+                <label class="form-label">{{ t('quality.validation.languageProficiency') }}</label>
                 <select v-model="validationData.languageProficiency" class="form-select">
-                  <option value="basic">{{ $t('quality.validation.proficiency.basic') }}</option>
-                  <option value="intermediate">{{ $t('quality.validation.proficiency.intermediate') }}</option>
-                  <option value="fluent">{{ $t('quality.validation.proficiency.fluent') }}</option>
-                  <option value="native">{{ $t('quality.validation.proficiency.native') }}</option>
+                  <option value="basic">{{ t('quality.validation.proficiency.basic') }}</option>
+                  <option value="intermediate">{{ t('quality.validation.proficiency.intermediate') }}</option>
+                  <option value="fluent">{{ t('quality.validation.proficiency.fluent') }}</option>
+                  <option value="native">{{ t('quality.validation.proficiency.native') }}</option>
                 </select>
               </div>
             </div>
@@ -128,11 +128,11 @@
                 class="form-checkbox"
               >
               <label for="allowLearning" class="form-check-label">
-                {{ $t('quality.validation.allowLearningData') }}
+                {{ t('quality.validation.allowLearningData') }}
               </label>
             </div>
             <p class="privacy-note">
-              {{ $t('quality.validation.privacyNote') }}
+              {{ t('quality.validation.privacyNote') }}
             </p>
           </div>
         </div>
@@ -144,7 +144,7 @@
           class="btn btn-secondary"
           type="button"
         >
-          {{ $t('common.cancel') }}
+          {{ t('common.cancel') }}
         </button>
         
         <button 
@@ -154,7 +154,7 @@
           type="button"
         >
           <span class="btn-icon">✓</span>
-          {{ $t('quality.validation.confirmCorrect') }}
+          {{ t('quality.validation.confirmCorrect') }}
         </button>
         
         <button 
@@ -165,7 +165,7 @@
         >
           <span v-if="isSubmitting" class="spinner"></span>
           <span v-else class="btn-icon">💾</span>
-          {{ isSubmitting ? $t('common.processing') : $t('quality.validation.submitCorrection') }}
+          {{ isSubmitting ? t('common.processing') : t('quality.validation.submitCorrection') }}
         </button>
       </div>
     </div>
@@ -180,8 +180,8 @@ import { SUPPORTED_LANGUAGES } from '@/constants/languages';
 import type {
   TranslationQualityScore,
   UserTranslationValidation,
-  SupportedLanguageCode,
-  CorrectionReason
+  SupportedLanguageCode
+  // CorrectionReason
 } from '@/types/multilingual';
 
 // Props

@@ -5,18 +5,18 @@
     <main class="main-content">
       <div class="container">
         <div class="page-header">
-          <h1 class="page-title">{{ $t('admin.bookManagement') }}</h1>
+          <h1 class="page-title">{{ t('admin.bookManagement') }}</h1>
           <div class="header-actions">
             <div class="admin-type-indicator" v-if="isSystemAdmin">
-              <span class="admin-badge">{{ $t('admin.systemAdmin') }}</span>
+              <span class="admin-badge">{{ t('admin.systemAdmin') }}</span>
             </div>
             <button @click="openAddModal" class="btn btn-primary">
               <span>➕</span>
-              {{ $t('admin.addNewBook') }}
+              {{ t('admin.addNewBook') }}
             </button>
             <button @click="generateTestVideo" class="btn btn-secondary" :disabled="isGeneratingTest">
               <span>🎬</span>
-              {{ isGeneratingTest ? $t('admin.generating') : $t('admin.testVideoGeneration') }}
+              {{ isGeneratingTest ? t('admin.generating') : t('admin.testVideoGeneration') }}
             </button>
           </div>
         </div>
@@ -36,8 +36,8 @@
 
         <div v-else class="empty-state">
           <div class="empty-icon">📖</div>
-          <h3>{{ $t('admin.noData') }}</h3>
-          <p>{{ $t('admin.addFirst') }}</p>
+          <h3>{{ t('admin.noData') }}</h3>
+          <p>{{ t('admin.addFirst') }}</p>
         </div>
       </div>
     </main>
@@ -55,19 +55,19 @@
     <div v-if="showDeleteModal" class="modal-overlay" @click="closeDeleteModal">
       <div class="modal-content delete-modal" @click.stop>
         <div class="modal-header">
-          <h3>{{ $t('admin.deleteBook') }}</h3>
+          <h3>{{ t('admin.deleteBook') }}</h3>
           <button @click="closeDeleteModal" class="modal-close">×</button>
         </div>
         <div class="modal-body">
-          <p>{{ $t('admin.confirmDelete') }}</p>
+          <p>{{ t('admin.confirmDelete') }}</p>
           <p class="book-title-confirm">"{{ bookToDelete?.title }}"</p>
         </div>
         <div class="modal-footer">
           <button @click="closeDeleteModal" class="btn btn-secondary">
-            {{ $t('common.cancel') }}
+            {{ t('common.cancel') }}
           </button>
           <button @click="confirmDelete" class="btn btn-danger" :disabled="isDeleting">
-            {{ isDeleting ? $t('admin.deleting') : $t('common.delete') }}
+            {{ isDeleting ? t('admin.deleting') : t('common.delete') }}
           </button>
         </div>
       </div>
@@ -82,6 +82,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useAppStore } from '@/stores/app';
 import { useAuthStore } from '@/stores/auth';
 import AdminHeader from '@/components/AdminHeader.vue';
@@ -92,6 +93,7 @@ import type { Book } from '@/types';
 // Stores
 const store = useAppStore();
 const authStore = useAuthStore();
+const { t } = useI18n();
 
 // State
 const showModal = ref(false);
@@ -141,11 +143,11 @@ const confirmDelete = async () => {
   isDeleting.value = true;
   try {
     await store.deleteBook(bookToDelete.value.id);
-    showToast($t('admin.bookDeleted'), 'success');
+    showToast(t('admin.bookDeleted'), 'success');
     closeDeleteModal();
   } catch (error) {
     console.error('Delete book error:', error);
-    showToast($t('admin.deleteError'), 'error');
+    showToast(t('admin.deleteError'), 'error');
   } finally {
     isDeleting.value = false;
   }
@@ -156,16 +158,16 @@ const saveBook = async (bookData: any) => {
     if (selectedBook.value) {
       // Edit existing book
       await store.updateBook(selectedBook.value.id, bookData);
-      showToast($t('admin.bookUpdated'), 'success');
+      showToast(t('admin.bookUpdated'), 'success');
     } else {
       // Add new book
       await store.addBook(bookData);
-      showToast($t('admin.bookAdded'), 'success');
+      showToast(t('admin.bookAdded'), 'success');
     }
     closeModal();
   } catch (error) {
     console.error('Save book error:', error);
-    showToast($t('admin.saveError'), 'error');
+    showToast(t('admin.saveError'), 'error');
   }
 };
 
@@ -181,13 +183,13 @@ const generateTestVideo = async () => {
     });
     
     if (response.ok) {
-      showToast($t('admin.videoGenerated'), 'success');
+      showToast(t('admin.videoGenerated'), 'success');
     } else {
       throw new Error('Video generation failed');
     }
   } catch (error) {
     console.error('Test video generation error:', error);
-    showToast($t('admin.videoGenerationFailed'), 'error');
+    showToast(t('admin.videoGenerationFailed'), 'error');
   } finally {
     isGeneratingTest.value = false;
   }

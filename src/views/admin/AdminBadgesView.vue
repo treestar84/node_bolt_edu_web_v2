@@ -5,10 +5,10 @@
     <main class="main-content">
       <div class="container">
         <div class="page-header">
-          <h1 class="page-title">{{ $t('admin.badgeManagement') }}</h1>
+          <h1 class="page-title">{{ t('admin.badgeManagement') }}</h1>
           <button @click="showAddModal = true" class="btn btn-primary">
             <span>🏆</span>
-            {{ $t('admin.newBadge') }}
+            {{ t('admin.newBadge') }}
           </button>
         </div>
 
@@ -18,21 +18,21 @@
               <div class="stat-icon">🏅</div>
               <div class="stat-content">
                 <div class="stat-value">{{ store.currentBadges.length }}</div>
-                <div class="stat-label">{{ $t('admin.totalBadges') }}</div>
+                <div class="stat-label">{{ t('admin.totalBadges') }}</div>
               </div>
             </div>
             <div class="stat-card">
               <div class="stat-icon">✅</div>
               <div class="stat-content">
                 <div class="stat-value">{{ store.availableBadges.length }}</div>
-                <div class="stat-label">{{ $t('admin.earnedBadges') }}</div>
+                <div class="stat-label">{{ t('admin.earnedBadges') }}</div>
               </div>
             </div>
             <div class="stat-card">
               <div class="stat-icon">🎯</div>
               <div class="stat-content">
                 <div class="stat-value">{{ store.quizScore }}</div>
-                <div class="stat-label">{{ $t('admin.currentScore') }}</div>
+                <div class="stat-label">{{ t('admin.currentScore') }}</div>
               </div>
             </div>
           </div>
@@ -41,18 +41,18 @@
         <div class="badges-table-container">
           <div v-if="store.currentBadges.length === 0" class="empty-state">
             <div class="empty-icon">🏆</div>
-            <h3>{{ $t('admin.noBadgesRegistered') }}</h3>
-            <p>{{ $t('admin.addFirstBadge') }}</p>
+            <h3>{{ t('admin.noBadgesRegistered') }}</h3>
+            <p>{{ t('admin.addFirstBadge') }}</p>
           </div>
 
           <div v-else class="badges-table">
             <div class="table-header">
-              <div class="header-cell">{{ $t('admin.badge') }}</div>
-              <div class="header-cell">{{ $t('admin.badgeName') }}</div>
-              <div class="header-cell">{{ $t('admin.description') }}</div>
-              <div class="header-cell">{{ $t('admin.requiredScore') }}</div>
-              <div class="header-cell">{{ $t('admin.status') }}</div>
-              <div class="header-cell">{{ $t('admin.actions') }}</div>
+              <div class="header-cell">{{ t('admin.badge') }}</div>
+              <div class="header-cell">{{ t('admin.badgeName') }}</div>
+              <div class="header-cell">{{ t('admin.description') }}</div>
+              <div class="header-cell">{{ t('admin.requiredScore') }}</div>
+              <div class="header-cell">{{ t('admin.status') }}</div>
+              <div class="header-cell">{{ t('admin.actions') }}</div>
             </div>
             
             <div 
@@ -71,19 +71,19 @@
                 <div class="badge-description">{{ badge.description }}</div>
               </div>
               <div class="cell score-cell">
-                <span class="required-score">{{ badge.requiredScore }}{{ $t('admin.points') }}</span>
+                <span class="required-score">{{ badge.requiredScore }}{{ t('admin.points') }}</span>
               </div>
               <div class="cell status-cell">
                 <span class="status-badge" :class="{ unlocked: badge.unlocked }">
-                  {{ badge.unlocked ? $t('admin.earned') : $t('admin.notEarned') }}
+                  {{ badge.unlocked ? t('admin.earned') : t('admin.notEarned') }}
                 </span>
               </div>
               <div class="cell actions-cell">
                 <button @click="editBadge(badge)" class="btn btn-sm btn-secondary">
-                  {{ $t('common.edit') }}
+                  {{ t('common.edit') }}
                 </button>
                 <button @click="deleteBadgeConfirm(badge)" class="btn btn-sm btn-danger">
-                  {{ $t('common.delete') }}
+                  {{ t('common.delete') }}
                 </button>
               </div>
             </div>
@@ -96,7 +96,7 @@
     <div v-if="showAddModal || showEditModal" class="modal-overlay" @click="closeModals">
       <div class="modal-content" @click.stop>
         <div class="modal-header">
-          <h2>{{ showAddModal ? $t('admin.addNewBadge') : $t('admin.editBadge') }}</h2>
+          <h2>{{ showAddModal ? t('admin.addNewBadge') : t('admin.editBadge') }}</h2>
           <button @click="closeModals" class="modal-close">×</button>
         </div>
         
@@ -205,7 +205,7 @@ import { useAppStore } from '@/stores/app';
 import type { Badge } from '@/types';
 
 const store = useAppStore();
-const { t } = useI18n();
+const { t } = useI18n()
 
 const showAddModal = ref(false);
 const showEditModal = ref(false);

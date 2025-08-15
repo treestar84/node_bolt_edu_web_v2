@@ -19,17 +19,17 @@
         type="button"
       >
         <span class="toggle-icon">{{ detailsExpanded ? '▼' : '▶' }}</span>
-        {{ $t('quality.viewDetails') }}
+        {{ t('quality.viewDetails') }}
       </button>
     </div>
 
     <!-- 상세 품질 정보 -->
     <div v-if="detailsExpanded && showDetails" class="quality-details">
       <div class="score-breakdown">
-        <h4>{{ $t('quality.scoreBreakdown') }}</h4>
+        <h4>{{ t('quality.scoreBreakdown') }}</h4>
         <div class="breakdown-items">
           <div class="breakdown-item">
-            <span class="breakdown-label">{{ $t('quality.providerReliability') }}</span>
+            <span class="breakdown-label">{{ t('quality.providerReliability') }}</span>
             <div class="breakdown-bar">
               <div 
                 class="breakdown-fill" 
@@ -40,7 +40,7 @@
           </div>
           
           <div class="breakdown-item">
-            <span class="breakdown-label">{{ $t('quality.languagePairQuality') }}</span>
+            <span class="breakdown-label">{{ t('quality.languagePairQuality') }}</span>
             <div class="breakdown-bar">
               <div 
                 class="breakdown-fill" 
@@ -51,7 +51,7 @@
           </div>
           
           <div class="breakdown-item">
-            <span class="breakdown-label">{{ $t('quality.contextComplexity') }}</span>
+            <span class="breakdown-label">{{ t('quality.contextComplexity') }}</span>
             <div class="breakdown-bar">
               <div 
                 class="breakdown-fill" 
@@ -62,7 +62,7 @@
           </div>
           
           <div class="breakdown-item">
-            <span class="breakdown-label">{{ $t('quality.lengthAppropriateness') }}</span>
+            <span class="breakdown-label">{{ t('quality.lengthAppropriateness') }}</span>
             <div class="breakdown-bar">
               <div 
                 class="breakdown-fill" 
@@ -76,7 +76,7 @@
 
       <!-- 권장사항 -->
       <div v-if="qualityScore.recommendations.length > 0" class="recommendations">
-        <h4>{{ $t('quality.recommendations') }}</h4>
+        <h4>{{ t('quality.recommendations') }}</h4>
         <ul class="recommendation-list">
           <li 
             v-for="(recommendation, index) in qualityScore.recommendations" 
@@ -92,8 +92,8 @@
       <div v-if="qualityScore.needsValidation" class="validation-alert">
         <div class="alert-icon">⚠️</div>
         <div class="alert-content">
-          <div class="alert-title">{{ $t('quality.validationNeeded') }}</div>
-          <div class="alert-message">{{ $t('quality.validationMessage') }}</div>
+          <div class="alert-title">{{ t('quality.validationNeeded') }}</div>
+          <div class="alert-message">{{ t('quality.validationMessage') }}</div>
         </div>
       </div>
     </div>
@@ -107,7 +107,7 @@
         type="button"
       >
         <span class="action-icon">✓</span>
-        {{ $t('quality.validate') }}
+        {{ t('quality.validate') }}
       </button>
       
       <button 
@@ -116,7 +116,7 @@
         type="button"
       >
         <span class="action-icon">💡</span>
-        {{ $t('quality.suggestAlternatives') }}
+        {{ t('quality.suggestAlternatives') }}
       </button>
       
       <button 
@@ -125,7 +125,7 @@
         type="button"
       >
         <span class="action-icon">🚩</span>
-        {{ $t('quality.reportIssue') }}
+        {{ t('quality.reportIssue') }}
       </button>
     </div>
   </div>
@@ -151,13 +151,13 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 // Emits
-interface Emits {
+/* interface Emits {
   (e: 'validate'): void;
   (e: 'suggest-alternatives'): void;
   (e: 'report-issue'): void;
-}
+} */
 
-const emit = defineEmits<Emits>();
+// const emit = defineEmits<Emits>();
 
 // Composables
 const { t } = useI18n();

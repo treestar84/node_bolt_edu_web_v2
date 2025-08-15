@@ -5,82 +5,82 @@
     <main class="main-content">
       <div class="container">
         <div class="page-header">
-          <h1 class="page-title">{{$t('settings.title')}}</h1>
+          <h1 class="page-title">{{t('settings.title')}}</h1>
           <p class="page-description">
-            {{$t('settings.desc')}}
+            {{t('settings.desc')}}
           </p>
         </div>
 
         <div class="settings-container">
           <div class="settings-card">
             <div class="card-header">
-              <h2>{{$t('settings.basicInfo')}}</h2>
+              <h2>{{t('settings.basicInfo')}}</h2>
             </div>
             
             <form @submit.prevent="saveSettings" class="settings-form">
               <div class="form-group">
-                <label class="form-label">{{$t('settings.username')}}</label>
+                <label class="form-label">{{t('settings.username')}}</label>
                 <input 
                   v-model="formData.username" 
                   type="text" 
                   class="form-input" 
-                  placeholder="{{$t('settings.usernamePlaceholder')}}"
+                  placeholder="{{t('settings.usernamePlaceholder')}}"
                   required 
                   disabled
                 />
                 <div class="form-hint">
-                  {{$t('settings.usernameHint')}}
+                  {{t('settings.usernameHint')}}
                 </div>
               </div>
 
               <div class="form-group">
-                <label class="form-label">{{$t('settings.userType')}}</label>
+                <label class="form-label">{{t('settings.userType')}}</label>
                 <select v-model="formData.userType" class="form-input" required>
-                  <option value="parent">{{$t('settings.parent')}}</option>
-                  <option value="teacher">{{$t('settings.teacher')}}</option>
-                  <option value="director">{{$t('settings.director')}}</option>
+                  <option value="parent">{{t('settings.parent')}}</option>
+                  <option value="teacher">{{t('settings.teacher')}}</option>
+                  <option value="director">{{t('settings.director')}}</option>
                 </select>
               </div>
 
               <div class="form-group">
-                <label class="form-label">{{$t('settings.siteName')}}</label>
+                <label class="form-label">{{t('settings.siteName')}}</label>
                 <input 
                   v-model="formData.siteName" 
                   type="text" 
                   class="form-input" 
-                  placeholder="{{$t('settings.siteNamePlaceholder')}}"
+                  placeholder="{{t('settings.siteNamePlaceholder')}}"
                   required 
                 />
               </div>
 
               <div class="form-group">
-                <label class="form-label">{{$t('settings.childAge')}}</label>
+                <label class="form-label">{{t('settings.childAge')}}</label>
                 <select v-model.number="formData.childAge" class="form-input" required>
-                  <option value="3">{{$t('settings.age3')}}</option>
-                  <option value="4">{{$t('settings.age4')}}</option>
-                  <option value="5">{{$t('settings.age5')}}</option>
-                  <option value="6">{{$t('settings.age6')}}</option>
+                  <option value="3">{{t('settings.age3')}}</option>
+                  <option value="4">{{t('settings.age4')}}</option>
+                  <option value="5">{{t('settings.age5')}}</option>
+                  <option value="6">{{t('settings.age6')}}</option>
                 </select>
                 <div class="form-hint">
-                  {{$t('settings.childAgeHint')}}
+                  {{t('settings.childAgeHint')}}
                 </div>
               </div>
 
               <div class="form-group">
-                <label class="form-label">{{$t('settings.mainImage')}}</label>
+                <label class="form-label">{{t('settings.mainImage')}}</label>
                 <FileUploadInput
                   v-model="formData.mainImageUrl"
-                  :label="$t('settings.mainImage')"
-                  :placeholder="$t('settings.mainImagePlaceholder')"
+                  :label="t('settings.mainImage')"
+                  :placeholder="t('settings.mainImagePlaceholder')"
                   file-type="image"
                   :required="false"
                 />
                 <div class="form-hint">
-                  {{$t('settings.mainImageHint')}}
+                  {{t('settings.mainImageHint')}}
                 </div>
                 <div v-if="currentImagePreview" class="current-image-preview">
-                  <h4>{{$t('settings.currentImage')}}</h4>
-                  <img :src="currentImagePreview" :alt="$t('settings.currentImageAlt')" class="preview-image" />
+                  <h4>{{t('settings.currentImage')}}</h4>
+                  <img :src="currentImagePreview" :alt="t('settings.currentImageAlt')" class="preview-image" />
                 </div>
               </div>
 
@@ -89,7 +89,7 @@
               </div>
 
               <div v-if="saveSuccess" class="success-message">
-                {{$t('settings.saveSuccess')}}
+                {{t('settings.saveSuccess')}}
               </div>
 
               <div class="form-actions">
@@ -98,7 +98,7 @@
                   class="btn btn-primary"
                   :disabled="authStore.isLoading"
                 >
-                  {{ authStore.isLoading ? $t('settings.saving') : $t('settings.saveSettings') }}
+                  {{ authStore.isLoading ? t('settings.saving') : t('settings.saveSettings') }}
                 </button>
                 
                 <button 
@@ -106,7 +106,7 @@
                   @click="resetForm"
                   class="btn btn-secondary"
                 >
-                  {{$t('common.cancel')}}
+                  {{t('common.cancel')}}
                 </button>
               </div>
             </form>
@@ -114,7 +114,7 @@
 
           <div class="settings-card">
             <div class="card-header">
-              <h2>{{$t('stats.title')}}</h2>
+              <h2>{{t('stats.title')}}</h2>
             </div>
             
             <div class="stats-grid" v-if="authStore.userProgress">
@@ -122,7 +122,7 @@
                 <div class="stat-icon">🧩</div>
                 <div class="stat-content">
                   <div class="stat-value">{{ authStore.userProgress.quizScore }}</div>
-                  <div class="stat-label">{{$t('achievements.quizScore')}}</div>
+                  <div class="stat-label">{{t('achievements.quizScore')}}</div>
                 </div>
               </div>
               
@@ -130,7 +130,7 @@
                 <div class="stat-icon">🎯</div>
                 <div class="stat-content">
                   <div class="stat-value">{{ authStore.userProgress.quizStreak }}</div>
-                  <div class="stat-label">{{$t('achievements.quizStreak', {streak: ''})}}</div>
+                  <div class="stat-label">{{t('achievements.quizStreak', {streak: ''})}}</div>
                 </div>
               </div>
               
@@ -138,7 +138,7 @@
                 <div class="stat-icon">🧩</div>
                 <div class="stat-content">
                   <div class="stat-value">{{ authStore.userProgress.puzzleCompletions }}</div>
-                  <div class="stat-label">{{$t('achievements.puzzleCompletions')}}</div>
+                  <div class="stat-label">{{t('achievements.puzzleCompletions')}}</div>
                 </div>
               </div>
               
@@ -146,7 +146,7 @@
                 <div class="stat-icon">📚</div>
                 <div class="stat-content">
                   <div class="stat-value">{{ authStore.userProgress.wordsLearned }}</div>
-                  <div class="stat-label">{{$t('achievements.wordsLearned')}}</div>
+                  <div class="stat-label">{{t('achievements.wordsLearned')}}</div>
                 </div>
               </div>
               
@@ -154,7 +154,7 @@
                 <div class="stat-icon">📖</div>
                 <div class="stat-content">
                   <div class="stat-value">{{ authStore.userProgress.booksRead }}</div>
-                  <div class="stat-label">{{$t('achievements.booksRead')}}</div>
+                  <div class="stat-label">{{t('achievements.booksRead')}}</div>
                 </div>
               </div>
               
@@ -162,7 +162,7 @@
                 <div class="stat-icon">🏆</div>
                 <div class="stat-content">
                   <div class="stat-value">{{ contentStore.availableBadges.length }}</div>
-                  <div class="stat-label">{{$t('settings.earnedBadges')}}</div>
+                  <div class="stat-label">{{t('settings.earnedBadges')}}</div>
                 </div>
               </div>
             </div>
@@ -170,12 +170,12 @@
 
           <div class="settings-card">
             <div class="card-header">
-              <h2>{{$t('settings.accountManagement')}}</h2>
+              <h2>{{t('settings.accountManagement')}}</h2>
             </div>
             
             <div class="account-actions">
               <button @click="handleLogout" class="btn btn-danger">
-                {{$t('auth.logout')}}
+                {{t('auth.logout')}}
               </button>
             </div>
           </div>
@@ -195,7 +195,7 @@ import { useAuthStore } from '@/stores/auth';
 import { useContentStore } from '@/stores/content';
 
 const router = useRouter();
-const { t } = useI18n();
+const { t } = useI18n()
 const authStore = useAuthStore();
 const contentStore = useContentStore();
 

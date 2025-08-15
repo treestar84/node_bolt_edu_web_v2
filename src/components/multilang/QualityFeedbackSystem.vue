@@ -1,9 +1,9 @@
 <template>
   <div class="quality-feedback-system">
     <!-- 품질 통계 대시보드 -->
-    <div v-if="showStatistics" class="statistics-section">
+    <div v-if="_props.showStatistics" class="statistics-section">
       <div class="section-header">
-        <h3>{{ $t('quality.feedback.statisticsTitle') }}</h3>
+        <h3>{{ t('quality.feedback.statisticsTitle') }}</h3>
         <button 
           @click="refreshStatistics"
           :disabled="isLoading"
@@ -11,35 +11,35 @@
           type="button"
         >
           <span class="refresh-icon" :class="{ spinning: isLoading }">🔄</span>
-          {{ $t('quality.feedback.refresh') }}
+          {{ t('quality.feedback.refresh') }}
         </button>
       </div>
 
       <div class="stats-grid">
         <div class="stat-card">
           <div class="stat-value">{{ statistics.summary.totalValidations }}</div>
-          <div class="stat-label">{{ $t('quality.feedback.stats.totalValidations') }}</div>
+          <div class="stat-label">{{ t('quality.feedback.stats.totalValidations') }}</div>
         </div>
         
         <div class="stat-card">
           <div class="stat-value">{{ formatPercentage(statistics.summary.correctionRate) }}</div>
-          <div class="stat-label">{{ $t('quality.feedback.stats.correctionRate') }}</div>
+          <div class="stat-label">{{ t('quality.feedback.stats.correctionRate') }}</div>
         </div>
         
         <div class="stat-card">
           <div class="stat-value">{{ statistics.summary.nativeContributions }}</div>
-          <div class="stat-label">{{ $t('quality.feedback.stats.nativeContributions') }}</div>
+          <div class="stat-label">{{ t('quality.feedback.stats.nativeContributions') }}</div>
         </div>
         
         <div class="stat-card">
           <div class="stat-value">{{ statistics.summary.languagePairCount }}</div>
-          <div class="stat-label">{{ $t('quality.feedback.stats.languagePairs') }}</div>
+          <div class="stat-label">{{ t('quality.feedback.stats.languagePairs') }}</div>
         </div>
       </div>
 
       <!-- 학습된 패턴 표시 -->
       <div v-if="learnedPatterns.length > 0" class="learned-patterns">
-        <h4>{{ $t('quality.feedback.learnedPatterns') }}</h4>
+        <h4>{{ t('quality.feedback.learnedPatterns') }}</h4>
         <div class="patterns-list">
           <div 
             v-for="(pattern, index) in learnedPatterns.slice(0, 5)" 
@@ -55,7 +55,7 @@
               <span class="corrected">{{ pattern.corrected }}</span>
             </div>
             <div class="pattern-frequency">
-              {{ $t('quality.feedback.usedTimes', { count: pattern.frequency }) }}
+              {{ t('quality.feedback.usedTimes', { count: pattern.frequency }) }}
             </div>
           </div>
         </div>
@@ -63,15 +63,15 @@
     </div>
 
     <!-- 실시간 피드백 수집 -->
-    <div v-if="showFeedbackForm" class="feedback-form-section">
+    <div v-if="_props.showFeedbackForm" class="feedback-form-section">
       <div class="section-header">
-        <h3>{{ $t('quality.feedback.improveTranslations') }}</h3>
+        <h3>{{ t('quality.feedback.improveTranslations') }}</h3>
         <div class="feedback-status">
           <span 
             class="status-indicator" 
             :class="{ active: feedbackEnabled }"
           ></span>
-          {{ feedbackEnabled ? $t('quality.feedback.active') : $t('quality.feedback.inactive') }}
+          {{ feedbackEnabled ? t('quality.feedback.active') : t('quality.feedback.inactive') }}
         </div>
       </div>
 
@@ -84,10 +84,10 @@
               class="setting-checkbox"
               @change="updateSettings"
             >
-            {{ $t('quality.feedback.settings.enableUserValidation') }}
+            {{ t('quality.feedback.settings.enableUserValidation') }}
           </label>
           <p class="setting-description">
-            {{ $t('quality.feedback.settings.enableUserValidationDesc') }}
+            {{ t('quality.feedback.settings.enableUserValidationDesc') }}
           </p>
         </div>
 
@@ -99,10 +99,10 @@
               class="setting-checkbox"
               @change="updateSettings"
             >
-            {{ $t('quality.feedback.settings.allowLearningData') }}
+            {{ t('quality.feedback.settings.allowLearningData') }}
           </label>
           <p class="setting-description">
-            {{ $t('quality.feedback.settings.allowLearningDataDesc') }}
+            {{ t('quality.feedback.settings.allowLearningDataDesc') }}
           </p>
         </div>
 
@@ -114,15 +114,15 @@
               class="setting-checkbox"
               @change="updateSettings"
             >
-            {{ $t('quality.feedback.settings.prioritizeNative') }}
+            {{ t('quality.feedback.settings.prioritizeNative') }}
           </label>
           <p class="setting-description">
-            {{ $t('quality.feedback.settings.prioritizeNativeDesc') }}
+            {{ t('quality.feedback.settings.prioritizeNativeDesc') }}
           </p>
         </div>
 
         <div class="setting-group">
-          <label class="setting-label">{{ $t('quality.feedback.settings.minConfidence') }}</label>
+          <label class="setting-label">{{ t('quality.feedback.settings.minConfidence') }}</label>
           <div class="confidence-slider">
             <input
               v-model="localSettings.minConfidenceThreshold"
@@ -136,19 +136,19 @@
             <span class="slider-value">{{ localSettings.minConfidenceThreshold }}%</span>
           </div>
           <p class="setting-description">
-            {{ $t('quality.feedback.settings.minConfidenceDesc') }}
+            {{ t('quality.feedback.settings.minConfidenceDesc') }}
           </p>
         </div>
       </div>
     </div>
 
     <!-- 커뮤니티 기여 섹션 -->
-    <div v-if="showCommunitySection" class="community-section">
+    <div v-if="_props.showCommunitySection" class="community-section">
       <div class="section-header">
-        <h3>{{ $t('quality.feedback.communityContribution') }}</h3>
+        <h3>{{ t('quality.feedback.communityContribution') }}</h3>
         <div class="contribution-level">
           <span class="level-badge" :class="contributionLevel">
-            {{ $t(`quality.feedback.levels.${contributionLevel}`) }}
+            {{ t(`quality.feedback.levels.${contributionLevel}`) }}
           </span>
         </div>
       </div>
@@ -158,7 +158,7 @@
           <div class="contrib-icon">✅</div>
           <div class="contrib-content">
             <div class="contrib-number">{{ userContributions.validations }}</div>
-            <div class="contrib-label">{{ $t('quality.feedback.yourValidations') }}</div>
+            <div class="contrib-label">{{ t('quality.feedback.yourValidations') }}</div>
           </div>
         </div>
 
@@ -166,7 +166,7 @@
           <div class="contrib-icon">🔧</div>
           <div class="contrib-content">
             <div class="contrib-number">{{ userContributions.corrections }}</div>
-            <div class="contrib-label">{{ $t('quality.feedback.yourCorrections') }}</div>
+            <div class="contrib-label">{{ t('quality.feedback.yourCorrections') }}</div>
           </div>
         </div>
 
@@ -174,7 +174,7 @@
           <div class="contrib-icon">🌟</div>
           <div class="contrib-content">
             <div class="contrib-number">{{ userContributions.helpfulVotes }}</div>
-            <div class="contrib-label">{{ $t('quality.feedback.helpfulVotes') }}</div>
+            <div class="contrib-label">{{ t('quality.feedback.helpfulVotes') }}</div>
           </div>
         </div>
       </div>
@@ -182,7 +182,7 @@
       <!-- 기여 독려 메시지 -->
       <div class="contribution-encouragement">
         <div class="encouragement-content">
-          <h4>{{ $t('quality.feedback.helpImprove') }}</h4>
+          <h4>{{ t('quality.feedback.helpImprove') }}</h4>
           <p>{{ getEncouragementMessage() }}</p>
           <div class="next-level-info">
             <div class="progress-bar">
@@ -192,7 +192,7 @@
               ></div>
             </div>
             <span class="progress-text">
-              {{ $t('quality.feedback.nextLevel', { 
+              {{ t('quality.feedback.nextLevel', { 
                 current: userContributions.validations + userContributions.corrections,
                 next: getNextLevelThreshold() 
               }) }}
@@ -205,7 +205,7 @@
     <!-- 품질 개선 제안 -->
     <div v-if="qualityInsights.length > 0" class="insights-section">
       <div class="section-header">
-        <h3>{{ $t('quality.feedback.qualityInsights') }}</h3>
+        <h3>{{ t('quality.feedback.qualityInsights') }}</h3>
       </div>
 
       <div class="insights-list">
@@ -248,7 +248,7 @@ interface Props {
   showCommunitySection?: boolean;
 }
 
-const props = withDefaults(defineProps<Props>(), {
+const _props = withDefaults(defineProps<Props>(), {
   showStatistics: true,
   showFeedbackForm: true,
   showCommunitySection: true
@@ -308,7 +308,7 @@ const contributionProgress = computed(() => {
 
 const learnedPatterns = computed(() => {
   // 실제로는 statistics에서 가져온 학습된 패턴을 포맷팅
-  const patterns = [];
+  const patterns: Array<{error: string, frequency: number, solutions: string[], languagePair: string, original?: string, corrected?: string}> = [];
   const commonErrors = statistics.value.database.learnedPatterns.commonErrors;
   
   Object.entries(commonErrors).forEach(([languagePair, errors]) => {
@@ -316,6 +316,8 @@ const learnedPatterns = computed(() => {
       if (error.includes('→')) {
         const [original, corrected] = error.split('→');
         patterns.push({
+          error,
+          solutions: [corrected.trim()],
           languagePair,
           original: original.trim(),
           corrected: corrected.trim(),
@@ -411,8 +413,8 @@ const getEncouragementMessage = (): string => {
 };
 
 const getNextLevelThreshold = (): number => {
-  const thresholds = { newcomer: 5, beginner: 20, intermediate: 50, advanced: 100 };
-  return thresholds[contributionLevel.value] || 100;
+  const thresholds = { newcomer: 5, beginner: 20, intermediate: 50, advanced: 100, expert: 200 };
+  return thresholds[contributionLevel.value as keyof typeof thresholds] || 100;
 };
 
 const handleInsightAction = (insight: any) => {

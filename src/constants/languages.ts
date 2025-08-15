@@ -3,6 +3,9 @@
 
 import type { LanguageConfig, SupportedLanguageCode } from '@/types/multilingual';
 
+// SupportedLanguageCode 타입을 다시 export
+export type { SupportedLanguageCode } from '@/types/multilingual';
+
 /**
  * 지원하는 10개 언어의 완전한 설정
  * 각 언어별로 TTS, 번역, UI 표시 최적화 정보 포함

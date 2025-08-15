@@ -1,7 +1,7 @@
 <template>
   <div class="step-content">
     <div class="step-header">
-      <h3 class="step-title">🎭 {{ $t('forms.contentMode') }}</h3>
+      <h3 class="step-title">🎭 {{ t('forms.contentMode') }}</h3>
       <p class="step-description">어떤 방식으로 책을 만들지 선택해주세요</p>
     </div>
     
@@ -16,8 +16,8 @@
         <div class="mode-card">
           <div class="mode-icon">🎬</div>
           <div class="mode-info">
-            <h4 class="mode-title">{{ $t('forms.videoMode') }}</h4>
-            <p class="mode-description">{{ $t('forms.videoModeDesc') }}</p>
+            <h4 class="mode-title">{{ t('forms.videoMode') }}</h4>
+            <p class="mode-description">{{ t('forms.videoModeDesc') }}</p>
             <div class="mode-features">
               <span class="feature-tag">동영상 스토리</span>
               <span class="feature-tag">자동 커버 생성</span>
@@ -36,8 +36,8 @@
         <div class="mode-card">
           <div class="mode-icon">📚</div>
           <div class="mode-info">
-            <h4 class="mode-title">{{ $t('forms.traditionalMode') }}</h4>
-            <p class="mode-description">{{ $t('forms.traditionalModeDesc') }}</p>
+            <h4 class="mode-title">{{ t('forms.traditionalMode') }}</h4>
+            <p class="mode-description">{{ t('forms.traditionalModeDesc') }}</p>
             <div class="mode-features">
               <span class="feature-tag">페이지별 이미지</span>
               <span class="feature-tag">음성 지원</span>
@@ -88,12 +88,14 @@
 </template>
 
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n';
 import type { BookModalFormData } from '@/types';
 
 interface Props {
   modelValue: BookModalFormData;
 }
 
+const { t } = useI18n();
 const props = defineProps<Props>();
 const emit = defineEmits<{
   'update:modelValue': [value: BookModalFormData];

@@ -5,9 +5,9 @@
     <main class="main-content">
       <div class="container">
         <div class="page-header">
-          <h1 class="page-title">{{$t('achievements.title')}}</h1>
+          <h1 class="page-title">{{t('achievements.title')}}</h1>
           <p class="page-description">
-            {{$t('achievements.description')}}
+            {{t('achievements.description')}}
           </p>
         </div>
 
@@ -32,15 +32,15 @@
             <!-- 로딩 상태 -->
             <div v-if="contentStore.isLoading" class="loading-state">
               <div class="spinner"></div>
-              <p>{{$t('achievements.loading')}}</p>
+              <p>{{t('achievements.loading')}}</p>
             </div>
 
             <!-- 에러 상태 -->
             <div v-else-if="contentStore.error" class="error-state">
               <div class="error-icon">오류</div>
-              <h3>{{$t('achievements.errorTitle')}}</h3>
+              <h3>{{t('achievements.errorTitle')}}</h3>
               <p>{{ contentStore.error }}</p>
-              <button @click="reloadContent" class="btn btn-primary">{{$t('achievements.retry')}}</button>
+              <button @click="reloadContent" class="btn btn-primary">{{t('achievements.retry')}}</button>
             </div>
 
             <!-- 정상 상태 -->
@@ -48,7 +48,7 @@
           <!-- 획득한 뱃지 섹션 - 최상단에 모든 뱃지 표시 -->
           <section class="earned-badges-section">
             <div class="section-header">
-              <h2 class="section-title">{{$t('achievements.earnedBadges')}}</h2>
+              <h2 class="section-title">{{t('achievements.earnedBadges')}}</h2>
               <div class="badge-count">
                 <span class="count">{{ displayedBadges.length }}</span>
                 <span class="total">/ {{ contentStore.badges.length }}</span>
@@ -69,21 +69,21 @@
                   <div class="badge-category">{{ getCategoryName(badge.category) }}</div>
                 </div>
                 <div class="earned-indicator">
-                  <span class="earned-text">{{$t('achievements.earned')}}</span>
+                  <span class="earned-text">{{t('achievements.earned')}}</span>
                 </div>
               </div>
             </div>
 
             <!-- 뱃지가 없는 경우 -->
             <div v-if="displayedBadges.length === 0" class="no-badges">
-              <h3>{{$t('achievements.noBadges')}}</h3>
-              <p>{{$t('achievements.startLearning')}}</p>
+              <h3>{{t('achievements.noBadges')}}</h3>
+              <p>{{t('achievements.startLearning')}}</p>
               <div class="quick-actions">
                 <router-link to="/quiz" class="btn btn-primary">
-                  {{$t('achievements.startQuiz')}}
+                  {{t('achievements.startQuiz')}}
                 </router-link>
                 <router-link to="/words" class="btn btn-secondary">
-                  {{$t('achievements.startWords')}}
+                  {{t('achievements.startWords')}}
                 </router-link>
               </div>
             </div>
@@ -91,7 +91,7 @@
 
           <!-- 다음 목표 섹션 -->
           <section v-if="nextBadges.length > 0" class="next-goals-section">
-            <h2 class="section-title">{{$t('achievements.nextGoals')}}</h2>
+            <h2 class="section-title">{{t('achievements.nextGoals')}}</h2>
             <div class="next-badges-grid">
               <div 
                 v-for="badge in nextBadges" 
@@ -120,37 +120,37 @@
 
           <!-- 학습 통계 섹션 - 컴팩트하게 -->
           <section class="stats-section">
-            <h2 class="section-title">{{$t('achievements.learningStats')}}</h2>
+            <h2 class="section-title">{{t('achievements.learningStats')}}</h2>
             
             <div class="stats-grid" v-if="authStore.userProgress">
               <div class="stat-card quiz">
                 <div class="stat-content">
                   <div class="stat-value">{{ authStore.userProgress.quizScore }}</div>
-                  <div class="stat-label">{{$t('achievements.quizScore')}}</div>
-                  <div class="stat-sub">{{$t('achievements.quizStreak', {streak: authStore.userProgress.quizStreak})}}</div>
+                  <div class="stat-label">{{t('achievements.quizScore')}}</div>
+                  <div class="stat-sub">{{t('achievements.quizStreak', {streak: authStore.userProgress.quizStreak})}}</div>
                 </div>
               </div>
 
               <div class="stat-card puzzle">
                 <div class="stat-content">
                   <div class="stat-value">{{ authStore.userProgress.puzzleCompletions }}</div>
-                  <div class="stat-label">{{$t('achievements.puzzleCompletions')}}</div>
+                  <div class="stat-label">{{t('achievements.puzzleCompletions')}}</div>
                 </div>
               </div>
 
               <div class="stat-card words">
                 <div class="stat-content">
                   <div class="stat-value">{{ authStore.userProgress.wordsLearned }}</div>
-                  <div class="stat-label">{{$t('achievements.wordsLearned')}}</div>
-                  <div class="stat-sub">{{$t('achievements.wordsTotal', {total: contentStore.words.length})}}</div>
+                  <div class="stat-label">{{t('achievements.wordsLearned')}}</div>
+                  <div class="stat-sub">{{t('achievements.wordsTotal', {total: contentStore.words.length})}}</div>
                 </div>
               </div>
 
               <div class="stat-card books">
                 <div class="stat-content">
                   <div class="stat-value">{{ authStore.userProgress.booksRead }}</div>
-                  <div class="stat-label">{{$t('achievements.booksRead')}}</div>
-                  <div class="stat-sub">{{$t('achievements.booksTotal', {total: contentStore.books.length})}}</div>
+                  <div class="stat-label">{{t('achievements.booksRead')}}</div>
+                  <div class="stat-sub">{{t('achievements.booksTotal', {total: contentStore.books.length})}}</div>
                 </div>
               </div>
             </div>
@@ -158,26 +158,26 @@
 
           <!-- 전체 진행률 섹션 - 컴팩트하게 -->
           <section class="progress-section">
-            <h2 class="section-title">{{$t('achievements.overallProgress')}}</h2>
+            <h2 class="section-title">{{t('achievements.overallProgress')}}</h2>
             
             <div class="progress-cards">
               <div class="progress-card">
-                <h3 class="progress-title">{{$t('achievements.badgeCollectionRate')}}</h3>
+                <h3 class="progress-title">{{t('achievements.badgeCollectionRate')}}</h3>
                 <div class="circular-progress">
                   <div class="progress-circle" :style="{ '--progress': badgeProgress }">
                     <span class="progress-percentage">{{ Math.round(badgeProgress) }}%</span>
                   </div>
                 </div>
                 <p class="progress-description">
-                  {{$t('achievements.badgeProgress', {earned: displayedBadges.length, total: contentStore.badges.length})}}
+                  {{t('achievements.badgeProgress', {earned: displayedBadges.length, total: contentStore.badges.length})}}
                 </p>
               </div>
 
               <div class="progress-card">
-                <h3 class="progress-title">{{$t('achievements.categoryProgress')}}</h3>
+                <h3 class="progress-title">{{t('achievements.categoryProgress')}}</h3>
                 <div class="category-progress">
                   <div class="category-item">
-                    <span class="category-label">{{$t('achievements.categories.quiz')}}</span>
+                    <span class="category-label">{{t('achievements.categories.quiz')}}</span>
                     <div class="category-bar">
                       <div 
                         class="category-fill quiz" 
@@ -187,7 +187,7 @@
                     <span class="category-value">{{ getCategoryBadgeCount('quiz') }}/5</span>
                   </div>
                   <div class="category-item">
-                    <span class="category-label">{{$t('achievements.categories.puzzle')}}</span>
+                    <span class="category-label">{{t('achievements.categories.puzzle')}}</span>
                     <div class="category-bar">
                       <div 
                         class="category-fill puzzle" 
@@ -197,7 +197,7 @@
                     <span class="category-value">{{ getCategoryBadgeCount('puzzle') }}/5</span>
                   </div>
                   <div class="category-item">
-                    <span class="category-label">{{$t('achievements.categories.words')}}</span>
+                    <span class="category-label">{{t('achievements.categories.words')}}</span>
                     <div class="category-bar">
                       <div 
                         class="category-fill words" 
@@ -207,7 +207,7 @@
                     <span class="category-value">{{ getCategoryBadgeCount('words') }}/5</span>
                   </div>
                   <div class="category-item">
-                    <span class="category-label">{{$t('achievements.categories.books')}}</span>
+                    <span class="category-label">{{t('achievements.categories.books')}}</span>
                     <div class="category-bar">
                       <div 
                         class="category-fill books" 
@@ -223,7 +223,7 @@
 
           <!-- 디버그 정보 (개발용) -->
           <section v-if="showDebugInfo" class="debug-section">
-            <h2 class="section-title">{{$t('auth.debugInfo')}}</h2>
+            <h2 class="section-title">{{t('auth.debugInfo')}}</h2>
             <div class="debug-content">
               <p><strong>사용자 진행도:</strong></p>
               <pre>{{ JSON.stringify(authStore.userProgress, null, 2) }}</pre>
@@ -235,8 +235,8 @@
               <pre>{{ JSON.stringify(contentStore.availableBadges, null, 2) }}</pre>
             </div>
             <div class="debug-actions">
-              <button @click="forceReloadBadges" class="btn btn-secondary">{{$t('achievements.forceReloadBadges')}}</button>
-              <button @click="checkBadges" class="btn btn-primary">{{$t('achievements.checkBadges')}}</button>
+              <button @click="forceReloadBadges" class="btn btn-secondary">{{t('achievements.forceReloadBadges')}}</button>
+              <button @click="checkBadges" class="btn btn-primary">{{t('achievements.checkBadges')}}</button>
             </div>
           </section>
           </div>
@@ -259,7 +259,7 @@
           class="debug-toggle"
           style="position: fixed; bottom: 20px; right: 20px; z-index: 1000;"
         >
-          {{ showDebugInfo ? $t('auth.hideDebug') : $t('ui.debug') }}
+          {{ showDebugInfo ? t('auth.hideDebug') : t('ui.debug') }}
         </button>
       </div>
     </main>

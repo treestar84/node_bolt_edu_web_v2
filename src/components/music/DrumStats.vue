@@ -1,21 +1,24 @@
 <template>
   <div class="drum-stats">
     <div class="stat-item">
-      <span class="stat-label">{{ $t('music.drums.hits') }}</span>
+      <span class="stat-label">{{ t('music.drums.hits') }}</span>
       <span class="stat-value">{{ stats.totalNotes }}</span>
     </div>
     <div class="stat-item">
-      <span class="stat-label">{{ $t('music.drums.uniqueSounds') }}</span>
+      <span class="stat-label">{{ t('music.drums.uniqueSounds') }}</span>
       <span class="stat-value">{{ stats.uniqueNotes }}</span>
     </div>
     <div class="stat-item">
-      <span class="stat-label">{{ $t('music.drums.playTime') }}</span>
-      <span class="stat-value">{{ stats.playDuration }}{{ $t('common.seconds') }}</span>
+      <span class="stat-label">{{ t('music.drums.playTime') }}</span>
+      <span class="stat-value">{{ stats.playDuration }}{{ t('common.seconds') }}</span>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 interface DrumStats {
   totalNotes: number;

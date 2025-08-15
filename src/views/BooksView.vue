@@ -5,9 +5,9 @@
     <main class="main-content">
       <div class="container">
         <div class="page-header">
-          <h1 class="page-title">{{$t('navigation.books')}}</h1>
+          <h1 class="page-title">{{t('navigation.books')}}</h1>
           <p class="page-description">
-            {{$t('books.description')}}
+            {{t('books.description')}}
           </p>
         </div>
 
@@ -43,20 +43,20 @@
                 <span style="font-size: 3rem; margin-bottom: 8px;">📖</span>
                 <p style="font-size: 1rem; font-weight: 600; text-align: center; margin: 0 0 4px 0; padding: 0 8px;">{{ book.title }}</p>
                 <div style="font-size: 0.75rem; color: #999;">
-                  {{$t('books.noThumbnail')}}
+                  {{t('books.noThumbnail')}}
                 </div>
               </div>
               
               <div class="play-overlay">
                 <span class="play-icon">📖</span>
-                <span class="play-text">{{$t('books.read')}}</span>
+                <span class="play-text">{{t('books.read')}}</span>
               </div>
             </div>
             <div class="book-info">
               <div class="book-details" @click="openBook(book.id)">
                 <h3 class="book-title">{{ book.title }}</h3>
                 <div class="book-meta">
-                  <span class="page-count">{{$t('books.pageCount', { count: book.pages.length })}}</span>
+                  <span class="page-count">{{t('books.pageCount', { count: book.pages.length })}}</span>
                 </div>
               </div>
               <div class="book-actions" @click.stop>
@@ -73,10 +73,10 @@
 
         <div v-else class="empty-state">
           <div class="empty-icon">📖</div>
-          <h3>{{$t('books.emptyTitle')}}</h3>
-          <p>{{$t('books.emptyDesc')}}</p>
+          <h3>{{t('books.emptyTitle')}}</h3>
+          <p>{{t('books.emptyDesc')}}</p>
           <router-link to="/admin" class="btn btn-primary">
-            {{$t('books.adminBtn')}}
+            {{t('books.adminBtn')}}
           </router-link>
         </div>
       </div>
@@ -95,7 +95,7 @@ import { useAuthStore } from '@/stores/auth';
 import { useContentStore } from '@/stores/content';
 import { useLazyLoading } from '@/composables/useLazyLoading';
 
-const { t } = useI18n();
+const { t } = useI18n()
 const store = useAppStore();
 const authStore = useAuthStore();
 const contentStore = useContentStore();

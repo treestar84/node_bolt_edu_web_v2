@@ -2,12 +2,11 @@
 // 10개 언어별 최적화된 음성 합성 및 재생 기능
 
 import { ref, computed } from 'vue';
-import type { MultiLangWordItem } from '@/types/multilingual';
+import type { MultiLangWordItem, SupportedLanguageCode } from '@/types/multilingual';
 import { 
   SUPPORTED_LANGUAGES, 
   getTTSVoiceKeywords, 
-  getTTSQualityGrade,
-  type SupportedLanguageCode 
+  getTTSQualityGrade
 } from '@/constants/languages';
 import { WordCompatibilityHelper } from '@/utils/wordCompatibility';
 
@@ -429,7 +428,7 @@ export function useMultiLangAudio() {
   // === 일괄 처리 및 테스트 함수들 ===
 
   // 모든 언어로 TTS 테스트
-  const testAllLanguagesTTS = async (testText: string = '안녕'): Promise<Record<string, boolean>> => {
+  const testAllLanguagesTTS = async (): Promise<Record<string, boolean>> => {
     console.log('🧪 Testing TTS support for all languages...');
     
     const results: Record<string, boolean> = {};

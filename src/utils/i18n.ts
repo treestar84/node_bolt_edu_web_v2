@@ -1,5 +1,5 @@
 import { createI18n } from 'vue-i18n';
-import type { Language } from '@/types';
+import type { SupportedLanguageCode as Language } from '@/types/multilingual';
 import { ALL_LANGUAGE_CODES } from '@/constants/languages';
 
 // 지원하는 언어 목록 (constants/languages.ts에서 가져옴)
@@ -158,7 +158,7 @@ export const preloadLanguage = async (language: Language) => {
 
 // 언어 표시명 가져오기
 export const getLanguageDisplayName = (language: Language, currentLanguage: Language = getCurrentLanguage()): string => {
-  const displayNames: Record<Language, Record<Language, string>> = {
+  const displayNames: Partial<Record<Language, Partial<Record<Language, string>>>> = {
     ko: {
       ko: '한국어',
       en: '영어'

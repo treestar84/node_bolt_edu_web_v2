@@ -6,11 +6,12 @@ import { useTranslation } from './useTranslation';
 import { useAutoImageFetch } from './useAutoImageFetch';
 import { useMultiLangAudio } from './useMultiLangAudio';
 import { useTranslationValidator } from './useTranslationValidator';
-import { SUPPORTED_LANGUAGES, type SupportedLanguageCode } from '@/constants/languages';
+import { SUPPORTED_LANGUAGES } from '@/constants/languages';
 import type { 
   MultiLangFormData, 
   AutoProcessingStatus,
-  TranslationResult as MultiLangTranslationResult
+  TranslationResult as MultiLangTranslationResult,
+  SupportedLanguageCode
 } from '@/types/multilingual';
 
 export interface ProcessingResult {
@@ -37,7 +38,7 @@ export function useMultiLangProcessor() {
     overallProgress: 0,
     phaseProgress: {
       image: { status: 'pending', progress: 0 },
-      translation: { status: 'pending', progress: 0, completedLanguages: [], currentLanguage: '' },
+      translation: { status: 'pending', progress: 0, completedLanguages: [], failedLanguages: [], currentLanguage: '' },
       tts: { status: 'pending', progress: 0, supportedLanguages: [], testedLanguages: [] }
     },
     results: {
@@ -113,7 +114,7 @@ export function useMultiLangProcessor() {
     console.log('📸 1단계: 이미지 검색 시작');
     
     processingStatus.value.currentPhase = 'image';
-    processingStatus.value.phaseProgress.image.status = 'processing';
+    processingStatus.value.phaseProgress.image.status = 'in-progress';
     updateOverallProgress();
 
     try {
@@ -177,7 +178,7 @@ export function useMultiLangProcessor() {
     console.log('🌍 2단계: 번역 처리 시작');
     
     processingStatus.value.currentPhase = 'translation';
-    processingStatus.value.phaseProgress.translation.status = 'processing';
+    processingStatus.value.phaseProgress.translation.status = 'in-progress';
 
     // 번역 대상 언어 결정
     const targetLanguages = getTargetLanguages(formData.languages);
@@ -247,7 +248,7 @@ export function useMultiLangProcessor() {
               isCustomAudio: false,
               translatedBy: translationResult.translatedBy === 'manual' ? 'user' : 'auto',
               verified: validation ? validation.isValid : false,
-              validation: validation // 검증 결과 추가 (선택사항)
+              validation: validation as any // 검증 결과 추가 (선택사항)
             };
             
             completedCount++;
@@ -297,7 +298,7 @@ export function useMultiLangProcessor() {
     console.log('🎤 3단계: TTS 테스트 시작');
     
     processingStatus.value.currentPhase = 'tts';
-    processingStatus.value.phaseProgress.tts.status = 'processing';
+    processingStatus.value.phaseProgress.tts.status = 'in-progress';
 
     const audioSupport: Record<SupportedLanguageCode, boolean> = {} as any;
     const languages = Object.keys(translations) as SupportedLanguageCode[];
@@ -305,7 +306,7 @@ export function useMultiLangProcessor() {
 
     try {
       for (const langCode of languages) {
-        const translation = translations[langCode];
+        // const _translation = translations[langCode];
         
         try {
           // TTS 지원 여부 확인 (실제 음성 재생하지 않고 지원만 확인)
@@ -400,7 +401,7 @@ export function useMultiLangProcessor() {
       overallProgress: 0,
       phaseProgress: {
         image: { status: 'pending', progress: 0 },
-        translation: { status: 'pending', progress: 0, completedLanguages: [], currentLanguage: '' },
+        translation: { status: 'pending', progress: 0, completedLanguages: [], failedLanguages: [], currentLanguage: '' },
         tts: { status: 'pending', progress: 0, supportedLanguages: [], testedLanguages: [] }
       },
       results: {

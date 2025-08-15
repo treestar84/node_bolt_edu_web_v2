@@ -1,7 +1,7 @@
 // 브라우저 내장 번역 기능 활용 - 완전 무료!
 // Chrome Translation API, Web Speech API 등을 활용한 비용 0원 번역
 
-import type { SupportedLanguageCode } from '@/constants/languages';
+import type { SupportedLanguageCode } from '@/types/multilingual';
 import type { TranslationResult } from '@/services/translationService';
 
 export interface BrowserTranslationCapability {
@@ -250,7 +250,7 @@ export class BrowserTranslationService {
     const apis = [
       () => this.translateWithLibreTranslate(text, fromLang, toLang),
       () => this.translateWithLinguee(text, fromLang, toLang),
-      () => this.translateWithTranslateDict(text, fromLang, toLang)
+      () => this.translateWithTranslateDict(text, toLang)
     ];
     
     for (const apiCall of apis) {
@@ -356,7 +356,6 @@ export class BrowserTranslationService {
    */
   private async translateWithTranslateDict(
     text: string,
-    fromLang: SupportedLanguageCode,
     toLang: SupportedLanguageCode
   ): Promise<string | null> {
     try {
@@ -415,7 +414,7 @@ export class BrowserTranslationService {
    */
   private async translateWithDictionary(
     text: string,
-    fromLang: SupportedLanguageCode,
+    _fromLang: SupportedLanguageCode,
     toLang: SupportedLanguageCode
   ): Promise<string | null> {
     // 기본 단어 사전 (확장 가능)

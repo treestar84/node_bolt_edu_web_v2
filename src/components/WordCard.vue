@@ -10,7 +10,7 @@
   >
     <div class="card-image">
       <img 
-        :src="getImageUrl(word.imageUrl)" 
+        :src="getImageUrl(word.imageUrl || '')" 
         :alt="`${currentName} ${t('words.image')}`"
         loading="lazy"
       />
@@ -23,9 +23,9 @@
         <h3 class="word-name" :id="`word-name-${word.id}`">{{ currentName }}</h3>
         <span 
           class="word-category"
-          :aria-label="`${t('words.category')}: ${$t('categories.'+word.category)}`"
+          :aria-label="`${t('words.category')}: ${t('categories.'+word.category)}`"
         >
-          {{$t('categories.'+word.category)}}
+          {{t('categories.'+word.category)}}
         </span>
       </div>
       <div class="card-actions" @click.stop>
@@ -92,7 +92,7 @@ const currentName = computed(() => {
       
       if (translations[store.currentLanguage]) {
         const translation = translations[store.currentLanguage];
-        return translation.name || translation;
+        return typeof translation === "object" ? (translation as any)?.name || translation : translation;
       }
     } catch (error) {
       console.warn(t('words.translationParseFailed') + ':', error);

@@ -1,4 +1,4 @@
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, readonly } from 'vue';
 
 export interface BeforeInstallPromptEvent extends Event {
   readonly platforms: string[];
@@ -93,7 +93,7 @@ export function usePWA() {
     try {
       const newRegistration = await registration.value.update();
       
-      if (newRegistration.waiting) {
+      if ((newRegistration as any)?.waiting) {
         isUpdateAvailable.value = true;
         console.log('🔄 앱 업데이트 사용 가능');
         

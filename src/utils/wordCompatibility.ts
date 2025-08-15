@@ -22,6 +22,7 @@ export class WordCompatibilityHelper {
     const newWord: MultiLangWordItem = {
       // 기존 필드 그대로 복사
       ...oldWord,
+      imageUrl: oldWord.imageUrl || '',
       
       // 새로운 다국어 시스템 초기화
       translations: {
@@ -31,7 +32,8 @@ export class WordCompatibilityHelper {
           isCustomAudio: !!oldWord.audioKo,
           translatedBy: 'user',
           confidence: 1.0,
-          verified: true
+          verified: true,
+          source: 'manual'
         },
         en: {
           name: oldWord.nameEn,
@@ -39,7 +41,8 @@ export class WordCompatibilityHelper {
           isCustomAudio: !!oldWord.audioEn,
           translatedBy: 'user',
           confidence: 1.0,
-          verified: true
+          verified: true,
+          source: 'manual'
         }
       },
       
@@ -166,7 +169,7 @@ export class WordCompatibilityHelper {
       id: word.id,
       name: word.name,
       nameEn: word.nameEn,
-      imageUrl: word.imageUrl,
+      imageUrl: word.imageUrl || '',
       audioKo: word.audioKo || '',
       audioEn: word.audioEn || '',
       category: word.category,
@@ -178,12 +181,20 @@ export class WordCompatibilityHelper {
         ko: {
           name: word.name,
           confidence: 1.0,
-          source: 'manual'
+          source: 'manual',
+          translatedBy: 'user',
+          audioUrl: word.audioKo || '',
+          isCustomAudio: !!word.audioKo,
+          verified: true
         },
         en: {
           name: word.nameEn,
           confidence: 1.0,
-          source: 'manual'
+          source: 'manual',
+          translatedBy: 'user',
+          audioUrl: word.audioEn || '',
+          isCustomAudio: !!word.audioEn,
+          verified: true
         }
       },
       primaryLanguage: 'ko',

@@ -4,7 +4,7 @@
     <div class="reader-header">
       <div class="header-content">
         <button @click="goBack" class="btn btn-secondary back-btn">
-          ← {{$t('common.back')}}
+          ← {{t('common.back')}}
         </button>
         <div class="title-section">
           <h1 class="book-title">{{ book?.title }}</h1>
@@ -12,7 +12,7 @@
             {{ currentPageIndex + 1 }} / {{ book?.pages?.length }}
           </div>
           <div class="video-indicator" v-else>
-            📹 {{$t('books.videoStory')}}
+            📹 {{t('books.videoStory')}}
           </div>
         </div>
       </div>
@@ -24,14 +24,14 @@
           :disabled="currentPageIndex === 0"
           class="btn btn-lg btn-secondary navigation-btn"
         >
-          ← {{$t('common.prev')}}
+          ← {{t('common.prev')}}
         </button>
         <button
           @click="nextPage"
           :disabled="currentPageIndex === (book?.pages?.length ?? 0) - 1"
           class="btn btn-lg btn-secondary navigation-btn"
         >
-          {{$t('common.next')}} →
+          {{t('common.next')}} →
         </button>
       </div>
     </div>
@@ -39,20 +39,20 @@
     <div v-if="!book">
       <div class="book-not-found">
         <div class="error-icon">📖</div>
-        <h2>{{$t('books.notFound')}}</h2>
-        <p>{{$t('books.notFoundDesc')}}</p>
+        <h2>{{t('books.notFound')}}</h2>
+        <p>{{t('books.notFoundDesc')}}</p>
         <router-link to="/books" class="btn btn-primary">
-          {{$t('books.backToList')}}
+          {{t('books.backToList')}}
         </router-link>
       </div>
     </div>
     <div v-else-if="!book.isVideoMode && (!book.pages || book.pages.length === 0)">
       <div class="book-not-found">
         <div class="error-icon">📖</div>
-        <h2>{{$t('books.noPages')}}</h2>
-        <p>{{$t('books.noPagesDesc')}}</p>
+        <h2>{{t('books.noPages')}}</h2>
+        <p>{{t('books.noPagesDesc')}}</p>
         <router-link to="/books" class="btn btn-primary">
-          {{$t('books.backToList')}}
+          {{t('books.backToList')}}
         </router-link>
       </div>
     </div>
@@ -68,11 +68,11 @@
             @loadeddata="onVideoLoaded"
             @error="onVideoError"
           >
-            {{$t('books.videoNotSupported')}}
+            {{t('books.videoNotSupported')}}
           </video>
           <div class="video-controls">
             <p class="video-description">
-              {{$t('books.watchFullStory')}}
+              {{t('books.watchFullStory')}}
             </p>
           </div>
         </div>
@@ -91,14 +91,14 @@
           <div class="page-image">
             <template v-if="currentPage && currentPage.imageUrl">
               <img 
-                :src="store.getImageUrl(currentPage.imageUrl)" 
+                :src="store.getImageUrl(currentPage.imageUrl || '')" 
                 :alt="`페이지 ${currentPageIndex + 1}`"
                 @load="handleImageLoad"
                 @error="handleImageError"
               />
             </template>
             <template v-else>
-              <div class="missing-media">{{$t('books.noImage')}}</div>
+              <div class="missing-media">{{t('books.noImage')}}</div>
             </template>
             
             <!-- Page text overlay -->
@@ -133,10 +133,10 @@
               :disabled="!currentPage || !currentPage.audioUrl"
             >
               <span class="audio-icon">{{ isPlaying ? '🔊' : '🔈' }}</span>
-              <span>{{$t('books.listenAudio')}}</span>
+              <span>{{t('books.listenAudio')}}</span>
             </button>
             <template v-if="!currentPage || !currentPage.audioUrl">
-              <div class="missing-media">{{$t('books.noAudio')}}</div>
+              <div class="missing-media">{{t('books.noAudio')}}</div>
             </template>
             
             <div class="auto-play-controls">
@@ -146,17 +146,17 @@
                   v-model="autoPlayEnabled"
                   @change="toggleAutoPlay"
                 />
-                <span class="toggle-text">{{$t('books.autoAdvance')}}</span>
+                <span class="toggle-text">{{t('books.autoAdvance')}}</span>
               </label>
               
               <div v-if="autoPlayEnabled" class="delay-settings">
-                <label class="delay-label">{{$t('books.delayLabel')}}:</label>
+                <label class="delay-label">{{t('books.delayLabel')}}:</label>
                 <select v-model="autoAdvanceDelay" class="delay-select">
-                  <option :value="500">0.5{{$t('common.seconds')}}</option>
-                  <option :value="1000">1{{$t('common.seconds')}}</option>
-                  <option :value="1500">1.5{{$t('common.seconds')}}</option>
-                  <option :value="2000">2{{$t('common.seconds')}}</option>
-                  <option :value="3000">3{{$t('common.seconds')}}</option>
+                  <option :value="500">0.5{{t('common.seconds')}}</option>
+                  <option :value="1000">1{{t('common.seconds')}}</option>
+                  <option :value="1500">1.5{{t('common.seconds')}}</option>
+                  <option :value="2000">2{{t('common.seconds')}}</option>
+                  <option :value="3000">3{{t('common.seconds')}}</option>
                 </select>
               </div>
             </div>
@@ -171,14 +171,14 @@
             :disabled="currentPageIndex === 0"
             class="btn btn-lg btn-secondary nav-btn"
           >
-            ← {{$t('common.prev')}}
+            ← {{t('common.prev')}}
           </button>
           <button
             @click="nextPage"
             :disabled="currentPageIndex === book.pages.length - 1"
             class="btn btn-lg btn-secondary nav-btn"
           >
-            {{$t('common.next')}} →
+            {{t('common.next')}} →
           </button>
         </div>
         
@@ -205,7 +205,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { useAppStore } from '@/stores/app';
 import { useAudio } from '@/composables/useAudio';
-import { useSwipeGestures } from '@/composables/useSwipeGestures';
+// import { useSwipeGestures } from '@/composables/useSwipeGestures';
 import { useTouchFeedback } from '@/composables/useTouchFeedback';
 
 const route = useRoute();
@@ -215,7 +215,7 @@ const store = useAppStore();
 const { isPlaying, playAudio, stopAudio } = useAudio();
 
 // 터치 및 제스처 설정
-const bookContainer = ref<HTMLElement | null>(null);
+// const bookContainer = ref<HTMLElement | null>(null);
 const { feedbackPatterns } = useTouchFeedback();
 
 const currentPageIndex = ref(0);

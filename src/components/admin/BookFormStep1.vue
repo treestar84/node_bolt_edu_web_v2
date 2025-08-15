@@ -7,20 +7,20 @@
     
     <div class="form-grid">
       <div class="form-group">
-        <label class="form-label">{{ $t('forms.title') }}</label>
+        <label class="form-label">{{ t('forms.title') }}</label>
         <input 
           :value="modelValue.title"
           @input="updateValue('title', ($event.target as HTMLInputElement).value)"
           type="text" 
           class="form-input" 
-          :placeholder="$t('forms.titlePlaceholder')"
+          :placeholder="t('forms.titlePlaceholder')"
           required 
         />
       </div>
 
       <div class="form-group">
         <label class="form-label">
-          {{ $t('forms.appropriateAge') }}
+          {{ t('forms.appropriateAge') }}
           <button 
             type="button"
             class="tooltip-trigger"
@@ -29,7 +29,7 @@
           >
             ℹ️
             <div v-if="showTooltip === 'age'" class="tooltip">
-              {{ $t('forms.tooltips.age') }}
+              {{ t('forms.tooltips.age') }}
             </div>
           </button>
         </label>
@@ -40,10 +40,10 @@
             class="form-input" 
             required
           >
-            <option value="3">{{ $t('settings.age3') }}</option>
-            <option value="4">{{ $t('settings.age4') }}</option>
-            <option value="5">{{ $t('settings.age5') }}</option>
-            <option value="6">{{ $t('settings.age6') }}</option>
+            <option value="3">{{ t('settings.age3') }}</option>
+            <option value="4">{{ t('settings.age4') }}</option>
+            <option value="5">{{ t('settings.age5') }}</option>
+            <option value="6">{{ t('settings.age6') }}</option>
           </select>
           <span class="age-separator">~</span>
           <select 
@@ -52,10 +52,10 @@
             class="form-input" 
             required
           >
-            <option value="3">{{ $t('settings.age3') }}</option>
-            <option value="4">{{ $t('settings.age4') }}</option>
-            <option value="5">{{ $t('settings.age5') }}</option>
-            <option value="6">{{ $t('settings.age6') }}</option>
+            <option value="3">{{ t('settings.age3') }}</option>
+            <option value="4">{{ t('settings.age4') }}</option>
+            <option value="5">{{ t('settings.age5') }}</option>
+            <option value="6">{{ t('settings.age6') }}</option>
           </select>
         </div>
       </div>
@@ -64,7 +64,7 @@
     <!-- 시스템 관리자만 소유권 선택 가능 -->
     <div v-if="isSystemAdmin" class="form-group">
       <label class="form-label">
-        {{ $t('admin.ownership.global') }}/{{ $t('admin.ownership.user') }} 설정
+        {{ t('admin.ownership.global') }}/{{ t('admin.ownership.user') }} 설정
         <button 
           type="button"
           class="tooltip-trigger"
@@ -72,7 +72,7 @@
           @mouseleave="showTooltip = null"
         >
           ℹ️
-          <div v-if="showTooltip === 'ownership'" class="tooltip" v-html="$t('forms.tooltips.ownership')">
+          <div v-if="showTooltip === 'ownership'" class="tooltip" v-html="t('forms.tooltips.ownership')">
           </div>
         </button>
       </label>
@@ -85,8 +85,8 @@
             value="global"
           />
           <span class="radio-text">
-            <strong>{{ $t('admin.ownership.global') }}</strong>
-            <small>{{ $t('admin.ownership.globalDesc') }}</small>
+            <strong>{{ t('admin.ownership.global') }}</strong>
+            <small>{{ t('admin.ownership.globalDesc') }}</small>
           </span>
         </label>
         <label class="radio-option">
@@ -97,8 +97,8 @@
             value="user"
           />
           <span class="radio-text">
-            <strong>{{ $t('admin.ownership.user') }}</strong>
-            <small>{{ $t('admin.ownership.userDesc') }}</small>
+            <strong>{{ t('admin.ownership.user') }}</strong>
+            <small>{{ t('admin.ownership.userDesc') }}</small>
           </span>
         </label>
       </div>
@@ -108,6 +108,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import type { BookModalFormData } from '@/types';
 
 interface Props {
@@ -115,6 +116,7 @@ interface Props {
   isSystemAdmin: boolean;
 }
 
+const { t } = useI18n();
 const props = defineProps<Props>();
 const emit = defineEmits<{
   'update:modelValue': [value: BookModalFormData];

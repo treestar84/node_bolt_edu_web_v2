@@ -49,7 +49,7 @@
             <span v-else class="pending-icon">📸</span>
           </div>
           <div class="phase-info">
-            <h4 class="phase-title">{{ $t('multiLang.imageSearch') }}</h4>
+            <h4 class="phase-title">{{ t('multiLang.imageSearch') }}</h4>
             <p class="phase-description">{{ getPhaseDescription('image') }}</p>
           </div>
           <div class="phase-progress">
@@ -64,17 +64,17 @@
         >
           <img 
             :src="status.phaseProgress.image.generatedImageUrl" 
-            :alt="$t('multiLang.generatedImage')"
+            :alt="t('multiLang.generatedImage')"
             class="preview-image"
           />
           <div class="image-info">
-            <span class="info-label">{{ $t('multiLang.foundImage') }}</span>
+            <span class="info-label">{{ t('multiLang.foundImage') }}</span>
             <button 
               @click="regenerateImage" 
               class="regenerate-btn"
               :disabled="status.currentPhase === 'image'"
             >
-              🔄 {{ $t('multiLang.findDifferentImage') }}
+              🔄 {{ t('multiLang.findDifferentImage') }}
             </button>
           </div>
         </div>
@@ -104,7 +104,7 @@
             <span v-else class="pending-icon">🌍</span>
           </div>
           <div class="phase-info">
-            <h4 class="phase-title">{{ $t('multiLang.autoTranslation') }}</h4>
+            <h4 class="phase-title">{{ t('multiLang.autoTranslation') }}</h4>
             <p class="phase-description">{{ getPhaseDescription('translation') }}</p>
           </div>
           <div class="phase-progress">
@@ -133,7 +133,7 @@
             <span class="lang-flag">{{ lang.flag }}</span>
             <span class="lang-name">{{ lang.name }}</span>
             <div class="translation-result">
-              <span v-if="translationResults[code]" class="translated-text">
+              <span v-if="translationResults && translationResults[code]" class="translated-text">
                 {{ translationResults[code].name }}
               </span>
               <span v-else-if="status.phaseProgress.translation.currentLanguage === code" class="translating">
@@ -144,15 +144,15 @@
               </span>
               <span v-else class="waiting">대기</span>
             </div>
-            <div v-if="translationResults[code]" class="confidence-indicator">
+            <div v-if="translationResults && translationResults[code]" class="confidence-indicator">
               <div class="confidence-bar">
                 <div 
                   class="confidence-fill" 
-                  :style="{ width: `${(translationResults[code].confidence || 0) * 100}%` }"
-                  :class="getConfidenceClass(translationResults[code].confidence || 0)"
+                  :style="{ width: `${(translationResults?.[code]?.confidence || 0) * 100}%` }"
+                  :class="getConfidenceClass(translationResults?.[code]?.confidence || 0)"
                 ></div>
               </div>
-              <span class="confidence-text">{{ Math.round((translationResults[code].confidence || 0) * 100) }}%</span>
+              <span class="confidence-text">{{ Math.round((translationResults?.[code]?.confidence || 0) * 100) }}%</span>
             </div>
           </div>
         </div>
@@ -182,7 +182,7 @@
             <span v-else class="pending-icon">🎤</span>
           </div>
           <div class="phase-info">
-            <h4 class="phase-title">{{ $t('multiLang.ttsTest') }}</h4>
+            <h4 class="phase-title">{{ t('multiLang.ttsTest') }}</h4>
             <p class="phase-description">{{ getPhaseDescription('tts') }}</p>
           </div>
           <div class="phase-progress">
@@ -199,21 +199,21 @@
         >
           <button 
             v-for="result in ttsTestResults" 
-            :key="result.language"
-            @click="testTTSPlayback(result.language, result.text)"
+            :key="result.languageCode"
+            @click="testTTSPlayback(result.languageCode, result.text)"
             class="tts-test-button"
             :class="{ 
-              playing: playingTTSLanguage === result.language,
-              supported: status.phaseProgress.tts.supportedLanguages.includes(result.language),
-              tested: status.phaseProgress.tts.testedLanguages.includes(result.language)
+              playing: playingTTSLanguage === result.languageCode,
+              supported: status.phaseProgress.tts.supportedLanguages.includes(result.languageCode),
+              tested: status.phaseProgress.tts.testedLanguages.includes(result.languageCode)
             }"
             :disabled="isTestingTTS"
           >
-            <span class="tts-flag">{{ SUPPORTED_LANGUAGES[result.language]?.flag }}</span>
+            <span class="tts-flag">{{ SUPPORTED_LANGUAGES[result.languageCode as SupportedLanguageCode]?.flag }}</span>
             <span class="tts-text">{{ result.text }}</span>
             <div class="tts-status">
-              <span v-if="playingTTSLanguage === result.language" class="playing-indicator">🔊</span>
-              <span v-else-if="status.phaseProgress.tts.supportedLanguages.includes(result.language)" class="supported-indicator">✓</span>
+              <span v-if="playingTTSLanguage === result.languageCode" class="playing-indicator">🔊</span>
+              <span v-else-if="status.phaseProgress.tts.supportedLanguages.includes(result.languageCode)" class="supported-indicator">✓</span>
               <span v-else class="unsupported-indicator">✗</span>
             </div>
           </button>
@@ -235,36 +235,36 @@
     >
       <div class="summary-header">
         <div class="celebration-icon">🎉</div>
-        <h3 class="summary-title">{{ $t('multiLang.processingComplete') }}</h3>
-        <p class="summary-subtitle">{{ $t('multiLang.allTasksCompleted') }}</p>
+        <h3 class="summary-title">{{ t('multiLang.processingComplete') }}</h3>
+        <p class="summary-subtitle">{{ t('multiLang.allTasksCompleted') }}</p>
       </div>
       
       <div class="summary-stats">
         <div class="stat-item">
           <span class="stat-icon">🌍</span>
-          <span class="stat-number">{{ Object.keys(translationResults).length }}</span>
-          <span class="stat-label">{{ $t('multiLang.languagesTranslated') }}</span>
+          <span class="stat-number">{{ Object.keys(props.translationResults || {}).length }}</span>
+          <span class="stat-label">{{ t('multiLang.languagesTranslated') }}</span>
         </div>
         <div class="stat-item">
           <span class="stat-icon">📸</span>
           <span class="stat-number">1</span>
-          <span class="stat-label">{{ $t('multiLang.imageFound') }}</span>
+          <span class="stat-label">{{ t('multiLang.imageFound') }}</span>
         </div>
         <div class="stat-item">
           <span class="stat-icon">🎤</span>
           <span class="stat-number">{{ status.phaseProgress.tts.supportedLanguages.length }}</span>
-          <span class="stat-label">{{ $t('multiLang.voicesReady') }}</span>
+          <span class="stat-label">{{ t('multiLang.voicesReady') }}</span>
         </div>
       </div>
 
       <div class="next-steps">
         <button @click="$emit('customize')" class="btn btn-secondary">
           <span class="btn-icon">🎨</span>
-          {{ $t('multiLang.customizeResults') }}
+          {{ t('multiLang.customizeResults') }}
         </button>
         <button @click="$emit('save')" class="btn btn-primary">
           <span class="btn-icon">💾</span>
-          {{ $t('multiLang.saveWord') }}
+          {{ t('multiLang.saveWord') }}
         </button>
       </div>
     </div>
@@ -276,17 +276,17 @@
     >
       <div class="error-content">
         <div class="error-icon">💥</div>
-        <h3 class="error-title">{{ $t('multiLang.processingError') }}</h3>
-        <p class="error-message">{{ status.error?.message || $t('multiLang.unknownError') }}</p>
+        <h3 class="error-title">{{ t('multiLang.processingError') }}</h3>
+        <p class="error-message">{{ status.error?.message || t('multiLang.unknownError') }}</p>
         
         <div class="error-actions">
           <button @click="$emit('retry')" class="btn btn-warning">
             <span class="btn-icon">🔄</span>
-            {{ $t('multiLang.retryProcessing') }}
+            {{ t('multiLang.retryProcessing') }}
           </button>
           <button @click="$emit('save-partial')" class="btn btn-secondary">
             <span class="btn-icon">💾</span>
-            {{ $t('multiLang.savePartialResults') }}
+            {{ t('multiLang.savePartialResults') }}
           </button>
         </div>
       </div>
@@ -296,8 +296,9 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-import type { AutoProcessingStatus, TranslationResult, TTSTestResult } from '@/types/multilingual';
-import { SUPPORTED_LANGUAGES, type SupportedLanguageCode } from '@/constants/languages';
+import { useI18n } from 'vue-i18n';
+import type { AutoProcessingStatus, TranslationResult, TTSTestResult, SupportedLanguageCode } from '@/types/multilingual';
+import { SUPPORTED_LANGUAGES } from '@/constants/languages';
 import { useMultiLangAudio } from '@/composables/useMultiLangAudio';
 
 // Props
@@ -309,6 +310,7 @@ interface Props {
 }
 
 const props = defineProps<Props>();
+const { t } = useI18n();
 
 // Emits
 interface Emits {
@@ -399,7 +401,7 @@ const getPhaseDescription = (phase: string) => {
         return '일부 번역 실패';
       } else if (props.status.currentPhase === 'translation') {
         const currentLang = props.status.phaseProgress.translation.currentLanguage;
-        if (currentLang && SUPPORTED_LANGUAGES[currentLang as SupportedLanguageCode]) {
+        if (currentLang && currentLang in SUPPORTED_LANGUAGES) {
           return `${SUPPORTED_LANGUAGES[currentLang as SupportedLanguageCode].name} 번역 중...`;
         }
         return '다국어 번역 진행 중...';
