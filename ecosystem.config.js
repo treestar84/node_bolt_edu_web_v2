@@ -20,7 +20,7 @@ module.exports = {
     {
       name: 'front',
       script: 'npm',
-      args: 'run preview',
+      args: 'run serve',
       env: {
         NODE_ENV: 'production',
         PORT: 4173
@@ -33,7 +33,8 @@ module.exports = {
       error_file: '~/.pm2/logs/front-error.log',
       out_file: '~/.pm2/logs/front-out.log',
       log_file: '~/.pm2/logs/front-combined.log',
-      merge_logs: true
+      merge_logs: true,
+      time: true
     }
   ]
 };

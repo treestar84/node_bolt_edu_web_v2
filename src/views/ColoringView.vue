@@ -15,7 +15,7 @@
             <!-- 갤러리 버튼 -->
             <div v-if="authStore.isAuthenticated" class="header-actions">
               <a href="/coloring/gallery" class="btn btn-secondary gallery-btn">
-            🖼️ {{t('coloring.gallery')}}
+            {{t('coloring.gallery')}}
           </a>
             </div>
           </div>
@@ -47,31 +47,32 @@
 
         <!-- 색칠하기 화면 -->
         <div v-else-if="coloring.gameState.value === 'coloring'" class="coloring-game">
-          <div class="game-header">
-            <button @click="coloring.goHome" class="btn btn-secondary back-btn">
-              ← {{t('common.back')}}
-            </button>
-            <div class="header-center">
-              <h2 class="coloring-title">{{ coloring.getCurrentName(coloring.selectedWord.value!) }} {{t('coloring.title')}}</h2>
-              <div class="progress-container">
-                <div class="progress-bar">
+          <!-- 콤팩트한 게임 헤더 -->
+          <div class="game-header-compact">
+            <div class="header-row">
+              <button @click="coloring.goHome" class="btn-compact back-btn">
+                ← {{t('common.back')}}
+              </button>
+              <h3 class="coloring-title-compact">{{ coloring.getCurrentName(coloring.selectedWord.value!) }} {{t('coloring.title')}}</h3>
+              <div class="progress-inline">
+                <div class="progress-bar-small">
                   <div class="progress-fill" :style="{ width: coloring.coloringProgress.value + '%' }"></div>
                 </div>
-                <span class="progress-text">{{ coloring.coloringProgress.value }}% {{t('coloring.completed')}}</span>
+                <span class="progress-text-small">{{ coloring.coloringProgress.value }}%</span>
               </div>
-              <div class="completion-controls">
+              <div class="action-buttons">
                 <button 
                   @click="coloring.completeColoringManually" 
-                  class="btn btn-success complete-btn"
+                  class="btn-compact complete-btn"
                   :disabled="coloring.coloringProgress.value < 5"
                 >
                   ✅ {{t('coloring.finished')}}
                 </button>
+                <button @click="coloring.canvas.clearCanvas" class="btn-compact clear-btn">
+                  🗑️ {{t('coloring.clear')}}
+                </button>
               </div>
             </div>
-            <button @click="coloring.canvas.clearCanvas" class="btn btn-secondary clear-btn">
-              🗑️ {{t('coloring.clear')}}
-            </button>
           </div>
 
           <div class="coloring-container">
@@ -92,20 +93,58 @@
                 </div>
               </div>
               
-              <!-- 브러쉬 크기 조절 -->
-              <div class="brush-size">
-                <h4>{{t('coloring.brushSize')}}</h4>
-                <div class="brush-options">
+              <!-- 도구 선택 -->
+              <div class="drawing-tools">
+                <h4>{{t('coloring.tools')}}</h4>
+                
+                <!-- 브러쉬/지우개 모드 토글 -->
+                <div class="tool-toggle">
                   <button 
-                    v-for="size in coloring.brushSizes" 
-                    :key="size.name"
-                    @click="coloring.selectBrushSize(size)"
-                    class="brush-btn"
-                    :class="{ active: coloring.selectedBrushSize.value?.name === size.name }"
+                    @click="coloring.setDrawingMode('brush')"
+                    class="tool-btn"
+                    :class="{ active: coloring.drawingMode.value === 'brush' }"
                   >
-                    <div class="brush-preview" :style="{ width: size.preview + 'px', height: size.preview + 'px' }"></div>
-                    <span>{{size.displayName}}</span>
+                    🖌️ {{t('coloring.brush')}}
                   </button>
+                  <button 
+                    @click="coloring.setDrawingMode('eraser')"
+                    class="tool-btn"
+                    :class="{ active: coloring.drawingMode.value === 'eraser' }"
+                  >
+                    🧽 {{t('coloring.eraser')}}
+                  </button>
+                </div>
+                
+                <!-- 브러쉬 크기 슬라이더 -->
+                <div class="brush-size-slider">
+                  <label>{{t('coloring.brushSize')}}</label>
+                  <div class="slider-container">
+                    <input 
+                      type="range"
+                      min="2"
+                      max="50"
+                      v-model="coloring.brushSize"
+                      class="size-slider"
+                    />
+                    <div class="brush-preview-circle" :style="{ width: coloring.brushSize.value + 'px', height: coloring.brushSize.value + 'px' }"></div>
+                  </div>
+                  <span class="size-value">{{ coloring.brushSize.value }}px</span>
+                </div>
+                
+                <!-- 지우개 크기 슬라이더 (지우개 모드일 때만) -->
+                <div v-if="coloring.drawingMode.value === 'eraser'" class="eraser-size-slider">
+                  <label>{{t('coloring.eraserSize')}}</label>
+                  <div class="slider-container">
+                    <input 
+                      type="range"
+                      min="5"
+                      max="80"
+                      v-model="coloring.eraserSize"
+                      class="size-slider eraser-slider"
+                    />
+                    <div class="eraser-preview-circle" :style="{ width: coloring.eraserSize.value + 'px', height: coloring.eraserSize.value + 'px' }"></div>
+                  </div>
+                  <span class="size-value">{{ coloring.eraserSize.value }}px</span>
                 </div>
               </div>
             </div>
@@ -181,10 +220,10 @@
                   <span v-else>💾 {{t('coloring.save')}}</span>
                 </button>
                 <button @click="coloring.shareArtwork" class="btn btn-secondary">
-                  📤 {{t('coloring.share')}}
+                   {{t('coloring.share')}}
                 </button>
                 <router-link v-if="authStore.isAuthenticated" to="/coloring/gallery" class="btn btn-info">
-                  🖼️ {{t('coloring.gallery')}}
+                   {{t('coloring.gallery')}}
                 </router-link>
               </div>
             </div>
@@ -232,7 +271,7 @@
                 <span v-else>💾 {{t('coloring.saveArtwork')}}</span>
               </button>
               <router-link v-if="authStore.isAuthenticated" to="/coloring/gallery" class="btn btn-info btn-lg">
-                🖼️ {{t('coloring.gallery')}}
+                 {{t('coloring.gallery')}}
               </router-link>
               <button @click="coloring.startNewColoring" class="btn btn-primary btn-lg">
                 🎨 {{t('coloring.colorAnother')}}
@@ -270,12 +309,12 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, nextTick, watch, ref } from 'vue';
-import { useI18n } from 'vue-i18n';
 import Navigation from '@/components/Navigation.vue';
+import { useColoring } from '@/composables/useColoring';
 import { useAppStore } from '@/stores/app';
 import { useAuthStore } from '@/stores/auth';
-import { useColoring } from '@/composables/useColoring';
+import { computed, nextTick, onMounted, ref, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();
 const store = useAppStore();
@@ -430,6 +469,19 @@ watch(() => coloring.gameState.value, (newState) => {
         }, 500);
       }, 200);
     });
+  }
+});
+
+// 슬라이더 값 변경 감지
+watch(() => coloring.brushSize.value, (newSize) => {
+  if (coloring.drawingMode.value === 'brush') {
+    coloring.canvas.setBrushSize(newSize);
+  }
+});
+
+watch(() => coloring.eraserSize.value, (newSize) => {
+  if (coloring.drawingMode.value === 'eraser') {
+    coloring.canvas.setBrushSize(newSize);
   }
 });
 
@@ -691,24 +743,96 @@ const getFireworkStyle = (index: number) => {
 }
 
 /* 색칠하기 화면 */
-.game-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 24px;
+/* 콤팩트한 게임 헤더 */
+.game-header-compact {
+  margin-bottom: 16px;
   background: var(--color-bg-card);
   border: 1px solid var(--color-border);
-  border-radius: 12px;
-  padding: 16px;
+  border-radius: 8px;
+  padding: 8px 12px;
 }
 
-.coloring-title {
-  font-size: 1.5rem;
+.header-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.coloring-title-compact {
+  font-size: 1rem;
   font-weight: 600;
   color: var(--color-text-primary);
-  text-align: center;
+  margin: 0;
   flex: 1;
-  margin: 0 16px;
+  text-align: left;
+}
+
+.btn-compact {
+  padding: 6px 10px;
+  font-size: 0.85rem;
+  border-radius: 6px;
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-secondary);
+  color: var(--color-text-primary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-compact:hover:not(:disabled) {
+  background: var(--color-bg-tertiary);
+  transform: translateY(-1px);
+}
+
+.btn-compact:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.progress-inline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.progress-bar-small {
+  width: 80px;
+  height: 6px;
+  background: var(--color-bg-secondary);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.progress-text-small {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  min-width: 30px;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 6px;
+}
+
+.complete-btn {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  border-color: #10b981;
+}
+
+.complete-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+}
+
+.clear-btn {
+  background: var(--color-danger);
+  color: white;
+  border-color: var(--color-danger);
+}
+
+.clear-btn:hover {
+  background: var(--color-danger-dark);
 }
 
 .coloring-container {
@@ -795,8 +919,8 @@ const getFireworkStyle = (index: number) => {
   100% { transform: scale(1); }
 }
 
-/* 브러쉬 크기 - 다크모드/화이트모드 적응형 */
-.brush-size h4 {
+/* 그리기 도구 */
+.drawing-tools h4 {
   font-size: 1.1rem;
   font-weight: 700;
   color: var(--color-text-primary);
@@ -804,44 +928,120 @@ const getFireworkStyle = (index: number) => {
   text-align: center;
 }
 
-.brush-options {
+.tool-toggle {
   display: flex;
-  flex-direction: column;
-  gap: 8px;
+  gap: 6px;
+  margin-bottom: 16px;
 }
 
-.brush-btn {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 16px;
+.tool-btn {
+  flex: 1;
+  padding: 8px 12px;
   border: 2px solid var(--color-border);
-  border-radius: 12px;
+  border-radius: 8px;
   background: var(--color-bg-secondary);
   color: var(--color-text-primary);
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.2s ease;
+  font-size: 0.85rem;
 }
 
-.brush-btn:hover {
+.tool-btn:hover {
   border-color: var(--color-primary);
   background: var(--color-bg-tertiary);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
 }
 
-.brush-btn.active {
+.tool-btn.active {
   border-color: var(--color-primary);
-  background: rgba(59, 130, 246, 0.1);
-  transform: scale(1.05);
-  box-shadow: var(--shadow-lg);
+  background: var(--color-primary);
+  color: white;
 }
 
-.brush-preview {
+.brush-size-slider,
+.eraser-size-slider {
+  margin-bottom: 16px;
+}
+
+.brush-size-slider label,
+.eraser-size-slider label {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: 8px;
+}
+
+.slider-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+
+.size-slider {
+  flex: 1;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--color-bg-secondary);
+  outline: none;
+  cursor: pointer;
+}
+
+.size-slider::-webkit-slider-thumb {
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.size-slider::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.eraser-slider {
+  background: #ff6b6b;
+}
+
+.eraser-slider::-webkit-slider-thumb {
+  background: #ff6b6b;
+}
+
+.eraser-slider::-moz-range-thumb {
+  background: #ff6b6b;
+}
+
+.brush-preview-circle {
   background: var(--color-text-primary);
   border-radius: 50%;
   flex-shrink: 0;
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+}
+
+.eraser-preview-circle {
+  background: #ff6b6b;
+  border-radius: 50%;
+  flex-shrink: 0;
+  box-shadow: 0 2px 4px rgba(255, 107, 107, 0.3);
+  border: 2px dashed white;
+  transition: all 0.2s ease;
+}
+
+.size-value {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  min-width: 35px;
+  text-align: center;
 }
 
 /* 캔버스 영역 - 밝고 친근한 디자인 */
@@ -1296,14 +1496,29 @@ const getFireworkStyle = (index: number) => {
     gap: 16px;
   }
   
-  .game-header {
-    flex-direction: column;
-    gap: 12px;
-    text-align: center;
+  .game-header-compact {
+    padding: 6px 8px;
   }
   
-  .coloring-title {
-    margin: 0;
+  .header-row {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  
+  .coloring-title-compact {
+    font-size: 0.9rem;
+    text-align: center;
+    flex-basis: 100%;
+    order: 1;
+  }
+  
+  .progress-inline {
+    order: 2;
+    justify-self: center;
+  }
+  
+  .action-buttons {
+    order: 3;
   }
   
   .color-grid {

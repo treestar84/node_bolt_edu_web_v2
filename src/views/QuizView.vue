@@ -23,6 +23,16 @@
           <div class="quiz-question-compact">
             <div class="question-content">
               <h2>{{t('quiz.findAnswer')}}</h2>
+              <div class="quiz-stats-inline">
+                <div class="stat-inline">
+                  <span class="stat-label">{{t('quiz.score')}}</span>
+                  <span class="stat-value">{{ authStore.userProgress?.quizScore || 0 }}</span>
+                </div>
+                <div class="stat-inline">
+                  <span class="stat-label">{{t('quiz.streak')}}</span>
+                  <span class="stat-value">{{ authStore.userProgress?.quizStreak || 0 }}</span>
+                </div>
+              </div>
               <button @click="playQuizAudio" class="audio-button-compact" :class="{ playing: isPlaying }">
                 <span class="audio-icon">🔊</span>
                 <span class="audio-text">{{t('quiz.listen')}}</span>
@@ -79,19 +89,6 @@
           </router-link>
         </div>
 
-        <!-- Quiz Stats -->
-        <div class="quiz-footer-stats">
-          <div class="quiz-stats">
-            <div class="stat">
-              <span class="stat-label">{{t('quiz.score')}}</span>
-              <span class="stat-value">{{ authStore.userProgress?.quizScore || 0 }}</span>
-            </div>
-            <div class="stat">
-              <span class="stat-label">{{t('quiz.streak')}}</span>
-              <span class="stat-value">{{ authStore.userProgress?.quizStreak || 0 }}</span>
-            </div>
-          </div>
-        </div>
       </div>
     </main>
   </div>
@@ -329,13 +326,13 @@ onMounted(() => {
 
 .quiz-header {
   text-align: center;
-  margin-bottom: 32px;
+  margin-bottom: 20px;
 }
 
 .page-title {
-  font-size: 2.25rem;
+  font-size: 1.5rem;
   font-weight: 600;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
   color: var(--color-text-primary);
   letter-spacing: -0.025em;
 }
@@ -441,6 +438,35 @@ onMounted(() => {
   flex: 1;
 }
 
+.quiz-stats-inline {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.stat-inline {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 4px 8px;
+  border-radius: 6px;
+  min-width: 50px;
+}
+
+.stat-inline .stat-label {
+  font-size: 0.65rem;
+  color: #cccccc;
+  margin-bottom: 1px;
+  font-weight: 500;
+}
+
+.stat-inline .stat-value {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
 .audio-button-compact {
   display: inline-flex;
   align-items: center;
@@ -479,10 +505,17 @@ onMounted(() => {
   
   .question-content h2 {
     font-size: 1.1rem;
+    order: 1;
+  }
+  
+  .quiz-stats-inline {
+    order: 2;
+    justify-content: center;
   }
   
   .audio-button-compact {
     align-self: center;
+    order: 3;
   }
 }
 
@@ -546,7 +579,7 @@ onMounted(() => {
 
 .quiz-option img {
   width: 100%;
-  height: 160px;
+  height: 220px;
   object-fit: cover;
 }
 
@@ -762,7 +795,7 @@ onMounted(() => {
   }
   
   .quiz-option img {
-    height: 200px;
+    height: 260px;
     flex: 1;
     object-fit: cover;
   }
@@ -810,7 +843,7 @@ onMounted(() => {
   }
   
   .quiz-option img {
-    height: 180px;
+    height: 200px;
   }
   
   .option-name {

@@ -301,7 +301,11 @@
     "frameHint": "작품이 보이지 않으면 위 프레임을 클릭해보세요",
     "saveArtwork": "작품 저장하기",
     "needImagesHint": "직접 업로드한 이미지가 있는 단어만 색칠하기가 가능합니다.",
-    "easy": "쉬움"
+    "easy": "쉬움",
+    "tools": "도구",
+    "brush": "붓",
+    "eraser": "지우개",
+    "eraserSize": "지우개 크기"
   },
   "music": {
     "title": "악기 연주",
@@ -334,7 +338,21 @@
       "description": "드럼을 치고 재미있는 소리들을 들어보세요",
       "hits": "타격 횟수",
       "uniqueSounds": "사용한 소리",
-      "playTime": "연주 시간"
+      "playTime": "연주 시간",
+      "funSounds": {
+        "title": "재미있는 소리",
+        "description": "고품질 효과음으로 업그레이드!",
+        "police": "경찰차 (위이잉~)",
+        "ambulance": "구급차 (삐뽀삐뽀~)",
+        "engine": "자동차 (부릉부릉~)",
+        "fart": "방귀 (뿡~ 뿌웅~)",
+        "horn": "경적 (빵빵!)",
+        "cow": "소 (음메~ 음메~)",
+        "frog": "개구리 (개굴개굴)",
+        "laugh": "웃음 (하하하하)",
+        "versionInfo": "각 소리마다 2가지 버전으로 다양성 증대",
+        "qualityImproved": "필터와 엔벨로프로 자연스러운 음질"
+      }
     },
     "violin": {
       "name": "바이올린",

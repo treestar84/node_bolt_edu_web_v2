@@ -320,3 +320,17 @@ await changeLanguage(nextLang)
 3. localStorage 언어 설정 확인
 
 **IMPORTANT: 다국어 지원 시스템이 구축되었으므로, 모든 새로운 UI 텍스트는 반드시 i18n 키를 사용해야 합니다. 하드코딩된 텍스트는 절대 금지입니다.**
+
+
+  🎯 코드 수정 시 필수 체크사항
+
+  1. 타입 정의 확인: 새로운 property 사용 전 반드시 타입 정의 존재 확인
+  2. 빌드 테스트: 수정 후 npm run build 실행으로 에러 검증
+  3. Import 확인: Vue (ref, computed 등) 누락 없이 import
+  4. Timer 타입: NodeJS.Timeout 사용 (not number)
+
+  🚫 금지사항
+
+  - 존재하지 않는 property 사용 (예: preview.middleware)
+  - any 타입 남용
+  - 타입 에러 상태로 진행

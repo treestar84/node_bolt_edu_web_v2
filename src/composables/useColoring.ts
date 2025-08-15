@@ -82,6 +82,11 @@ export function useColoring() {
   // 현재 선택된 색상과 브러쉬
   const selectedColor = ref<ColorItem>(colorPalette[0]); // 빨간색 기본
   const selectedBrushSize = ref<BrushSize>(brushSizes[1]); // 보통 크기 기본
+  
+  // 드로잉 모드와 크기 (슬라이더용)
+  const drawingMode = ref<'brush' | 'eraser'>('brush');
+  const brushSize = ref(20); // 슬라이더 브러쉬 크기
+  const eraserSize = ref(30); // 슬라이더 지우개 크기
 
   // 색칠 진행률 계산 (실제 픽셀 기반)
   const coloringProgress = ref(0);
@@ -157,7 +162,8 @@ export function useColoring() {
       
       // 초기 색상과 브러쉬 크기 설정
       canvas.setColor(selectedColor.value.value);
-      canvas.setBrushSize(selectedBrushSize.value.size);
+      canvas.setBrushSize(brushSize.value);
+      canvas.setDrawingMode(drawingMode.value);
       
       console.log('🎨 Coloring session started for:', getCurrentName(word));
     } catch (error) {
@@ -171,17 +177,36 @@ export function useColoring() {
    */
   const selectColor = (color: ColorItem) => {
     selectedColor.value = color;
-    canvas.setColor(color.value);
+    if (drawingMode.value === 'brush') {
+      canvas.setColor(color.value);
+    }
     console.log('🎨 Color selected:', color.displayName);
   };
 
   /**
-   * 브러쉬 크기 선택
+   * 브러쉬 크기 선택 (기존 버튼 방식)
    */
-  const selectBrushSize = (brushSize: BrushSize) => {
-    selectedBrushSize.value = brushSize;
-    canvas.setBrushSize(brushSize.size);
-    console.log('🖌️ Brush size selected:', brushSize.displayName);
+  const selectBrushSize = (brushSizeObj: BrushSize) => {
+    selectedBrushSize.value = brushSizeObj;
+    canvas.setBrushSize(brushSizeObj.size);
+    console.log('🖌️ Brush size selected:', brushSizeObj.displayName);
+  };
+  
+  /**
+   * 드로잉 모드 설정 (브러쉬/지우개)
+   */
+  const setDrawingMode = (mode: 'brush' | 'eraser') => {
+    drawingMode.value = mode;
+    canvas.setDrawingMode(mode);
+    
+    if (mode === 'brush') {
+      canvas.setColor(selectedColor.value.value);
+      canvas.setBrushSize(brushSize.value);
+    } else {
+      canvas.setBrushSize(eraserSize.value);
+    }
+    
+    console.log('🔧 Drawing mode set to:', mode);
   };
 
   /**
@@ -450,6 +475,11 @@ export function useColoring() {
     coloringProgress,
     isColoringComplete,
     
+    // 새로운 드로잉 상태
+    drawingMode,
+    brushSize,
+    eraserSize,
+    
     // 데이터
     colorPalette,
     brushSizes,
@@ -462,6 +492,7 @@ export function useColoring() {
     selectImageForColoring,
     selectColor,
     selectBrushSize,
+    setDrawingMode,
     completeColoringManually,
     saveArtwork,
     shareArtwork,

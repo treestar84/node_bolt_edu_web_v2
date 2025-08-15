@@ -47,7 +47,11 @@ export default defineConfig({
     host: '0.0.0.0',
     port: 4173,
     strictPort: true,
-    allowedHosts: ['duck-edu-word.duckdns.org']
+    // URL 디코딩 문제는 http-server로 해결
+    cors: true,
+    headers: {
+      'Cache-Control': 'no-cache'
+    }
   },
   build: {
     // PWA 최적화를 위한 빌드 설정

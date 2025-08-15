@@ -223,10 +223,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
 import Navigation from '@/components/Navigation.vue';
 import { useColoringGallery } from '@/composables/useColoringGallery';
 import type { ColoringArtwork } from '@/types';
+import { onMounted, ref } from 'vue';
 
 const gallery = useColoringGallery();
 const selectedArtwork = ref<ColoringArtwork | null>(null);
@@ -354,7 +354,7 @@ const shareArtwork = async (artwork: ColoringArtwork) => {
 
 // 초기화
 onMounted(async () => {
-  console.log('🖼️ ColoringGalleryView mounted');
+  console.log('ColoringGalleryView mounted');
   await gallery.initialize();
 });
 </script>

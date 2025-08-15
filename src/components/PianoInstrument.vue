@@ -100,6 +100,69 @@
         <span class="stat-value">{{ playStats.playDuration }}초</span>
       </div>
     </div>
+
+    <!-- Chord Control Panel -->
+    <div class="chord-controls" v-if="playMode === 'free'">
+      <h3>화음 연주</h3>
+      <div class="chord-buttons">
+        <button 
+          class="chord-btn" 
+          @click="playChord('C')"
+          :disabled="isPlayingChord"
+        >
+          C 메이저
+        </button>
+        <button 
+          class="chord-btn" 
+          @click="playChord('Cm')"
+          :disabled="isPlayingChord"
+        >
+          C 마이너
+        </button>
+        <button 
+          class="chord-btn" 
+          @click="playChord('G')"
+          :disabled="isPlayingChord"
+        >
+          G 메이저
+        </button>
+        <button 
+          class="chord-btn" 
+          @click="playChord('Am')"
+          :disabled="isPlayingChord"
+        >
+          A 마이너
+        </button>
+        <button 
+          class="chord-btn" 
+          @click="playChord('F')"
+          :disabled="isPlayingChord"
+        >
+          F 메이저
+        </button>
+        <button 
+          class="chord-btn" 
+          @click="playChord('Dm')"
+          :disabled="isPlayingChord"
+        >
+          D 마이너
+        </button>
+        <button 
+          class="chord-btn advanced" 
+          @click="playChord('C7')"
+          :disabled="isPlayingChord"
+        >
+          C7
+        </button>
+        <button 
+          class="chord-btn advanced" 
+          @click="playChord('Gmaj7')"
+          :disabled="isPlayingChord"
+        >
+          G maj7
+        </button>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -128,6 +191,7 @@ const isPlaying = ref(false);
 const autoPlayIndex = ref(0);
 const autoPlayTimer = ref<NodeJS.Timeout | null>(null);
 const isAutoPlaying = ref(false);
+const isPlayingChord = ref(false);
 
 const WHITE_KEY_WIDTH_PERCENT = 100 / 12;
 const BLACK_KEY_WIDTH_PERCENT = WHITE_KEY_WIDTH_PERCENT * 0.6; // 검은 건반 너비 조정
@@ -426,6 +490,63 @@ onUnmounted(() => {
 watch(selectedSong, () => {
   resetGuide(); // Reset guide when song changes
 });
+
+// Chord definitions
+const chordDefinitions: Record<string, string[]> = {
+  'C': ['C4', 'E4', 'G4'],
+  'Cm': ['C4', 'D#4', 'G4'],
+  'G': ['G3', 'B3', 'D4'],
+  'Am': ['A3', 'C4', 'E4'],
+  'F': ['F3', 'A3', 'C4'],
+  'Dm': ['D4', 'F4', 'A3'],
+  'C7': ['C4', 'E4', 'G4', 'A#3'],
+  'Gmaj7': ['G3', 'B3', 'D4', 'F#4']
+};
+
+/**
+ * 화음 연주
+ */
+const playChord = async (chordName: string) => {
+  if (isPlayingChord.value || !chordDefinitions[chordName]) return;
+  
+  isPlayingChord.value = true;
+  const chordNotes = chordDefinitions[chordName];
+  
+  console.log('🎵 화음 연주 시작:', chordName, chordNotes);
+  
+  try {
+    // 모든 화음 구성음을 동시에 재생
+    const playPromises = chordNotes.map(async (note) => {
+      pressedKeys.value.add(note);
+      try {
+        await music.ensureAudioActive();
+        await music.playPianoNote(note);
+      } catch (error) {
+        console.error('❌ Failed to play chord note:', note, error);
+      }
+    });
+    
+    await Promise.all(playPromises);
+    
+    // 화음 시각적 피드백 유지
+    setTimeout(() => {
+      chordNotes.forEach(note => {
+        pressedKeys.value.delete(note);
+      });
+      isPlayingChord.value = false;
+    }, 1500); // 1.5초 동안 화음 유지
+    
+    console.log('✅ 화음 연주 완료:', chordName);
+    
+  } catch (error) {
+    console.error('❌ 화음 연주 실패:', error);
+    isPlayingChord.value = false;
+    // 실패 시 pressed keys 정리
+    chordNotes.forEach(note => {
+      pressedKeys.value.delete(note);
+    });
+  }
+};
 
 </script>
 
@@ -795,6 +916,69 @@ watch(selectedSong, () => {
   }
 }
 
+/* 화음 컨트롤 패널 */
+.chord-controls {
+  background: var(--color-bg-card);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: var(--shadow-card);
+  margin-top: 16px;
+}
+
+.chord-controls h3 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.chord-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+}
+
+.chord-btn {
+  padding: 12px 20px;
+  background: linear-gradient(145deg, var(--color-primary), var(--color-primary-dark));
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  min-width: 90px;
+}
+
+.chord-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  background: linear-gradient(145deg, var(--color-primary-light), var(--color-primary));
+}
+
+.chord-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.chord-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.chord-btn.advanced {
+  background: linear-gradient(145deg, var(--color-accent), var(--color-accent-dark));
+}
+
+.chord-btn.advanced:hover:not(:disabled) {
+  background: linear-gradient(145deg, var(--color-accent-light), var(--color-accent));
+}
+
 /* 터치 최적화 */
 @media (hover: none) and (pointer: coarse) {
   .piano-key {
@@ -811,6 +995,11 @@ watch(selectedSong, () => {
   
   .piano-key:active {
     transition: none;
+  }
+  
+  .chord-btn {
+    min-height: 48px;
+    font-size: 1rem;
   }
 }
 </style>

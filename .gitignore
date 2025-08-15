@@ -59,6 +59,12 @@ config/production.json
 *.tmp
 *.temp
 
+# Test files
+src/test/
+*.test.html
+*Test.html
+test-*.html
+
 # Gemini suggested additions
 .bolt/
 .claude/

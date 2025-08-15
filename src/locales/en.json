@@ -300,7 +300,11 @@
     "frameHint": "If you can't see the artwork, click the frame above",
     "saveArtwork": "Save Artwork",
     "needImagesHint": "Only words with uploaded images can be used for coloring.",
-    "easy": "Easy"
+    "easy": "Easy",
+    "tools": "Tools",
+    "brush": "Brush",
+    "eraser": "Eraser",
+    "eraserSize": "Eraser Size"
   },
   "music": {
     "title": "Play Instruments",
@@ -333,7 +337,21 @@
       "description": "Play the drums and listen to fun sounds.",
       "hits": "Hits",
       "uniqueSounds": "Unique Sounds",
-      "playTime": "Play Time"
+      "playTime": "Play Time",
+      "funSounds": {
+        "title": "Fun Sounds",
+        "description": "Upgraded to high-quality sound effects!",
+        "police": "Police Car (Wee-oo~)",
+        "ambulance": "Ambulance (Bee-boo~)",
+        "engine": "Car Engine (Vroom~)",
+        "fart": "Fart (Poot~ Pfft~)",
+        "horn": "Horn (Beep beep!)",
+        "cow": "Cow (Moo~ Moo~)",
+        "frog": "Frog (Ribbit ribbit)",
+        "laugh": "Laugh (Ha ha ha)",
+        "versionInfo": "Each sound has 2 versions for variety",
+        "qualityImproved": "Natural sound quality with filters and envelopes"
+      }
     },
     "violin": {
       "name": "Violin",

@@ -29,6 +29,7 @@ export function useCanvas() {
   // 현재 그리기 설정
   const currentColor = ref('#FF6B6B');
   const currentBrushSize = ref(10);
+  const drawingMode = ref<'brush' | 'eraser'>('brush');
   
   // 캔버스 레퍼런스들
   const backgroundCanvas = ref<HTMLCanvasElement | null>(null);  
@@ -185,8 +186,18 @@ export function useCanvas() {
     
     const ctx = drawingCanvas.value.getContext('2d');
     if (ctx) {
-      ctx.strokeStyle = currentColor.value;
+      if (drawingMode.value === 'eraser') {
+        // 지우개 모드
+        ctx.globalCompositeOperation = 'destination-out';
+      } else {
+        // 브러쉬 모드
+        ctx.globalCompositeOperation = 'source-over';
+        ctx.strokeStyle = currentColor.value;
+      }
+      
       ctx.lineWidth = currentBrushSize.value;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
       ctx.beginPath();
       ctx.moveTo(point.x, point.y);
     }
@@ -420,6 +431,13 @@ export function useCanvas() {
   const setBrushSize = (size: number) => {
     currentBrushSize.value = size;
   };
+  
+  /**
+   * 그리기 모드 설정 (브러쉬/지우개)
+   */
+  const setDrawingMode = (mode: 'brush' | 'eraser') => {
+    drawingMode.value = mode;
+  };
 
   /**
    * 되돌리기 가능 여부 확인
@@ -440,6 +458,7 @@ export function useCanvas() {
     canvasState,
     currentColor,
     currentBrushSize,
+    drawingMode,
     canvasSize,
     backgroundCanvas,
     drawingCanvas,
@@ -449,6 +468,7 @@ export function useCanvas() {
     loadBackgroundImage,
     setColor,
     setBrushSize,
+    setDrawingMode,
     
     // 그리기 기능
     startDrawing,

@@ -4,7 +4,7 @@
       <!-- Hi-Hat Cymbal -->
       <div 
         class="cymbal hi-hat"
-        :class="{ active: activeElement === 'hihat' }"
+        :class="{ active: activeElements.has('hihat') }"
         @click="playDrum('hihat')"
         @mousedown="startHit('hihat')"
         @mouseup="endHit('hihat')"
@@ -17,7 +17,7 @@
       <!-- Crash Cymbal Left -->
       <div 
         class="cymbal crash-left"
-        :class="{ active: activeElement === 'crash1' }"
+        :class="{ active: activeElements.has('crash1') }"
         @click="playDrum('crash1')"
         @mousedown="startHit('crash1')"
         @mouseup="endHit('crash1')"
@@ -30,7 +30,7 @@
       <!-- Crash Cymbal Right -->
       <div 
         class="cymbal crash-right"
-        :class="{ active: activeElement === 'crash2' }"
+        :class="{ active: activeElements.has('crash2') }"
         @click="playDrum('crash2')"
         @mousedown="startHit('crash2')"
         @mouseup="endHit('crash2')"
@@ -43,7 +43,7 @@
       <!-- Ride Cymbal -->
       <div 
         class="cymbal ride"
-        :class="{ active: activeElement === 'ride' }"
+        :class="{ active: activeElements.has('ride') }"
         @click="playDrum('ride')"
         @mousedown="startHit('ride')"
         @mouseup="endHit('ride')"
@@ -56,7 +56,7 @@
       <!-- Tom 1 -->
       <div 
         class="drum tom tom1"
-        :class="{ active: activeElement === 'tom1' }"
+        :class="{ active: activeElements.has('tom1') }"
         @click="playDrum('tom1')"
         @mousedown="startHit('tom1')"
         @mouseup="endHit('tom1')"
@@ -70,7 +70,7 @@
       <!-- Tom 2 -->
       <div 
         class="drum tom tom2"
-        :class="{ active: activeElement === 'tom2' }"
+        :class="{ active: activeElements.has('tom2') }"
         @click="playDrum('tom2')"
         @mousedown="startHit('tom2')"
         @mouseup="endHit('tom2')"
@@ -84,7 +84,7 @@
       <!-- Snare Drum -->
       <div 
         class="drum snare"
-        :class="{ active: activeElement === 'snare' }"
+        :class="{ active: activeElements.has('snare') }"
         @click="playDrum('snare')"
         @mousedown="startHit('snare')"
         @mouseup="endHit('snare')"
@@ -99,7 +99,7 @@
       <!-- Floor Tom -->
       <div 
         class="drum floor-tom"
-        :class="{ active: activeElement === 'floortom' }"
+        :class="{ active: activeElements.has('floortom') }"
         @click="playDrum('floortom')"
         @mousedown="startHit('floortom')"
         @mouseup="endHit('floortom')"
@@ -114,7 +114,7 @@
       <!-- Kick Drum -->
       <div 
         class="drum kick"
-        :class="{ active: activeElement === 'kick' }"
+        :class="{ active: activeElements.has('kick') }"
         @click="playDrum('kick')"
         @mousedown="startHit('kick')"
         @mouseup="endHit('kick')"
@@ -163,6 +163,48 @@
       >
         {{ t('drumSet.metronome') }}
       </button>
+      
+      <!-- Drum Pattern Buttons -->
+      <div class="pattern-controls">
+        <h3>{{ t('drumSet.patterns') || '드럼 패턴' }}</h3>
+        <div class="pattern-buttons">
+          <button 
+            class="pattern-btn"
+            @click="playPattern('rock')"
+            :disabled="isPatternPlaying"
+          >
+            🎸 록
+          </button>
+          <button 
+            class="pattern-btn"
+            @click="playPattern('jazz')"
+            :disabled="isPatternPlaying"
+          >
+            🎷 재즈
+          </button>
+          <button 
+            class="pattern-btn"
+            @click="playPattern('funk')"
+            :disabled="isPatternPlaying"
+          >
+            🕺 펑크
+          </button>
+          <button 
+            class="pattern-btn"
+            @click="playPattern('latin')"
+            :disabled="isPatternPlaying"
+          >
+            💃 라틴
+          </button>
+          <button 
+            class="pattern-btn stop-btn"
+            @click="stopPattern"
+            :disabled="!isPatternPlaying"
+          >
+            ⏹️ 정지
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -174,16 +216,18 @@ import { useI18n } from 'vue-i18n'
 const { t } = useI18n()
 
 // Reactive state
-const activeElement = ref<string | null>(null)
+const activeElements = ref<Set<string>>(new Set())
 const isPlaying = ref(false)
 const volume = ref(75)
 const tempo = ref(120)
 const metronomeActive = ref(false)
+const isPatternPlaying = ref(false)
+const patternInterval = ref<NodeJS.Timeout | null>(null)
 
 // Audio contexts and buffers
 const audioContext = ref<AudioContext | null>(null)
 const drumSounds = ref<{ [key: string]: AudioBuffer | null }>({})
-const metronomeInterval = ref<number | null>(null)
+const metronomeInterval = ref<NodeJS.Timeout | null>(null)
 
 // Drum sound URLs (using Web Audio API compatible sounds)
 const drumSoundUrls = {
@@ -294,16 +338,18 @@ function createTone(drumType: string) {
 
 // Visual feedback
 function startHit(drumType: string) {
-  activeElement.value = drumType
+  if (activeElements.value.has(drumType)) return; // 이미 눌려있으면 무시
+  activeElements.value.add(drumType)
   isPlaying.value = true
 }
 
 function endHit(drumType: string) {
-  if (activeElement.value === drumType) {
-    activeElement.value = null
-  }
+  activeElements.value.delete(drumType)
+  // 모든 드럼이 해제되면 isPlaying을 false로
   setTimeout(() => {
-    isPlaying.value = false
+    if (activeElements.value.size === 0) {
+      isPlaying.value = false
+    }
   }, 200)
 }
 
@@ -315,7 +361,7 @@ function toggleMetronome() {
     const interval = 60000 / tempo.value
     metronomeInterval.value = setInterval(() => {
       createMetronomeTick()
-    }, interval) as unknown as number
+    }, interval)
   } else {
     if (metronomeInterval.value) {
       clearInterval(metronomeInterval.value)
@@ -359,7 +405,7 @@ onMounted(() => {
 
   function handleKeyDown(event: KeyboardEvent) {
     const drumType = keyMap[event.code]
-    if (drumType && activeElement.value !== drumType) {
+    if (drumType && !activeElements.value.has(drumType)) {
       event.preventDefault()
       startHit(drumType)
       playDrum(drumType)
@@ -379,8 +425,82 @@ onMounted(() => {
   onUnmounted(() => {
     window.removeEventListener('keydown', handleKeyDown)
     window.removeEventListener('keyup', handleKeyUp)
+    stopPattern() // 패턴 정지
   })
 })
+
+// Drum patterns (beats in 16th notes)
+const drumPatterns = {
+  rock: [
+    { beat: 0, drums: ['kick', 'hihat'] },
+    { beat: 4, drums: ['hihat'] },
+    { beat: 8, drums: ['snare', 'hihat'] },
+    { beat: 12, drums: ['hihat'] }
+  ],
+  jazz: [
+    { beat: 0, drums: ['kick', 'ride'] },
+    { beat: 6, drums: ['ride'] },
+    { beat: 8, drums: ['snare'] },
+    { beat: 10, drums: ['ride'] },
+    { beat: 14, drums: ['kick'] }
+  ],
+  funk: [
+    { beat: 0, drums: ['kick', 'hihat'] },
+    { beat: 2, drums: ['hihat'] },
+    { beat: 6, drums: ['snare'] },
+    { beat: 8, drums: ['hihat'] },
+    { beat: 10, drums: ['kick'] },
+    { beat: 14, drums: ['snare', 'hihat'] }
+  ],
+  latin: [
+    { beat: 0, drums: ['kick', 'ride'] },
+    { beat: 4, drums: ['tom1'] },
+    { beat: 8, drums: ['snare', 'ride'] },
+    { beat: 12, drums: ['tom2', 'kick'] }
+  ]
+}
+
+// Pattern playback functions
+function playPattern(patternName: keyof typeof drumPatterns) {
+  if (isPatternPlaying.value) return
+  
+  isPatternPlaying.value = true
+  let currentBeat = 0
+  const pattern = drumPatterns[patternName]
+  const beatLength = 60000 / (tempo.value * 4) // 16th note in ms
+  
+  console.log(`🥁 Starting ${patternName} pattern at ${tempo.value} BPM`)
+  
+  patternInterval.value = setInterval(() => {
+    // Check if any drums should play at this beat
+    const currentPatternBeat = pattern.find(p => p.beat === currentBeat % 16)
+    
+    if (currentPatternBeat) {
+      // Play all drums for this beat simultaneously
+      currentPatternBeat.drums.forEach(drum => {
+        playDrum(drum)
+        startHit(drum)
+        setTimeout(() => endHit(drum), 100)
+      })
+    }
+    
+    currentBeat++
+  }, beatLength)
+}
+
+function stopPattern() {
+  if (patternInterval.value) {
+    clearInterval(patternInterval.value)
+    patternInterval.value = null
+  }
+  isPatternPlaying.value = false
+  
+  // Clear any active visual elements
+  activeElements.value.clear()
+  isPlaying.value = false
+  
+  console.log('🛑 Pattern stopped')
+}
 </script>
 
 <style scoped>
@@ -805,6 +925,65 @@ onMounted(() => {
   background: #ff7700;
   color: white;
   box-shadow: 0 0 20px rgba(255, 119, 0, 0.4);
+}
+
+/* Pattern Controls */
+.pattern-controls {
+  margin-top: 1.5rem;
+  text-align: center;
+}
+
+.pattern-controls h3 {
+  color: #ffffff;
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.pattern-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: center;
+}
+
+.pattern-btn {
+  padding: 0.75rem 1.25rem;
+  background: linear-gradient(145deg, #4a5568, #2d3748);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  min-width: 80px;
+}
+
+.pattern-btn:hover:not(:disabled) {
+  background: linear-gradient(145deg, #5a6578, #3d4758);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+}
+
+.pattern-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.pattern-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.pattern-btn.stop-btn {
+  background: linear-gradient(145deg, #e53e3e, #c53030);
+}
+
+.pattern-btn.stop-btn:hover:not(:disabled) {
+  background: linear-gradient(145deg, #f56565, #e53e3e);
 }
 
 /* Responsive design */
