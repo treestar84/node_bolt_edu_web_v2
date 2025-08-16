@@ -21,7 +21,7 @@ module.exports = {
     {
       name: 'front',
       script: 'npm',
-      args: 'run serve',
+      args: 'run preview',
       env: {
         NODE_ENV: 'production',
         PORT: 4173
