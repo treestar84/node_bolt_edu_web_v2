@@ -42,7 +42,7 @@ pm2 delete api || true
 
 # 5. PM2 프로세스 시작
 echo "▶️ Starting PM2 processes..."
-pm2 start ecosystem.config.js
+pm2 start ecosystem.config.cjs
 
 # 6. PM2 저장
 echo "💾 Saving PM2 configuration..."

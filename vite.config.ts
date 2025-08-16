@@ -49,6 +49,12 @@ export default defineConfig({
     strictPort: true,
     // URL 디코딩 문제는 http-server로 해결
     cors: true,
+    allowedHosts: [
+      'duck-edu-word.duckdns.org',
+      'localhost',
+      '127.0.0.1',
+      '0.0.0.0'
+    ],
     headers: {
       'Cache-Control': 'no-cache'
     }

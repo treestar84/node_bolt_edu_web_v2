@@ -1,3 +1,4 @@
+// PM2 ecosystem configuration (CommonJS format)
 module.exports = {
   apps: [
     {
