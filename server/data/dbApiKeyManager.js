@@ -74,37 +74,20 @@ export const ensureApiKeysTable = async () => {
   }
 };
 
-// 모든 API 키 조회 (관리자용) - RLS 우회를 위해 rpc 사용
+// 모든 API 키 조회 (관리자용) - 직접 테이블 조회
 export const getApiKeys = async () => {
   try {
-    // RLS를 우회하기 위해 직접 SQL 쿼리 사용
-    const { data, error } = await supabase.rpc('get_api_keys_admin');
-
+    // 직접 테이블 조회 (RPC 함수 없이)
+    const { data, error } = await supabase
+      .from('api_keys')
+      .select('*')
+      .order('created_at', { ascending: false });
+    
     if (error) {
       console.error('❌ Error fetching API keys:', error);
-      // 대안: 직접 테이블 조회 시도
-      const { data: directData, error: directError } = await supabase
-        .from('api_keys')
-        .select('*')
-        .order('created_at', { ascending: false });
-      
-      if (directError) {
-        console.error('❌ Direct query also failed:', directError);
-        return [];
-      }
-      
-      return directData.map(key => ({
-        id: key.id,
-        name: key.name,
-        description: key.description,
-        active: key.active,
-        createdAt: key.created_at,
-        lastUsed: key.last_used,
-        usageCount: key.usage_count,
-        keyPreview: `${key.key_hash.substring(0, 8)}...${key.key_hash.substring(key.key_hash.length - 4)}`
-      }));
+      return [];
     }
-
+    
     // 보안을 위해 실제 키 값은 숨기고 미리보기만 제공
     return data.map(key => ({
       id: key.id,

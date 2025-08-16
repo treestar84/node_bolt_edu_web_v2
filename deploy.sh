@@ -15,6 +15,21 @@ npm ci
 echo "🔨 Building application..."
 npm run build
 
+# 2.1. 빌드 결과 확인
+echo "📋 Verifying build output..."
+if [ ! -d "dist" ]; then
+  echo "❌ ERROR: dist directory not found!"
+  exit 1
+fi
+
+if [ ! -f "dist/index.html" ]; then
+  echo "❌ ERROR: dist/index.html not found!"
+  exit 1
+fi
+
+echo "✅ Build verification completed - dist folder ready"
+ls -la dist/
+
 # 3. PM2 프로세스 중단
 echo "⏹️ Stopping PM2 processes..."
 pm2 stop front || true
